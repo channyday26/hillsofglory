@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login - Hills of Glory International Christian Center Inc.</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Apply saved theme before paint (prevents flash) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="../css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-card animate-fade-scale">
+      <div class="login-card__header">
+        <img src="../images/hills_ic.png" alt="Hills of Glory Logo" class="login-card__logo" />
+        <h1 class="login-card__title">Admin Portal</h1>
+        <p class="login-card__subtitle">Sign in to manage the Hills of Glory website.</p>
+      </div>
+
+      <form class="login-form" id="loginForm" novalidate>
+        <div class="form__group">
+          <label for="loginEmail" class="form__label">Email Address</label>
+          <input type="email" id="loginEmail" name="email" class="form__input" placeholder="you@hillsofglory.org" autocomplete="username" required aria-required="true" />
+        </div>
+        <div class="form__group">
+          <label for="loginPassword" class="form__label">Password</label>
+          <input type="password" id="loginPassword" name="password" class="form__input" placeholder="••••••••" autocomplete="current-password" required aria-required="true" />
+        </div>
+
+        <!-- Honeypot -->
+        <div class="form__group form__group--hidden" aria-hidden="true">
+          <label for="loginWebsite" class="form__label">Leave this empty</label>
+          <input type="text" id="loginWebsite" name="url" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--full" id="loginSubmit">
+          <i class="ti ti-login-2"></i> Sign In
+        </button>
+      </form>
+
+      <div class="login-card__error" id="loginError" role="alert"></div>
+
+      <a href="../index.html" class="login-card__back">
+        <i class="ti ti-arrow-left"></i> Back to website
+      </a>
+    </div>
+  </main>
+
+  <script src="../js/supabase-client.js"></script>
+  <script src="js/admin-auth.js"></script>
+</body>
+</html>

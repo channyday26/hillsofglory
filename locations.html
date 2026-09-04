@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Locations &amp; Services - Hills of Glory International Christian Center Inc.</title>
+  <meta name="description" content="Find a Hills of Glory campus near you. View our main campus and outreach locations along with weekly service schedules." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="navbar" role="banner">
+    <div class="container navbar__container">
+      <a href="index.html" class="navbar__brand" aria-label="Hills of Glory Home">
+        <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="navbar__logo" />
+        <div class="navbar__title">
+          Hills of Glory
+          <span>International Christian Center</span>
+        </div>
+      </a>
+
+      <div class="navbar__backdrop" id="navbarBackdrop"></div>
+
+      <nav class="navbar__nav" id="navbarNav" aria-label="Main navigation">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="about.html" class="navbar__link">About</a>
+        <a href="ministries.html" class="navbar__link">Ministries</a>
+        <a href="sermons.html" class="navbar__link">Sermons</a>
+        <a href="events.html" class="navbar__link">Events</a>
+        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
+        <a href="locations.html" class="navbar__link navbar__link--active">Locations</a>
+        <a href="give.html" class="navbar__link">Give</a>
+        <a href="contact.html" class="navbar__link">Contact</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="ti ti-sun"></i>
+        </button>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="ti ti-menu-2"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="section-badge"><i class="ti ti-map-pin"></i> Plan Your Visit</span>
+        <h1 class="page-hero__title">Locations &amp; Services</h1>
+        <p class="page-hero__lead">
+          We can't wait to worship with you. Find our main campus and outreach locations, and click a campus to view its service schedule.
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Campus -->
+    <section class="section" aria-label="Main Campus">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-building-church"></i> Headquarters</span>
+          <h2 class="section-title">Main Campus</h2>
+          <p class="section-subtitle">Our central place of worship and gathering.</p>
+        </div>
+        <div id="mainCampusCard">
+          <!-- Populated dynamically from Supabase -->
+          <div class="glass-card">
+            <span class="card__tag">Main Campus</span>
+            <h3 class="card__title">Hills of Glory Main Campus</h3>
+            <p class="card__text"><i class="ti ti-map-pin"></i> Location details coming soon.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Outreach Locations -->
+    <section class="section section--alt" aria-label="Outreach Locations">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-tent"></i> Daughter Churches</span>
+          <h2 class="section-title">Outreach Locations</h2>
+          <p class="section-subtitle">Our growing family of outreach churches serving communities near and far.</p>
+        </div>
+        <div class="grid-cards" id="outreachGrid">
+          <!-- Populated dynamically from Supabase -->
+          <div class="card">
+            <p class="card__text">Outreach locations will appear here once they are added.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand-block">
+          <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="footer__logo" />
+          <h3 class="footer__church-name">Hills of Glory</h3>
+          <p class="footer__tagline">International Christian Center Inc. A welcoming house of prayer, worship, and transformation.</p>
+          <div class="footer__social" id="footerSocial">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ti ti-brand-youtube"></i></a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="ti ti-brand-x"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Quick Links</h4>
+          <nav class="footer__links" aria-label="Footer Quick Links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="ministries.html">Ministries</a>
+            <a href="sermons.html">Sermons</a>
+            <a href="events.html">Events</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Connect</h4>
+          <nav class="footer__links" aria-label="Footer Connect Links">
+            <a href="lifegroups.html">Lifegroups</a>
+            <a href="locations.html">Locations</a>
+            <a href="give.html">Give Online</a>
+            <a href="contact.html">Prayer Requests</a>
+            <a href="admin/login.html">Admin Portal</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Contact Info</h4>
+          <ul class="footer__contact-list" id="footerContactList">
+            <li>
+              <i class="ti ti-map-pin"></i>
+              <span id="footerAddress">Hills of Glory International Christian Center</span>
+            </li>
+            <li>
+              <i class="ti ti-phone"></i>
+              <span id="footerPhone">Contact church office</span>
+            </li>
+            <li>
+              <i class="ti ti-mail"></i>
+              <span id="footerEmail">info@hillsofglory.org</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2026 Hills of Glory International Christian Center Inc. All rights reserved.</p>
+        <div>
+          <a href="contact.html">Contact Us</a> &bull; <a href="admin/login.html">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

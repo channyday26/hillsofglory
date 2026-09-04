@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events - Hills of Glory International Christian Center Inc.</title>
+  <meta name="description" content="Stay connected with upcoming events, conferences, and gatherings at Hills of Glory International Christian Center Inc." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="navbar" role="banner">
+    <div class="container navbar__container">
+      <a href="index.html" class="navbar__brand" aria-label="Hills of Glory Home">
+        <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="navbar__logo" />
+        <div class="navbar__title">
+          Hills of Glory
+          <span>International Christian Center</span>
+        </div>
+      </a>
+
+      <div class="navbar__backdrop" id="navbarBackdrop"></div>
+
+      <nav class="navbar__nav" id="navbarNav" aria-label="Main navigation">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="about.html" class="navbar__link">About</a>
+        <a href="ministries.html" class="navbar__link">Ministries</a>
+        <a href="sermons.html" class="navbar__link">Sermons</a>
+        <a href="events.html" class="navbar__link navbar__link--active">Events</a>
+        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
+        <a href="locations.html" class="navbar__link">Locations</a>
+        <a href="give.html" class="navbar__link">Give</a>
+        <a href="contact.html" class="navbar__link">Contact</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="ti ti-sun"></i>
+        </button>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="ti ti-menu-2"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="section-badge"><i class="ti ti-calendar-star"></i> Gather &amp; Celebrate</span>
+        <h1 class="page-hero__title">Events</h1>
+        <p class="page-hero__lead">
+          There's always something happening at Hills of Glory. Join us for worship nights, conferences, and community gatherings.
+        </p>
+      </div>
+    </section>
+
+    <!-- Recurring Gatherings -->
+    <section class="section" aria-label="Recurring Gatherings">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-repeat"></i> Weekly Rhythm</span>
+          <h2 class="section-title">Recurring Gatherings</h2>
+          <p class="section-subtitle">Mark your calendar for these regular moments of worship and fellowship.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="glass-card hover-lift animate-fade-up stagger-1">
+            <div class="schedule-badge"><i class="ti ti-sun"></i> Every Sunday</div>
+            <h3 class="card__title">Sunday Celebration</h3>
+            <p class="card__text">Our main worship gathering with praise, the Word, and fellowship for the whole family.</p>
+            <div class="card__footer">
+              <span class="card__tag">Worship &amp; Word</span>
+              <a href="locations.html" class="btn btn--outline btn--sm">Times &rarr;</a>
+            </div>
+          </div>
+
+          <div class="glass-card hover-lift animate-fade-up stagger-2">
+            <div class="schedule-badge"><i class="ti ti-book"></i> Every Wednesday</div>
+            <h3 class="card__title">Midweek Prayer &amp; Word</h3>
+            <p class="card__text">A midweek recharge of prayer and Bible study to strengthen your walk with God.</p>
+            <div class="card__footer">
+              <span class="card__tag card__tag--secondary">Prayer &amp; Study</span>
+              <a href="locations.html" class="btn btn--outline btn--sm">Times &rarr;</a>
+            </div>
+          </div>
+
+          <div class="glass-card hover-lift animate-fade-up stagger-3">
+            <div class="schedule-badge"><i class="ti ti-flame"></i> Every Friday</div>
+            <h3 class="card__title">Generation Glory Youth</h3>
+            <p class="card__text">A vibrant gathering for youth and students full of worship, teaching, and community.</p>
+            <div class="card__footer">
+              <span class="card__tag">Youth &amp; Students</span>
+              <a href="ministries.html" class="btn btn--outline btn--sm">Learn More &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Special Events -->
+    <section class="section section--alt" aria-label="Upcoming Special Events">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-confetti"></i> Don't Miss Out</span>
+          <h2 class="section-title">Upcoming Special Events</h2>
+          <p class="section-subtitle">Conferences, revivals, and special services on the horizon.</p>
+        </div>
+
+        <div class="glass-card form-card" style="text-align:center;">
+          <i class="ti ti-calendar-plus" style="font-size:3rem;color:var(--color-primary);margin-bottom:var(--space-md);"></i>
+          <h3 class="card__title">New Events Coming Soon</h3>
+          <p class="card__text">
+            We're planning something special. Follow us on social media or contact the church office to stay updated on our next big gathering.
+          </p>
+          <div style="margin-top:var(--space-lg);display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap;">
+            <a href="contact.html" class="btn btn--primary"><i class="ti ti-mail"></i> Get in Touch</a>
+            <a href="index.html" class="btn btn--outline"><i class="ti ti-home"></i> Back Home</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand-block">
+          <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="footer__logo" />
+          <h3 class="footer__church-name">Hills of Glory</h3>
+          <p class="footer__tagline">International Christian Center Inc. A welcoming house of prayer, worship, and transformation.</p>
+          <div class="footer__social" id="footerSocial">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ti ti-brand-youtube"></i></a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="ti ti-brand-x"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Quick Links</h4>
+          <nav class="footer__links" aria-label="Footer Quick Links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="ministries.html">Ministries</a>
+            <a href="sermons.html">Sermons</a>
+            <a href="events.html">Events</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Connect</h4>
+          <nav class="footer__links" aria-label="Footer Connect Links">
+            <a href="lifegroups.html">Lifegroups</a>
+            <a href="locations.html">Locations</a>
+            <a href="give.html">Give Online</a>
+            <a href="contact.html">Prayer Requests</a>
+            <a href="admin/login.html">Admin Portal</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Contact Info</h4>
+          <ul class="footer__contact-list" id="footerContactList">
+            <li>
+              <i class="ti ti-map-pin"></i>
+              <span id="footerAddress">Hills of Glory International Christian Center</span>
+            </li>
+            <li>
+              <i class="ti ti-phone"></i>
+              <span id="footerPhone">Contact church office</span>
+            </li>
+            <li>
+              <i class="ti ti-mail"></i>
+              <span id="footerEmail">info@hillsofglory.org</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2026 Hills of Glory International Christian Center Inc. All rights reserved.</p>
+        <div>
+          <a href="contact.html">Contact Us</a> &bull; <a href="admin/login.html">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

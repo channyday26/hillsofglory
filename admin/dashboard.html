@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Hills of Glory International Christian Center Inc.</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Apply saved theme before paint (prevents flash) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="../css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar__backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+      <div class="sidebar__brand">
+        <img src="../images/hills_ic.png" alt="Hills of Glory Logo" class="sidebar__logo" />
+        <span class="sidebar__title">
+          Hills of Glory
+          <small>Admin CMS</small>
+        </span>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="#" class="sidebar__link sidebar__link--active" data-section="settings"><i class="ti ti-settings"></i><span>Church Settings</span></a>
+        <a href="#" class="sidebar__link" data-section="leadership"><i class="ti ti-users"></i><span>Leadership</span></a>
+        <a href="#" class="sidebar__link" data-section="ministries"><i class="ti ti-heart-handshake"></i><span>Ministries</span></a>
+        <a href="#" class="sidebar__link" data-section="locations"><i class="ti ti-map-pin"></i><span>Locations</span></a>
+        <a href="#" class="sidebar__link" data-section="lifegroups"><i class="ti ti-book"></i><span>Lifegroups</span></a>
+        <a href="#" class="sidebar__link" data-section="sermons"><i class="ti ti-player-play"></i><span>Sermons</span></a>
+        <a href="#" class="sidebar__link" data-section="requests"><i class="ti ti-mail"></i><span>Requests</span></a>
+      </nav>
+      <div class="sidebar__footer">
+        <a href="../index.html" class="sidebar__link"><i class="ti ti-external-link"></i><span>View Website</span></a>
+        <button class="sidebar__logout" id="sidebarLogout"><i class="ti ti-logout"></i><span>Logout</span></button>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-header">
+        <div class="admin-header__actions">
+          <button class="mobile-menu-toggle" id="sidebarToggle" aria-label="Toggle sidebar" style="display:none;">
+            <i class="ti ti-menu-2"></i>
+          </button>
+          <h1 class="admin-header__title">Dashboard</h1>
+        </div>
+        <div class="admin-header__actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <i class="ti ti-sun"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="admin-content" id="adminContent">
+        <!-- Section: Church Settings -->
+        <section class="admin-section" id="section-settings">
+          <div class="admin-card">
+            <h2 class="section-title">Church Settings</h2>
+            <p class="card__text" style="margin-bottom:var(--space-lg);">Update global contact details, banking info, hero video, and social links shown across the website.</p>
+            <form class="admin-form" id="settingsForm" novalidate>
+              <div class="form__group">
+                <label for="setAddress" class="form__label">Main Address</label>
+                <input type="text" id="setAddress" name="main_address" class="form__input" />
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="setPhone" class="form__label">Phone</label>
+                  <input type="text" id="setPhone" name="contact_phone" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="setEmail" class="form__label">Email</label>
+                  <input type="email" id="setEmail" name="contact_email" class="form__input" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="setBank" class="form__label">Bank Details</label>
+                <textarea id="setBank" name="bank_details" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="setFacebook" class="form__label">Facebook URL</label>
+                  <input type="url" id="setFacebook" name="facebook_url" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="setInstagram" class="form__label">Instagram URL</label>
+                  <input type="url" id="setInstagram" name="instagram_url" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="setYouTube" class="form__label">YouTube URL</label>
+                  <input type="url" id="setYouTube" name="youtube_url" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="setX" class="form__label">X / Twitter URL</label>
+                  <input type="url" id="setX" name="x_url" class="form__input" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="setHeroVideo" class="form__label">Hero Video URL</label>
+                <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" />
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-device-floppy"></i> Save Settings</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Section: Leadership -->
+        <section class="admin-section" id="section-leadership" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Leadership</h2>
+            <form class="admin-form" id="leadershipForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="leaderName" class="form__label">Name</label>
+                  <input type="text" id="leaderName" name="name" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="leaderRole" class="form__label">Role</label>
+                  <input type="text" id="leaderRole" name="role" class="form__input" required />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="leaderBio" class="form__label">Bio</label>
+                <textarea id="leaderBio" name="bio" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="form__group">
+                <label for="leaderImage" class="form__label">Profile Image (Max 2MB)</label>
+                <input type="file" id="leaderImage" name="image" class="form__input" accept="image/*" />
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Leader</button>
+            </form>
+          </div>
+          <div class="admin-list" id="leadershipList"></div>
+        </section>
+
+        <!-- Section: Ministries -->
+        <section class="admin-section" id="section-ministries" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Ministries</h2>
+            <form class="admin-form" id="ministriesForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="minName" class="form__label">Name</label>
+                  <input type="text" id="minName" name="name" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="minCategory" class="form__label">Category</label>
+                  <select id="minCategory" name="category" class="form__input" required>
+                    <option value="">Select</option>
+                    <option value="Worship">Worship</option>
+                    <option value="General">General</option>
+                    <option value="Campus">Campus</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="minDesc" class="form__label">Description</label>
+                <textarea id="minDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="minContact" class="form__label">Contact Person</label>
+                  <input type="text" id="minContact" name="contact_person" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="minSchool" class="form__label">Target School</label>
+                  <input type="text" id="minSchool" name="target_school" class="form__input" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="minImage" class="form__label">Image (Max 2MB)</label>
+                <input type="file" id="minImage" name="image" class="form__input" accept="image/*" />
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Ministry</button>
+            </form>
+          </div>
+          <div class="admin-list" id="ministriesList"></div>
+        </section>
+
+        <!-- Section: Locations -->
+        <section class="admin-section" id="section-locations" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Locations</h2>
+            <form class="admin-form" id="locationsForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="locName" class="form__label">Campus Name</label>
+                  <input type="text" id="locName" name="name" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="locType" class="form__label">Type</label>
+                  <select id="locType" name="location_type" class="form__input" required>
+                    <option value="Main">Main</option>
+                    <option value="Outreach">Outreach</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="locAddress" class="form__label">Address</label>
+                <input type="text" id="locAddress" name="address" class="form__input" />
+              </div>
+              <div class="form__group">
+                <label for="locMaps" class="form__label">Google Maps Link</label>
+                <input type="url" id="locMaps" name="google_maps_embed_link" class="form__input" />
+              </div>
+              <div class="form__group">
+                <label for="locStatus" class="form__label">Status</label>
+                <select id="locStatus" name="status" class="form__input">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Location</button>
+            </form>
+          </div>
+          <div class="admin-list" id="locationsList"></div>
+        </section>
+
+        <!-- Section: Lifegroups -->
+        <section class="admin-section" id="section-lifegroups" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Lifegroups</h2>
+            <form class="admin-form" id="lifegroupsForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="lgName" class="form__label">Group Name</label>
+                  <input type="text" id="lgName" name="group_name" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="lgLeader" class="form__label">Leader Name</label>
+                  <input type="text" id="lgLeader" name="leader_name" class="form__input" />
+                </div>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="lgLocation" class="form__label">Location</label>
+                  <input type="text" id="lgLocation" name="location" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="lgTime" class="form__label">Meeting Time</label>
+                  <input type="text" id="lgTime" name="meeting_time" class="form__input" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="lgContact" class="form__label">Contact Info</label>
+                <input type="text" id="lgContact" name="contact_info" class="form__input" />
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Lifegroup</button>
+            </form>
+          </div>
+          <div class="admin-list" id="lifegroupsList"></div>
+        </section>
+
+        <!-- Section: Sermons -->
+        <section class="admin-section" id="section-sermons" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Sermons</h2>
+            <form class="admin-form" id="sermonsForm" novalidate>
+              <div class="form__group">
+                <label for="sermonTitle" class="form__label">Title</label>
+                <input type="text" id="sermonTitle" name="title" class="form__input" required />
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="sermonSpeaker" class="form__label">Speaker</label>
+                  <input type="text" id="sermonSpeaker" name="speaker" class="form__input" />
+                </div>
+                <div class="form__group">
+                  <label for="sermonDate" class="form__label">Date</label>
+                  <input type="date" id="sermonDate" name="date" class="form__input" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="sermonYoutube" class="form__label">YouTube URL</label>
+                <input type="url" id="sermonYoutube" name="youtube_url" class="form__input" />
+              </div>
+              <div class="form__group">
+                <label for="sermonDesc" class="form__label">Description</label>
+                <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Sermon</button>
+            </form>
+          </div>
+          <div class="admin-list" id="sermonsList"></div>
+        </section>
+
+        <!-- Section: Requests -->
+        <section class="admin-section" id="section-requests" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Prayer &amp; Ministry Requests</h2>
+            <div class="admin-tabs">
+              <button class="admin-tab admin-tab--active" data-tab="prayer">Prayer Requests</button>
+              <button class="admin-tab" data-tab="ministry">Ministry Join Requests</button>
+            </div>
+            <div class="admin-list" id="requestsList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/supabase-client.js"></script>
+  <script src="js/admin-ui.js"></script>
+  <script src="js/admin-cms.js"></script>
+</body>
+</html>

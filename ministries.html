@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ministries - Hills of Glory International Christian Center Inc.</title>
+  <meta name="description" content="Explore the vibrant ministries of Hills of Glory — Worship Team, general ministries, and campus outreach. Find your place to serve and grow, and join a ministry today." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="navbar" role="banner">
+    <div class="container navbar__container">
+      <a href="index.html" class="navbar__brand" aria-label="Hills of Glory Home">
+        <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="navbar__logo" />
+        <div class="navbar__title">
+          Hills of Glory
+          <span>International Christian Center</span>
+        </div>
+      </a>
+
+      <div class="navbar__backdrop" id="navbarBackdrop"></div>
+
+      <nav class="navbar__nav" id="navbarNav" aria-label="Main navigation">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="about.html" class="navbar__link">About</a>
+        <a href="ministries.html" class="navbar__link navbar__link--active">Ministries</a>
+        <a href="sermons.html" class="navbar__link">Sermons</a>
+        <a href="events.html" class="navbar__link">Events</a>
+        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
+        <a href="locations.html" class="navbar__link">Locations</a>
+        <a href="give.html" class="navbar__link">Give</a>
+        <a href="contact.html" class="navbar__link">Contact</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="ti ti-sun"></i>
+        </button>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="ti ti-menu-2"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="section-badge"><i class="ti ti-heart-handshake"></i> Serve &amp; Grow</span>
+        <h1 class="page-hero__title">Our Ministries</h1>
+        <p class="page-hero__lead">
+          Every believer has a place to belong and a gift to offer. Discover a ministry where your passion meets God's purpose.
+        </p>
+      </div>
+    </section>
+
+    <!-- Worship Team -->
+    <section class="section" id="worship-section" aria-label="Worship Team">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-music"></i> Praise &amp; Worship</span>
+          <h2 class="section-title">Worship Team</h2>
+          <p class="section-subtitle">
+            Leading the congregation into the presence of God through spirit-filled music, song, and creative arts.
+          </p>
+        </div>
+        <div class="grid-cards" id="worshipGrid">
+          <!-- Fallback content, replaced dynamically from Supabase -->
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/worshipteam.jpg" alt="Worship Team" loading="lazy" />
+            </div>
+            <h3 class="card__title">Choir &amp; Vocalists</h3>
+            <p class="card__text">Voices united in harmony, leading passionate praise and worship across every service.</p>
+          </div>
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/music.jpg" alt="Instrumentalists" loading="lazy" />
+            </div>
+            <h3 class="card__title">Instrumentalists &amp; Band</h3>
+            <p class="card__text">Skilled musicians creating an atmosphere of glory through instruments and sound.</p>
+          </div>
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/express.jpg" alt="Creative Arts" loading="lazy" />
+            </div>
+            <h3 class="card__title">Media &amp; Creative Arts</h3>
+            <p class="card__text">Serving through sound, media, and creative expression to enhance every gathering.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- General Ministries -->
+    <section class="section section--alt" id="general-ministries-section" aria-label="General Ministries">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-users-group"></i> Church Life</span>
+          <h2 class="section-title">Ministries</h2>
+          <p class="section-subtitle">
+            From children to seniors, our ministries nurture spiritual growth and genuine community at every stage of life.
+          </p>
+        </div>
+        <div class="grid-cards" id="ministriesGrid">
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/generation.png" alt="Children's Ministry" loading="lazy" />
+            </div>
+            <h3 class="card__title">Children's Ministry</h3>
+            <p class="card__text">A safe, fun, and faith-building environment where children learn about Jesus.</p>
+          </div>
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/community.jpg" alt="Outreach Ministry" loading="lazy" />
+            </div>
+            <h3 class="card__title">Community Outreach</h3>
+            <p class="card__text">Extending the love of Christ through service, care, and compassion to our community.</p>
+          </div>
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/life.jpg" alt="Women's Ministry" loading="lazy" />
+            </div>
+            <h3 class="card__title">Men &amp; Women's Fellowship</h3>
+            <p class="card__text">Purpose-driven fellowships building strong families and Christ-centered relationships.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Campus Ministries -->
+    <section class="section" id="campus-section" aria-label="Campus Ministries">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-school"></i> Next Generation</span>
+          <h2 class="section-title">Campus Ministries</h2>
+          <p class="section-subtitle">
+            Reaching students on college and university campuses with the transforming Gospel of Jesus Christ.
+          </p>
+        </div>
+        <div class="grid-cards" id="campusGrid">
+          <div class="glass-card hover-lift">
+            <div class="card__media">
+              <img src="images/generation1.png" alt="Campus Fellowship" loading="lazy" />
+            </div>
+            <h3 class="card__title">Campus Fellowship</h3>
+            <p class="card__text">Weekly gatherings for worship, Bible study, and fellowship on campus.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Join a Ministry -->
+    <section class="section section--alt" aria-label="Join a Ministry">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-hand-love-you"></i> Get Involved</span>
+          <h2 class="section-title">Join a Ministry</h2>
+          <p class="section-subtitle">
+            Ready to serve? Tell us where you'd love to get involved and our team will reach out to you.
+          </p>
+        </div>
+
+        <div class="glass-card form-card">
+          <form id="joinMinistryForm" novalidate>
+            <div class="form__row">
+              <div class="form__group">
+                <label for="joinName" class="form__label">Full Name</label>
+                <input type="text" id="joinName" name="name" class="form__input" placeholder="Your full name" required aria-required="true" />
+              </div>
+              <div class="form__group">
+                <label for="joinEmail" class="form__label">Email or Phone</label>
+                <input type="text" id="joinEmail" name="contact" class="form__input" placeholder="How can we reach you?" required aria-required="true" />
+              </div>
+            </div>
+            <div class="form__group">
+              <label for="joinMinistry" class="form__label">Ministry of Interest</label>
+              <select id="joinMinistry" name="ministry" class="form__input" required aria-required="true">
+                <option value="">Select a ministry</option>
+                <option value="Worship Team">Worship Team</option>
+                <option value="Children's Ministry">Children's Ministry</option>
+                <option value="Community Outreach">Community Outreach</option>
+                <option value="Men &amp; Women's Fellowship">Men &amp; Women's Fellowship</option>
+                <option value="Campus Ministry">Campus Ministry</option>
+                <option value="Media &amp; Creative Arts">Media &amp; Creative Arts</option>
+              </select>
+            </div>
+            <!-- Honeypot (hidden from humans, traps bots) -->
+            <div class="form__group form__group--hidden" aria-hidden="true">
+              <label for="websiteUrl">Leave this empty</label>
+              <input type="text" id="websiteUrl" name="url" tabindex="-1" autocomplete="off" />
+            </div>
+            <button type="submit" class="btn btn--primary btn--full">
+              <i class="ti ti-send"></i> Submit Request
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand-block">
+          <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="footer__logo" />
+          <h3 class="footer__church-name">Hills of Glory</h3>
+          <p class="footer__tagline">International Christian Center Inc. A welcoming house of prayer, worship, and transformation.</p>
+          <div class="footer__social" id="footerSocial">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ti ti-brand-youtube"></i></a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="ti ti-brand-x"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Quick Links</h4>
+          <nav class="footer__links" aria-label="Footer Quick Links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="ministries.html">Ministries</a>
+            <a href="sermons.html">Sermons</a>
+            <a href="events.html">Events</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Connect</h4>
+          <nav class="footer__links" aria-label="Footer Connect Links">
+            <a href="lifegroups.html">Lifegroups</a>
+            <a href="locations.html">Locations</a>
+            <a href="give.html">Give Online</a>
+            <a href="contact.html">Prayer Requests</a>
+            <a href="admin/login.html">Admin Portal</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Contact Info</h4>
+          <ul class="footer__contact-list" id="footerContactList">
+            <li>
+              <i class="ti ti-map-pin"></i>
+              <span id="footerAddress">Hills of Glory International Christian Center</span>
+            </li>
+            <li>
+              <i class="ti ti-phone"></i>
+              <span id="footerPhone">Contact church office</span>
+            </li>
+            <li>
+              <i class="ti ti-mail"></i>
+              <span id="footerEmail">info@hillsofglory.org</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2026 Hills of Glory International Christian Center Inc. All rights reserved.</p>
+        <div>
+          <a href="contact.html">Contact Us</a> &bull; <a href="admin/login.html">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
