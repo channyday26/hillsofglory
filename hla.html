@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hills Leadership Academy - Hills of Glory International Christian Center Inc.</title>
+  <meta name="description" content="Hills Leadership Academy (HLA) - A comprehensive training and mentorship program developing new believers into effective, Christ-centered leaders through biblical teaching and practical ministry experience." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+
+  <!-- Compiled CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- jQuery & Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="navbar" role="banner">
+    <div class="container navbar__container">
+      <a href="index.html" class="navbar__brand" aria-label="Hills of Glory Home">
+        <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="navbar__logo" />
+        <div class="navbar__title">
+          Hills of Glory
+          <span>International Christian Center</span>
+        </div>
+      </a>
+
+      <div class="navbar__backdrop" id="navbarBackdrop"></div>
+
+      <nav class="navbar__nav" id="navbarNav" aria-label="Main navigation">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="about.html" class="navbar__link">About</a>
+        <a href="ministries.html" class="navbar__link">Ministries</a>
+        <a href="discipleship.html" class="navbar__link navbar__link--active">Discipleship</a>
+        <a href="sermons.html" class="navbar__link">Sermons</a>
+        <a href="events.html" class="navbar__link">Events</a>
+        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
+        <a href="locations.html" class="navbar__link">Locations</a>
+        <a href="give.html" class="navbar__link">Give</a>
+        <a href="contact.html" class="navbar__link">Contact</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="ti ti-sun"></i>
+        </button>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="ti ti-menu-2"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HLA Hero with Logo -->
+    <section class="page-hero" style="background: linear-gradient(135deg, rgba(45, 90, 3, 0.08) 0%, rgba(217, 130, 43, 0.08) 100%);">
+      <div class="container" style="text-align: center;">
+        <img src="images/hla_logo.svg" alt="Hills Leadership Academy Logo" style="max-width: 180px; height: auto; margin: 0 auto var(--space-lg); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));" />
+        <span class="section-badge"><i class="ti ti-school"></i> Leadership Training Program</span>
+        <h1 class="page-hero__title">Hills Leadership Academy</h1>
+        <p class="page-hero__lead">
+          Developing new believers into effective, Christ-centered leaders through intensive biblical training, practical ministry experience, and personal mentorship.
+        </p>
+      </div>
+    </section>
+
+    <!-- Program Overview -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge">About HLA</span>
+          <h2 class="section-title">A Transformative Leadership Journey</h2>
+          <p class="section-subtitle">
+            Hills Leadership Academy is more than a training program — it's a life-changing experience that equips believers with the knowledge, character, and competencies to lead with confidence in ministry and the marketplace.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="glass-card hover-lift animate-fade-up stagger-1">
+            <div class="card__tag"><i class="ti ti-bible"></i> Biblical Foundation</div>
+            <h3 class="card__title">Solid Doctrine</h3>
+            <p class="card__text">
+              Comprehensive study of Scripture, theology, hermeneutics, and biblical principles that form the foundation of effective Christian leadership.
+            </p>
+          </div>
+
+          <div class="glass-card hover-lift animate-fade-up stagger-2">
+            <div class="card__tag card__tag--secondary"><i class="ti ti-users"></i> Practical Training</div>
+            <h3 class="card__title">Ministry Experience</h3>
+            <p class="card__text">
+              Hands-on practicum in preaching, teaching, worship leading, counseling, and serving in various ministry contexts under supervision.
+            </p>
+          </div>
+
+          <div class="glass-card hover-lift animate-fade-up stagger-3">
+            <div class="card__tag"><i class="ti ti-user-check"></i> Personal Mentorship</div>
+            <h3 class="card__title">One-on-One Guidance</h3>
+            <p class="card__text">
+              Each student is paired with an experienced leader who provides personalized coaching, accountability, and spiritual formation throughout the program.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Image Gallery Section -->
+    <section class="section section--alt" aria-label="HLA Activities Gallery">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-photo"></i> See HLA in Action</span>
+          <h2 class="section-title">Our Community</h2>
+          <p class="section-subtitle">
+            Witness the vibrant learning environment, hands-on training, and powerful community that makes HLA a life-changing experience.
+          </p>
+        </div>
+
+        <div class="hla-gallery">
+          <div class="hla-gallery__item animate-fade-up stagger-1">
+            <img src="images/hla1.jpg" alt="HLA Training Session - Students in intensive Bible study" loading="lazy" />
+            <div class="hla-gallery__caption">
+              <h4>Intensive Training</h4>
+              <p>Students engage in deep biblical study and theological discussion</p>
+            </div>
+          </div>
+
+          <div class="hla-gallery__item animate-fade-up stagger-2">
+            <img src="images/hla2.jpg" alt="HLA Worship and Prayer - Students in worship session" loading="lazy" />
+            <div class="hla-gallery__caption">
+              <h4>Worship &amp; Prayer</h4>
+              <p>Leaders-in-training cultivate a vibrant prayer life and worship culture</p>
+            </div>
+          </div>
+
+          <div class="hla-gallery__item animate-fade-up stagger-3">
+            <img src="images/hla3.jpg" alt="HLA Mentorship - One-on-one coaching session" loading="lazy" />
+            <div class="hla-gallery__caption">
+              <h4>Personal Mentorship</h4>
+              <p>Experienced leaders provide guidance and accountability to each student</p>
+            </div>
+          </div>
+
+          <div class="hla-gallery__item animate-fade-up stagger-4">
+            <img src="images/hla4.jpg" alt="HLA Community - Group fellowship and team building" loading="lazy" />
+            <div class="hla-gallery__caption">
+              <h4>Community &amp; Fellowship</h4>
+              <p>Building lifelong friendships and ministry partnerships</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Curriculum Overview -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge">Curriculum</span>
+          <h2 class="section-title">What You'll Learn</h2>
+          <p class="section-subtitle">
+            A comprehensive, multi-dimensional curriculum covering biblical knowledge, ministry skills, character development, and leadership competencies.
+          </p>
+        </div>
+
+        <div class="grid-cards">
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag">Core Studies</span>
+            <h3 class="card__title">Biblical &amp; Theological Foundations</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Old &amp; New Testament Survey, Systematic Theology, Biblical Interpretation, Church History, Christian Ethics
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-clock"></i> 12 Weeks</span>
+            </div>
+          </div>
+
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag card__tag--secondary">Ministry Skills</span>
+            <h3 class="card__title">Practical Ministry Training</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Preaching &amp; Teaching, Worship Leading, Evangelism &amp; Discipleship, Pastoral Care &amp; Counseling, Small Group Leadership
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-clock"></i> 10 Weeks</span>
+            </div>
+          </div>
+
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag">Leadership</span>
+            <h3 class="card__title">Leadership Development</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Servant Leadership Principles, Team Building, Vision Casting, Conflict Resolution, Communication Excellence, Decision Making
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-clock"></i> 8 Weeks</span>
+            </div>
+          </div>
+
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag">Character</span>
+            <h3 class="card__title">Spiritual Formation</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Developing Christ-like Character, Spiritual Disciplines, Integrity &amp; Accountability, Identity in Christ, Overcoming Temptation
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-clock"></i> Ongoing</span>
+            </div>
+          </div>
+
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag card__tag--secondary">Practicum</span>
+            <h3 class="card__title">Ministry Practicum</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Supervised ministry experience in preaching, teaching, leading worship, outreach events, and various church ministries
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-briefcase"></i> 16 Weeks</span>
+            </div>
+          </div>
+
+          <div class="card glass-card hover-lift animate-fade-up">
+            <span class="card__tag">Mentorship</span>
+            <h3 class="card__title">Personal Coaching</h3>
+            <p class="card__text" style="margin-bottom: var(--space-md);">
+              Weekly one-on-one sessions with an assigned mentor covering personal growth, ministry development, and life challenges
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-calendar"></i> Weekly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Discipleship Pathways -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge">Programs</span>
+          <h2 class="section-title">Discipleship Pathways</h2>
+          <p class="section-subtitle">
+            Multiple pathways designed to meet you where you are and guide you toward spiritual maturity and leadership excellence.
+          </p>
+        </div>
+
+        <div class="grid-cards">
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/congregation.jpg" alt="New Believers Class" loading="lazy" />
+            </div>
+            <span class="card__tag">Foundations</span>
+            <h3 class="card__title">New Believers Class</h3>
+            <p class="card__text">
+              A foundational course covering salvation, baptism, the Holy Spirit, prayer, and the basics of Christian living.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-clock"></i> 6 Weeks</span>
+            </div>
+          </div>
+
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/preach.png" alt="Bible Study Groups" loading="lazy" />
+            </div>
+            <span class="card__tag card__tag--secondary">Growth</span>
+            <h3 class="card__title">Bible Study Groups</h3>
+            <p class="card__text">
+              Weekly topical and book-by-book Bible studies that deepen your understanding of Scripture and its application.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-calendar"></i> Weekly</span>
+            </div>
+          </div>
+
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/hla2.jpg" alt="Hills Leadership Academy" loading="lazy" />
+            </div>
+            <span class="card__tag">Leadership</span>
+            <h3 class="card__title">Hills Leadership Academy</h3>
+            <p class="card__text">
+              Intensive leadership training program combining biblical teaching, ministry practicum, and personal mentorship.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-trophy"></i> Featured Program</span>
+            </div>
+          </div>
+
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/worshipteam.jpg" alt="Mentorship Program" loading="lazy" />
+            </div>
+            <span class="card__tag">Mentorship</span>
+            <h3 class="card__title">One-on-One Mentoring</h3>
+            <p class="card__text">
+              Personalized spiritual guidance from mature believers who walk alongside you in your faith journey.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-user-check"></i> By Application</span>
+            </div>
+          </div>
+
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/music.jpg" alt="Ministry Training" loading="lazy" />
+            </div>
+            <span class="card__tag card__tag--secondary">Equipping</span>
+            <h3 class="card__title">Ministry Skills Training</h3>
+            <p class="card__text">
+              Practical workshops covering worship leading, teaching, evangelism, counseling, and various ministry competencies.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-certificate"></i> Quarterly</span>
+            </div>
+          </div>
+
+          <div class="card hover-lift animate-fade-up">
+            <div class="card__media">
+              <img src="images/worship.png" alt="Prayer School" loading="lazy" />
+            </div>
+            <span class="card__tag">Spiritual Disciplines</span>
+            <h3 class="card__title">School of Prayer</h3>
+            <p class="card__text">
+              Learn the power and practice of effective prayer through teaching on intercession, spiritual warfare, and intimacy with God.
+            </p>
+            <div class="card__footer">
+              <span class="card__text"><i class="ti ti-calendar-time"></i> 8 Weeks</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Program Details -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge">Details</span>
+          <h2 class="section-title">Program Information</h2>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto;">
+          <div class="grid-2">
+            <div class="glass-card hover-lift">
+              <div class="card__tag"><i class="ti ti-calendar-time"></i> Duration</div>
+              <h3 class="card__title">12-Month Program</h3>
+              <p class="card__text">
+                Full-time intensive training with evening and weekend classes to accommodate working students. Program runs annually from January to December.
+              </p>
+            </div>
+
+            <div class="glass-card hover-lift">
+              <div class="card__tag card__tag--secondary"><i class="ti ti-user-plus"></i> Eligibility</div>
+              <h3 class="card__title">Open to All Believers</h3>
+              <p class="card__text">
+                New believers, mature Christians seeking leadership training, and anyone with a sincere desire to serve God and develop leadership capacity.
+              </p>
+            </div>
+
+            <div class="glass-card hover-lift">
+              <div class="card__tag"><i class="ti ti-coin"></i> Investment</div>
+              <h3 class="card__title">Tuition &amp; Fees</h3>
+              <p class="card__text">
+                Affordable tuition with payment plans available. Scholarships offered for students with demonstrated financial need. Contact us for details.
+              </p>
+            </div>
+
+            <div class="glass-card hover-lift">
+              <div class="card__tag"><i class="ti ti-certificate"></i> Completion</div>
+              <h3 class="card__title">Certificate of Completion</h3>
+              <p class="card__text">
+                Graduates receive an official HLA Certificate and recognition during a special graduation ceremony with family and church community.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i class="ti ti-quote"></i> Testimonials</span>
+          <h2 class="section-title">Life-Changing Impact</h2>
+          <p class="section-subtitle">
+            Hear from HLA graduates who have been transformed and are now serving powerfully in ministry and leadership.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card glass-card animate-fade-up stagger-1" style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: var(--radius-full); background: var(--color-accent-glow); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 2rem; color: var(--color-primary);">
+              <i class="ti ti-user-circle"></i>
+            </div>
+            <p class="card__text" style="font-style: italic; margin-bottom: var(--space-md);">
+              "HLA completely transformed my understanding of ministry and leadership. The training was rigorous, but the mentorship and community made all the difference. I now serve as a youth pastor with confidence!"
+            </p>
+            <h4 class="card__title" style="font-size: 1rem; margin-bottom: 0.25rem;">Sarah M.</h4>
+            <p class="card__subtitle">HLA Class of 2025</p>
+          </div>
+
+          <div class="card glass-card animate-fade-up stagger-2" style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: var(--radius-full); background: var(--color-secondary-glow); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 2rem; color: var(--color-secondary);">
+              <i class="ti ti-user-circle"></i>
+            </div>
+            <p class="card__text" style="font-style: italic; margin-bottom: var(--space-md);">
+              "As a new believer, I didn't think I had what it takes to lead. HLA showed me that God can use anyone willing to be trained. Today I'm leading a small group and preaching regularly!"
+            </p>
+            <h4 class="card__title" style="font-size: 1rem; margin-bottom: 0.25rem;">Michael T.</h4>
+            <p class="card__subtitle">HLA Class of 2024</p>
+          </div>
+
+          <div class="card glass-card animate-fade-up stagger-3" style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: var(--radius-full); background: var(--color-accent-glow); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 2rem; color: var(--color-primary);">
+              <i class="ti ti-user-circle"></i>
+            </div>
+            <p class="card__text" style="font-style: italic; margin-bottom: var(--space-md);">
+              "The combination of biblical depth, practical ministry training, and personal mentorship is unmatched. HLA prepared me not just for ministry, but for leadership in every area of life."
+            </p>
+            <h4 class="card__title" style="font-size: 1rem; margin-bottom: 0.25rem;">Grace L.</h4>
+            <p class="card__subtitle">HLA Class of 2025</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Application CTA -->
+    <section class="section" style="background: linear-gradient(135deg, var(--color-primary) 0%, #1B3802 100%); color: #FFFFFF;" aria-label="Apply to HLA">
+      <div class="container" style="text-align: center;">
+        <img src="images/hla_logo.svg" alt="Hills Leadership Academy Logo" style="max-width: 120px; height: auto; margin: 0 auto var(--space-lg); filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));" />
+        <h2 style="color: #FFFFFF; margin-bottom: var(--space-md);">Ready to Begin Your Leadership Journey?</h2>
+        <p style="color: rgba(255,255,255,0.9); max-width: 620px; margin: 0 auto var(--space-xl); font-size: 1.15rem;">
+          Applications are now open for the next HLA cohort. Don't miss this opportunity to develop into the leader God has called you to be.
+        </p>
+        <div style="display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap;">
+          <a href="contact.html" class="btn btn--secondary">
+            <i class="ti ti-send"></i> Enroll Now
+          </a>
+          <a href="discipleship.html" class="btn btn--ghost-white">
+            <i class="ti ti-arrow-left"></i> Back to Discipleship
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand-block">
+          <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="footer__logo" />
+          <h3 class="footer__church-name">Hills of Glory</h3>
+          <p class="footer__tagline">International Christian Center Inc. A welcoming house of prayer, worship, and transformation.</p>
+          <div class="footer__social" id="footerSocial">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ti ti-brand-youtube"></i></a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="ti ti-brand-x"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Quick Links</h4>
+          <nav class="footer__links" aria-label="Footer Quick Links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="ministries.html">Ministries</a>
+            <a href="discipleship.html">Discipleship</a>
+            <a href="hla.html">HLA</a>
+            <a href="sermons.html">Sermons</a>
+            <a href="events.html">Events</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Connect</h4>
+          <nav class="footer__links" aria-label="Footer Connect Links">
+            <a href="lifegroups.html">Lifegroups</a>
+            <a href="locations.html">Locations</a>
+            <a href="give.html">Give Online</a>
+            <a href="contact.html">Prayer Requests</a>
+            <a href="admin/">Admin Portal</a>
+          </nav>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Contact Info</h4>
+          <ul class="footer__contact-list" id="footerContactList">
+            <li>
+              <i class="ti ti-map-pin"></i>
+              <span id="footerAddress">Hills of Glory International Christian Center</span>
+            </li>
+            <li>
+              <i class="ti ti-phone"></i>
+              <span id="footerPhone">Contact church office</span>
+            </li>
+            <li>
+              <i class="ti ti-mail"></i>
+              <span id="footerEmail">info@hillsofglory.org</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2026 Hills of Glory International Christian Center Inc. All rights reserved.</p>
+        <div>
+          <a href="contact.html">Contact Us</a> &bull; <a href="admin/">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
