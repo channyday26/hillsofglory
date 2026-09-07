@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../images/hills.svg" />
   <title>Admin Dashboard - Hills of Glory International Christian Center Inc.</title>
   <meta name="robots" content="noindex, nofollow" />
 
@@ -20,10 +21,11 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <!-- Tabler Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 
   <!-- Compiled CSS -->
   <link rel="stylesheet" href="../css/main.css" />
@@ -38,24 +40,24 @@
 
     <aside class="sidebar" role="navigation" aria-label="Admin navigation">
       <div class="sidebar__brand">
-        <img src="../images/hills_ic.png" alt="Hills of Glory Logo" class="sidebar__logo" />
+        <img src="../images/hills.svg" alt="Hills of Glory Logo" class="sidebar__logo" />
         <span class="sidebar__title">
           Hills of Glory
           <small>Admin CMS</small>
         </span>
       </div>
       <nav class="sidebar__nav">
-        <a href="#" class="sidebar__link sidebar__link--active" data-section="settings"><i class="ti ti-settings"></i><span>Church Settings</span></a>
-        <a href="#" class="sidebar__link" data-section="leadership"><i class="ti ti-users"></i><span>Leadership</span></a>
-        <a href="#" class="sidebar__link" data-section="ministries"><i class="ti ti-heart-handshake"></i><span>Ministries</span></a>
-        <a href="#" class="sidebar__link" data-section="locations"><i class="ti ti-map-pin"></i><span>Locations</span></a>
-        <a href="#" class="sidebar__link" data-section="lifegroups"><i class="ti ti-book"></i><span>Lifegroups</span></a>
-        <a href="#" class="sidebar__link" data-section="sermons"><i class="ti ti-player-play"></i><span>Sermons</span></a>
-        <a href="#" class="sidebar__link" data-section="requests"><i class="ti ti-mail"></i><span>Requests</span></a>
+        <a href="#" class="sidebar__link sidebar__link--active" data-section="settings"><i data-lucide="settings"></i><span>Church Settings</span></a>
+        <a href="#" class="sidebar__link" data-section="leadership"><i data-lucide="users"></i><span>Leadership</span></a>
+        <a href="#" class="sidebar__link" data-section="ministries"><i data-lucide="heart-handshake"></i><span>Ministries</span></a>
+        <a href="#" class="sidebar__link" data-section="locations"><i data-lucide="map-pin"></i><span>Locations</span></a>
+        <a href="#" class="sidebar__link" data-section="lifegroups"><i data-lucide="book"></i><span>Lifegroups</span></a>
+        <a href="#" class="sidebar__link" data-section="sermons"><i data-lucide="player-play"></i><span>Sermons</span></a>
+        <a href="#" class="sidebar__link" data-section="requests"><i data-lucide="mail"></i><span>Requests</span></a>
       </nav>
       <div class="sidebar__footer">
-        <a href="../index.html" class="sidebar__link"><i class="ti ti-external-link"></i><span>View Website</span></a>
-        <button class="sidebar__logout" id="sidebarLogout"><i class="ti ti-logout"></i><span>Logout</span></button>
+        <a href="../index.html" class="sidebar__link"><i data-lucide="external-link"></i><span>View Website</span></a>
+        <button class="sidebar__logout" id="sidebarLogout"><i data-lucide="log-out"></i><span>Logout</span></button>
       </div>
     </aside>
 
@@ -63,13 +65,13 @@
       <header class="admin-header">
         <div class="admin-header__actions">
           <button class="mobile-menu-toggle" id="sidebarToggle" aria-label="Toggle sidebar" style="display:none;">
-            <i class="ti ti-menu-2"></i>
+            <i data-lucide="menu"></i>
           </button>
           <h1 class="admin-header__title">Dashboard</h1>
         </div>
         <div class="admin-header__actions">
           <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-            <i class="ti ti-sun"></i>
+            <i data-lucide="sun"></i>
           </button>
         </div>
       </header>
@@ -121,7 +123,7 @@
                 <label for="setHeroVideo" class="form__label">Hero Video URL</label>
                 <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" />
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-device-floppy"></i> Save Settings</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="save" class=""></i> Save Settings</button>
             </form>
           </div>
         </section>
@@ -149,7 +151,7 @@
                 <label for="leaderImage" class="form__label">Profile Image (Max 2MB)</label>
                 <input type="file" id="leaderImage" name="image" class="form__input" accept="image/*" />
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Leader</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Leader</button>
             </form>
           </div>
           <div class="admin-list" id="leadershipList"></div>
@@ -193,7 +195,7 @@
                 <label for="minImage" class="form__label">Image (Max 2MB)</label>
                 <input type="file" id="minImage" name="image" class="form__input" accept="image/*" />
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Ministry</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Ministry</button>
             </form>
           </div>
           <div class="admin-list" id="ministriesList"></div>
@@ -232,7 +234,7 @@
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Location</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Location</button>
             </form>
           </div>
           <div class="admin-list" id="locationsList"></div>
@@ -267,7 +269,7 @@
                 <label for="lgContact" class="form__label">Contact Info</label>
                 <input type="text" id="lgContact" name="contact_info" class="form__input" />
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Lifegroup</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Lifegroup</button>
             </form>
           </div>
           <div class="admin-list" id="lifegroupsList"></div>
@@ -300,7 +302,7 @@
                 <label for="sermonDesc" class="form__label">Description</label>
                 <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
               </div>
-              <button type="submit" class="btn btn--primary"><i class="ti ti-plus"></i> Add Sermon</button>
+              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Sermon</button>
             </form>
           </div>
           <div class="admin-list" id="sermonsList"></div>

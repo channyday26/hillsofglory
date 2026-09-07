@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../images/hills.svg" />
   <title>Admin Login - Hills of Glory International Christian Center Inc.</title>
   <meta name="robots" content="noindex, nofollow" />
 
@@ -20,10 +21,11 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <!-- Tabler Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 
   <!-- Compiled CSS -->
   <link rel="stylesheet" href="../css/main.css" />
@@ -36,7 +38,7 @@
   <main class="login-page">
     <div class="login-card animate-fade-scale">
       <div class="login-card__header">
-        <img src="../images/hills_ic.png" alt="Hills of Glory Logo" class="login-card__logo" />
+        <img src="../images/hills.svg" alt="Hills of Glory Logo" class="login-card__logo" />
         <h1 class="login-card__title">Admin Portal</h1>
         <p class="login-card__subtitle">Sign in to manage the Hills of Glory website.</p>
       </div>
@@ -58,14 +60,14 @@
         </div>
 
         <button type="submit" class="btn btn--primary btn--full" id="loginSubmit">
-          <i class="ti ti-login-2"></i> Sign In
+          <i data-lucide="log-in" class=""></i> Sign In
         </button>
       </form>
 
       <div class="login-card__error" id="loginError" role="alert"></div>
 
       <a href="../index.html" class="login-card__back">
-        <i class="ti ti-arrow-left"></i> Back to website
+        <i data-lucide="arrow-left" class=""></i> Back to website
       </a>
     </div>
   </main>

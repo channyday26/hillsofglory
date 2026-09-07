@@ -8,6 +8,20 @@
   const html = document.documentElement;
 
   // ============================================
+  // Lucide Icons
+  // The markup uses <i data-lucide="..."> placeholders that are converted to
+  // inline SVGs by lucide.createIcons(). This must run after any static or
+  // dynamically-injected icon markup is in the DOM. It's called unconditionally
+  // on load (independent of the theme toggle) and again after async content
+  // renderers insert rows containing icons.
+  // ============================================
+  function initIcons() {
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  }
+
+  // ============================================
   // Theme Toggle (respects system + localStorage)
   // ============================================
   const themeToggle = document.getElementById('themeToggle');
@@ -23,15 +37,19 @@
     localStorage.setItem('theme', theme);
     if (themeToggle) {
       themeToggle.setAttribute('data-theme-active', theme);
-      const icon = themeToggle.querySelector('.ti');
+      const icon = themeToggle.querySelector('[data-lucide]');
       if (icon) {
-        icon.classList.toggle('ti-sun', theme === 'light');
-        icon.classList.toggle('ti-moon', theme === 'dark');
+        icon.setAttribute('data-lucide', theme === 'light' ? 'sun' : 'moon');
       }
     }
+    // Re-render icons so the sun/moon toggle reflects the new theme.
+    initIcons();
   }
 
   applyTheme(getPreferredTheme());
+  // Guarantee static icons (hero, nav, footer, badges) render even though
+  // applyTheme only swaps the theme toggle's own icon.
+  initIcons();
 
   if (themeToggle) {
     themeToggle.addEventListener('click', function () {
@@ -48,28 +66,62 @@
   });
 
   // ============================================
-  // Mobile Menu Drawer + Backdrop
+  // Mobile Menu Drawer
   // ============================================
   const mobileMenuToggle = document.getElementById('mobileMenuToggle');
   const navbarNav = document.getElementById('navbarNav');
-  const navbarBackdrop = document.getElementById('navbarBackdrop');
+  const navbar = document.querySelector('.navbar');
+
+  // Remember the scroll position so the fixed-body lock doesn't jump the page.
+  // Crucially, it must be captured BEFORE any style mutation: setting
+  // `position: fixed` on <body> can reset window.scrollY to 0 in some browsers,
+  // which previously caused a scroll-to-top on toggle.
+  let savedScrollY = 0;
+
+  // Toggles the hamburger icon to a close (X) icon (and back) by swapping the
+  // Lucide icon name, then re-rendering the icons.
+  function setToggleIcon(icon) {
+    if (!mobileMenuToggle) return;
+    const el = mobileMenuToggle.querySelector('[data-lucide]');
+    if (el) el.setAttribute('data-lucide', icon);
+    mobileMenuToggle.setAttribute(
+      'aria-label',
+      icon === 'x' ? 'Close navigation menu' : 'Open navigation menu'
+    );
+    initIcons();
+  }
 
   function openMenu() {
     if (navbarNav) navbarNav.classList.add('is-open');
-    if (navbarBackdrop) navbarBackdrop.classList.add('is-open');
+    if (navbar) navbar.classList.add('menu-open');
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'true');
+    setToggleIcon('x');
+
+    // Capture the offset first, then lock the page.
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '-' + savedScrollY + 'px';
   }
 
   function closeMenu() {
     if (navbarNav) navbarNav.classList.remove('is-open');
-    if (navbarBackdrop) navbarBackdrop.classList.remove('is-open');
+    if (navbar) navbar.classList.remove('menu-open');
     if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    setToggleIcon('menu');
+
+    // Re-enable body scroll and restore the scroll position we saved on open.
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    window.scrollTo(0, savedScrollY);
   }
 
   if (mobileMenuToggle && navbarNav) {
-    mobileMenuToggle.addEventListener('click', function () {
+    mobileMenuToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
       if (navbarNav.classList.contains('is-open')) {
         closeMenu();
       } else {
@@ -78,30 +130,47 @@
     });
   }
 
-  if (navbarBackdrop) {
-    navbarBackdrop.addEventListener('click', closeMenu);
-  }
+  // Click outside to close - improved event handling
+  document.addEventListener('click', function (e) {
+    if (!navbarNav || !navbarNav.classList.contains('is-open')) return;
+    
+    // Check if click is outside the menu and outside the toggle button
+    const clickedInsideMenu = navbarNav.contains(e.target);
+    const clickedOnToggle = mobileMenuToggle && mobileMenuToggle.contains(e.target);
+    
+    if (!clickedInsideMenu && !clickedOnToggle) {
+      closeMenu();
+    }
+  });
 
+  // Close menu when clicking on navigation links
   if (navbarNav) {
     navbarNav.querySelectorAll('.navbar__link').forEach(function (link) {
       link.addEventListener('click', closeMenu);
     });
   }
 
+  // Close menu on Escape key
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeMenu();
+    if (e.key === 'Escape' && navbarNav && navbarNav.classList.contains('is-open')) {
+      closeMenu();
+    }
   });
 
   // ============================================
-  // Sticky navbar scroll shadow
+  // Navbar scroll shadow
+  // The bar itself stays strictly sticky at the top of the viewport; the only
+  // dynamic behavior is a subtle shadow on desktop once the user scrolls.
   // ============================================
-  const navbar = document.querySelector('.navbar');
   if (navbar) {
     let ticking = false;
     window.addEventListener('scroll', function () {
       if (!ticking) {
         window.requestAnimationFrame(function () {
-          navbar.classList.toggle('is-scrolled', window.scrollY > 8);
+          // Only apply the scroll shadow on desktop.
+          if (window.innerWidth > 960) {
+            navbar.classList.toggle('is-scrolled', window.scrollY > 8);
+          }
           ticking = false;
         });
         ticking = true;
@@ -170,9 +239,10 @@
     const container = ensureToastContainer();
     const toast = document.createElement('div');
     toast.className = 'toast toast--' + (type === 'error' ? 'error' : 'success');
-    const iconClass = type === 'error' ? 'ti-alert-circle' : 'ti-circle-check';
-    toast.innerHTML = '<i class="ti ' + iconClass + ' toast__icon"></i><span>' + esc(message) + '</span>';
+         const iconClass = type === 'error' ? 'circle-alert' : 'circle-check';
+    toast.innerHTML = '<i data-lucide="' + iconClass + '" class="toast__icon"></i><span>' + esc(message) + '</span>';
     container.appendChild(toast);
+    initIcons();
     setTimeout(function () {
       toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
       toast.style.opacity = '0';
@@ -212,16 +282,16 @@
     const footerSocial = document.getElementById('footerSocial');
     if (footerSocial) {
       const socials = [
-        { url: s.facebook_url, label: 'Facebook', icon: 'ti-brand-facebook' },
-        { url: s.instagram_url, label: 'Instagram', icon: 'ti-brand-instagram' },
-        { url: s.youtube_url, label: 'YouTube', icon: 'ti-brand-youtube' },
-        { url: s.x_url, label: 'X', icon: 'ti-brand-x' },
+         { url: s.facebook_url, label: 'Facebook', icon: 'facebook' },
+        { url: s.instagram_url, label: 'Instagram', icon: 'instagram' },
+        { url: s.youtube_url, label: 'YouTube', icon: 'youtube' },
+        { url: s.x_url, label: 'X', icon: 'twitter' },
       ].filter(function (item) { return item.url; });
 
       if (socials.length) {
         footerSocial.innerHTML = socials.map(function (item) {
           return '<a href="' + escAttr(item.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escAttr(item.label) + '">' +
-            '<i class="ti ' + item.icon + '"></i></a>';
+            '<i data-lucide="' + item.icon + '"></i></a>';
         }).join('');
       }
     }
@@ -241,12 +311,12 @@
 
     grid.innerHTML = schedules.map(function (s) {
       return '<div class="card glass-card hover-lift animate-fade-up">' +
-        '<div class="schedule-badge"><i class="ti ti-calendar-event"></i> ' + esc(s.service_name || 'Service') + '</div>' +
+        '<div class="schedule-badge"><i data-lucide="calendar-check"></i> ' + esc(s.service_name || 'Service') + '</div>' +
         '<h3 class="card__title">' + esc(s.service_name || 'Service') + '</h3>' +
         '<p class="card__text"><strong>' + esc(s.day || '') + '</strong> &mdash; ' + esc(s.time || '') + '</p>' +
         '<div class="card__footer">' +
         '<span class="card__tag">Worship &amp; Word</span>' +
-        '<a href="locations.html" class="btn btn--outline btn--sm">Locations &rarr;</a>' +
+        '<a href="locations.html" class="btn btn--outline btn--sm">Outreaches &rarr;</a>' +
         '</div></div>';
     }).join('');
   }
@@ -300,6 +370,7 @@
 
     grid.innerHTML = sermons.map(renderSermonCard).join('');
     wireSermonPlayButtons();
+    initIcons();
   }
 
   // ============================================
@@ -370,6 +441,7 @@
       wireSermonPlayButtons();
     }
 
+    initIcons();
     sermonsPager.loading = false;
     setLoadMoreState(btn, sermonsPager.exhausted ? 'exhausted' : 'ready');
   }
@@ -403,10 +475,11 @@
       modal.className = 'video-modal';
       modal.innerHTML =
         '<div class="video-modal__dialog">' +
-        '<button type="button" class="video-modal__close" aria-label="Close video"><i class="ti ti-x"></i></button>' +
+        '<button type="button" class="video-modal__close" aria-label="Close video"><i data-lucide="x"></i></button>' +
         '<div class="video-modal__player"></div>' +
         '</div>';
       document.body.appendChild(modal);
+      initIcons();
 
       modal.addEventListener('click', function (e) {
         if (e.target === modal || e.target.closest('.video-modal__close')) {
@@ -494,8 +567,8 @@
             : '') +
           '<h3 class="card__title">' + esc(m.name || '') + '</h3>' +
           '<p class="card__text">' + esc(m.description || '') + '</p>' +
-          (m.target_school ? '<p class="card__subtitle"><i class="ti ti-school"></i> ' + esc(m.target_school) + '</p>' : '') +
-          (m.contact_person ? '<div class="card__footer"><span class="card__text"><i class="ti ti-user"></i> ' + esc(m.contact_person) + '</span></div>' : '') +
+          (m.target_school ? '<p class="card__subtitle"><i data-lucide="graduation-cap"></i> ' + esc(m.target_school) + '</p>' : '') +
+          (m.contact_person ? '<div class="card__footer"><span class="card__text"><i data-lucide="user"></i> ' + esc(m.contact_person) + '</span></div>' : '') +
           '</div>';
       }).join('');
     });
@@ -506,6 +579,8 @@
           return '<option value="' + escAttr(m.name || '') + '">' + esc(m.name || '') + '</option>';
         }).join('');
     }
+
+    initIcons();
   }
 
   // ============================================
@@ -540,12 +615,12 @@
       return '<div class="glass-card hover-lift animate-fade-up">' +
         '<span class="card__tag">' + esc(loc.location_type === 'Main' ? 'Main Campus' : 'Outreach') + '</span>' +
         '<h3 class="card__title">' + esc(loc.name || '') + '</h3>' +
-        '<p class="card__text"><i class="ti ti-map-pin"></i> ' + esc(loc.address || '') + '</p>' +
+        '<p class="card__text"><i data-lucide="map-pin"></i> ' + esc(loc.address || '') + '</p>' +
         '<div class="location-accordion">' +
         '<button type="button" class="location-accordion__trigger" aria-expanded="false">' +
-        '<span><i class="ti ti-clock"></i> Service Schedule</span><i class="ti ti-chevron-down"></i></button>' +
+        '<span><i data-lucide="clock"></i> Service Schedule</span><i data-lucide="chevron-down"></i></button>' +
         '<div class="location-accordion__body" hidden>' + scheduleBody +
-        (loc.google_maps_embed_link ? '<a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i class="ti ti-map"></i> View Map</a>' : '') +
+        (loc.google_maps_embed_link ? '<a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a>' : '') +
         '</div></div></div>';
     }
 
@@ -568,6 +643,7 @@
     }
 
     wireAccordions();
+    initIcons();
   }
 
   function wireAccordions() {
@@ -607,10 +683,10 @@
     return '<div class="card hover-lift animate-fade-up">' +
       (g.group_type ? '<span class="card__tag">' + esc(g.group_type) + '</span>' : '') +
       '<h3 class="card__title">' + esc(g.group_name || '') + '</h3>' +
-      (g.leader_name ? '<p class="card__subtitle"><i class="ti ti-user"></i> ' + esc(g.leader_name) + '</p>' : '') +
-      '<p class="card__text"><i class="ti ti-map-pin"></i> ' + esc(g.location || 'TBA') + '</p>' +
-      '<p class="card__text"><i class="ti ti-clock"></i> ' + esc(g.meeting_time || 'TBA') + '</p>' +
-      (g.contact_info ? '<div class="card__footer"><span class="card__text"><i class="ti ti-phone"></i> ' + esc(g.contact_info) + '</span></div>' : '') +
+      (g.leader_name ? '<p class="card__subtitle"><i data-lucide="user"></i> ' + esc(g.leader_name) + '</p>' : '') +
+      '<p class="card__text"><i data-lucide="map-pin"></i> ' + esc(g.location || 'TBA') + '</p>' +
+      '<p class="card__text"><i data-lucide="clock"></i> ' + esc(g.meeting_time || 'TBA') + '</p>' +
+       (g.contact_info ? '<div class="card__footer"><span class="card__text"><i data-lucide="phone"></i> ' + esc(g.contact_info) + '</span></div>' : '') +
       '</div>';
   }
 
@@ -650,6 +726,7 @@
       grid.insertAdjacentHTML('beforeend', groups.map(renderLifegroupCard).join(''));
     }
 
+    initIcons();
     setLoadMoreState(btn, lifegroupsPager.exhausted ? 'exhausted' : 'ready');
   }
 

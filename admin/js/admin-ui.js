@@ -8,6 +8,20 @@
 
   const html = document.documentElement;
 
+  // --- Lucide Icons ---
+  // The admin pages render icons as <i data-lucide="..."> placeholders. They
+  // are converted to inline SVGs by lucide.createIcons(), which on admin pages
+  // is not wired into any page flow — so we call it explicitly here and again
+  // after the CMS re-injects rows into the DOM.
+  function initIcons() {
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  }
+  // Exposed so admin-cms.js can re-render icons after injecting dynamic rows.
+  window.initIcons = initIcons;
+  initIcons();
+
   // --- Theme (early theme is applied by an inline <head> script) ---
   const themeToggle = document.getElementById('themeToggle');
 
@@ -15,12 +29,13 @@
     html.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
     if (themeToggle) {
-      const icon = themeToggle.querySelector('.ti');
+      const icon = themeToggle.querySelector('[data-lucide]');
       if (icon) {
-        icon.classList.toggle('ti-sun', theme === 'light');
-        icon.classList.toggle('ti-moon', theme === 'dark');
+        icon.setAttribute('data-lucide', theme === 'light' ? 'sun' : 'moon');
       }
     }
+    // Re-render icons so the sun/moon toggle reflects the new theme.
+    initIcons();
   }
 
   // Sync the toggle icon with whatever theme is currently set

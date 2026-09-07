@@ -1,0 +1,410 @@
+// ============================================
+// Hills of Glory — Admin CMS Specific Styles
+// ============================================
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--color-surface-solid);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform var(--transition-smooth);
+
+  @media (max-width: 900px) {
+    transform: translateX(-100%);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+
+    &.is-open {
+      transform: translateX(0);
+    }
+  }
+}
+
+// Mobile backdrop behind the open sidebar
+.sidebar__backdrop {
+  display: none;
+
+  @media (max-width: 900px) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+
+    &.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-sm) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-md);
+}
+
+.sidebar__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.sidebar__title {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+  line-height: 1.1;
+
+  small {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  .ti,
+  .lucide {
+    width: 1.15em;
+    height: 1.15em;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background-color: var(--color-accent-glow);
+    color: var(--color-primary);
+  }
+
+  &--active {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(45, 90, 3, 0.25);
+
+    &:hover {
+      background-color: var(--color-primary);
+      color: #FFFFFF;
+    }
+  }
+}
+
+.sidebar__footer {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background-color: #EF4444;
+    color: #FFFFFF;
+  }
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  @media (max-width: 900px) {
+    margin-left: 0;
+  }
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-2xl);
+  background-color: var(--color-surface-solid);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+
+  @media (max-width: 600px) {
+    padding: var(--space-md);
+  }
+}
+
+.admin-header__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.admin-content {
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.admin-card {
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-xl);
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+
+  th {
+    background: var(--color-accent-glow);
+    color: var(--color-primary);
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--color-surface-hover);
+  }
+}
+
+// Login Page
+.login-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: var(--color-bg-gradient);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(2rem, 5vw, 3rem);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.login-card__logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-md);
+  object-fit: contain;
+}
+
+.login-card__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.login-card__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xl);
+}
+
+.login-card__error {
+  margin-top: var(--space-md);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #DC2626;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: none;
+
+  // Shown by admin-auth.js (sets display:block) when a message is present.
+  &:not(:empty) {
+    display: block;
+  }
+}
+
+.login-card__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: var(--space-lg);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+// ============================================
+// Admin Forms, Lists & Tabs
+// ============================================
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+
+  // Inputs already carry their own bottom spacing via .form__group
+  .form__group:last-of-type {
+    margin-bottom: var(--space-lg);
+  }
+
+  .btn {
+    align-self: flex-start;
+  }
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  // Rows rendered by admin-cms.js reuse .card
+  .card {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  > p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-md);
+}
+
+.admin-tab {
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-brand);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast),
+              transform var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  &--active {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(45, 90, 3, 0.25);
+
+    &:hover {
+      background-color: var(--color-primary);
+      color: #FFFFFF;
+    }
+  }
+}
+
+// Show the sidebar toggle only on narrow screens
+@media (max-width: 900px) {
+  #sidebarToggle {
+    display: inline-flex !important;
+  }
+}

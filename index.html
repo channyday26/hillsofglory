@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hills of Glory International Christian Center Inc. - A Vibrant House of Prayer</title>
-  <meta name="description" content="Welcome to Hills of Glory International Christian Center Inc. Join us for vibrant worship, dynamic ministries, Bible lifegroups, and life-changing sermons." />
+  <link rel="icon" type="image/svg+xml" href="images/hills.svg" />
+  <title>Hills of Glory International Christian Center Inc.</title>
+  <meta name="description" content="Welcome to Hills of Glory International Christian Center Inc. Join us for worship, dynamic ministries, lifegroups, and life-changing message." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- Tabler Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 
   <!-- Compiled CSS -->
   <link rel="stylesheet" href="css/main.css" />
@@ -26,34 +27,31 @@
   <header class="navbar" role="banner">
     <div class="container navbar__container">
       <a href="index.html" class="navbar__brand" aria-label="Hills of Glory Home">
-        <img src="images/hills_ic.png" alt="Hills of Glory Church Logo" class="navbar__logo" />
+        <img src="images/hills.svg" alt="Hills of Glory Church Logo" class="navbar__logo" />
         <div class="navbar__title">
-          Hills of Glory
+          HILLS OF GLORY
           <span>International Christian Center</span>
         </div>
       </a>
-
-      <div class="navbar__backdrop" id="navbarBackdrop"></div>
 
       <nav class="navbar__nav" id="navbarNav" aria-label="Main navigation">
         <a href="index.html" class="navbar__link navbar__link--active">Home</a>
         <a href="about.html" class="navbar__link">About</a>
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
-        <a href="sermons.html" class="navbar__link">Sermons</a>
         <a href="events.html" class="navbar__link">Events</a>
         <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Locations</a>
+        <a href="locations.html" class="navbar__link">Outreaches</a>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
 
       <div class="navbar__actions">
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <i class="ti ti-sun"></i>
+          <i data-lucide="sun"></i>
         </button>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-          <i class="ti ti-menu-2"></i>
+          <i data-lucide="menu"></i>
         </button>
       </div>
     </div>
@@ -77,7 +75,7 @@
       <div class="container">
         <div class="hero__content animate-fade-up">
           <div class="hero__badge">
-            <i class="ti ti-flame"></i> A House of Prayer and Worship
+            <i data-lucide="flame"></i> A House of Prayer and Worship
           </div>
           <h1 class="hero__heading" id="heroTitle">
             Experience God's Glory &amp; <span class="text-highlight">Transform Your Life</span>
@@ -87,10 +85,10 @@
           </p>
           <div class="hero__actions">
             <a href="locations.html" class="btn btn--primary">
-              <i class="ti ti-map-pin"></i> Plan Your Visit
+              <i data-lucide="map-pin"></i> Plan Your Visit
             </a>
             <a href="sermons.html" class="btn btn--ghost-white">
-              <i class="ti ti-player-play"></i> Watch Sermons
+              <i data-lucide="player-play"></i> Watch Sermons
             </a>
           </div>
         </div>
@@ -102,7 +100,7 @@
       <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge">Who We Are</span>
-          <h2 class="section-title">A Vibrant Community of Faith</h2>
+          <h2 class="section-title">A Community of Believers</h2>
           <p class="section-subtitle">
             Rooted in the Word of God, moving in the power of the Holy Spirit, and reaching communities with the love of Jesus.
           </p>
@@ -110,7 +108,7 @@
 
         <div class="grid-3">
           <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i class="ti ti-music"></i> Vibrant Worship</div>
+            <div class="card__tag"><i data-lucide="music"></i> Spirit-led Worship</div>
             <h3 class="card__title">Inspiring Encounters</h3>
             <p class="card__text">
               Passionate, spirit-led praise and worship that connects hearts directly to the presence and glory of God.
@@ -118,7 +116,7 @@
           </div>
 
           <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i class="ti ti-book"></i> Biblical Truth</div>
+            <div class="card__tag card__tag--secondary"><i data-lucide="book"></i> Biblical Truth</div>
             <h3 class="card__title">Transforming Word</h3>
             <p class="card__text">
               Practical, life-applicable teachings from the Holy Scriptures designed to build faith and empower everyday living.
@@ -126,7 +124,7 @@
           </div>
 
           <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="card__tag"><i class="ti ti-users-group"></i> Lifegroups</div>
+            <div class="card__tag"><i data-lucide="users-round"></i> Lifegroups</div>
             <h3 class="card__title">Genuine Community</h3>
             <p class="card__text">
               Small fellowship groups where believers grow together, support one another in prayer, and form lifelong bonds.
@@ -147,41 +145,7 @@
           </p>
         </div>
 
-        <div class="grid-cards" id="homeScheduleGrid">
-          <!-- Fallback static schedules while loading / if database empty -->
-          <div class="card glass-card hover-lift">
-            <div class="schedule-badge"><i class="ti ti-calendar-event"></i> Sunday Service</div>
-            <h3 class="card__title">Sunday Celebration</h3>
-            <p class="card__subtitle">Main Sanctuary</p>
-            <p class="card__text"><strong>Time:</strong> 9:00 AM &amp; 11:00 AM</p>
-            <div class="card__footer">
-              <span class="card__tag">Worship &amp; Word</span>
-              <a href="locations.html" class="btn btn--outline btn--sm">Locations &rarr;</a>
-            </div>
-          </div>
-
-          <div class="card glass-card hover-lift">
-            <div class="schedule-badge"><i class="ti ti-calendar-event"></i> Midweek Service</div>
-            <h3 class="card__title">Midweek Prayer &amp; Word</h3>
-            <p class="card__subtitle">Main &amp; Online</p>
-            <p class="card__text"><strong>Time:</strong> Wednesdays at 6:30 PM</p>
-            <div class="card__footer">
-              <span class="card__tag card__tag--secondary">Prayer &amp; Bible Study</span>
-              <a href="locations.html" class="btn btn--outline btn--sm">Locations &rarr;</a>
-            </div>
-          </div>
-
-          <div class="card glass-card hover-lift">
-            <div class="schedule-badge"><i class="ti ti-calendar-event"></i> Youth Gathering</div>
-            <h3 class="card__title">Generation Glory Youth</h3>
-            <p class="card__subtitle">Youth Chapel</p>
-            <p class="card__text"><strong>Time:</strong> Fridays at 7:00 PM</p>
-            <div class="card__footer">
-              <span class="card__tag">Youth &amp; Students</span>
-              <a href="ministries.html" class="btn btn--outline btn--sm">Learn More &rarr;</a>
-            </div>
-          </div>
-        </div>
+        <img src="images/services.jpg" alt="Weekly service schedules at Hills of Glory" class="services-image" loading="lazy" />
       </div>
     </section>
 
@@ -206,7 +170,7 @@
             <h3 class="card__title">Walking in Kingdom Authority</h3>
             <p class="card__text">Pastor • Faith &amp; Victory Series</p>
             <div class="card__footer">
-              <a href="sermons.html" class="btn btn--primary btn--sm"><i class="ti ti-player-play"></i> Watch</a>
+              <a href="sermons.html" class="btn btn--primary btn--sm"><i data-lucide="player-play"></i> Watch</a>
             </div>
           </div>
 
@@ -218,7 +182,7 @@
             <h3 class="card__title">The Power of Persistent Prayer</h3>
             <p class="card__text">Pastor • Prayer Series</p>
             <div class="card__footer">
-              <a href="sermons.html" class="btn btn--primary btn--sm"><i class="ti ti-player-play"></i> Watch</a>
+              <a href="sermons.html" class="btn btn--primary btn--sm"><i data-lucide="player-play"></i> Watch</a>
             </div>
           </div>
 
@@ -230,32 +194,109 @@
             <h3 class="card__title">An Atmosphere of Glory</h3>
             <p class="card__text">Worship Team • Worship Gathering</p>
             <div class="card__footer">
-              <a href="sermons.html" class="btn btn--primary btn--sm"><i class="ti ti-player-play"></i> Watch</a>
+              <a href="sermons.html" class="btn btn--primary btn--sm"><i data-lucide="player-play"></i> Watch</a>
             </div>
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: var(--space-2xl);">
+        <div class="btn-row">
           <a href="sermons.html" class="btn btn--secondary">
-            <i class="ti ti-video"></i> Browse All Sermons
+            <i data-lucide="video"></i> Browse All Sermons
           </a>
         </div>
       </div>
     </section>
 
+    <!-- God's Purpose -->
+    <section class="section" aria-label="God's Purpose">
+      <div class="container paragraph-list">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="compass"></i> His Plan For You</span>
+          <h2 class="section-title">God's Purpose</h2>
+          <p class="section-subtitle">
+            From the very beginning, God has had a specific and beautiful purpose for your life. He is able to transform who you are and shape you into the person He designed you to become.
+          </p>
+        </div>
+
+        <ol class="purpose-list animate-fade-up">
+          <li>
+            <span class="purpose-list__number">1</span>
+            <div class="purpose-list__content">
+              <h3>Known and Chosen</h3>
+              <p>Before you were formed, God knew you and set you apart. You are not an accident — you were lovingly and intentionally created for a divine assignment.</p>
+            </div>
+          </li>
+          <li>
+            <span class="purpose-list__number">2</span>
+            <div class="purpose-list__content">
+              <h3>Created to Glorify God</h3>
+              <p>Every life is designed to reflect the goodness and glory of God. As you walk with Him, your life becomes a testimony of His faithfulness and love.</p>
+            </div>
+          </li>
+          <li>
+            <span class="purpose-list__number">3</span>
+            <div class="purpose-list__content">
+              <h3>Called to Transformation</h3>
+              <p>God does not leave you as you are. Through His Spirit, He renews your mind and transforms your character, making you whole and thriving in every area of life.</p>
+            </div>
+          </li>
+          <li>
+            <span class="purpose-list__number">4</span>
+            <div class="purpose-list__content">
+              <h3>Empowered to Serve</h3>
+              <p>God equips you with gifts and opportunities to serve others. Your purpose finds its richest expression when you pour out the love you have received.</p>
+            </div>
+          </li>
+          <li>
+            <span class="purpose-list__number">5</span>
+            <div class="purpose-list__content">
+              <h3>Given a Future and Hope</h3>
+              <p>God's plans for you are plans of peace and a future filled with hope. No matter your past, He is committed to completing the good work He began in you.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Prayer of Acceptance -->
+    <section class="section section--alt" aria-label="Prayer of Acceptance">
+      <div class="container prayer">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="heart"></i> A New Beginning</span>
+          <h2 class="section-title">Prayer of Acceptance</h2>
+        </div>
+
+        <div class="prayer__card animate-fade-up">
+          <p class="prayer__text">
+            "Lord Jesus, I come to You and acknowledge that I have sinned and fallen short of Your glory. Thank You for loving me and giving Your life for me. I believe You died and rose again so I could live. Today, I receive You as my Lord and Savior. Forgive my sins, cleanse my heart, and take Your rightful place in my life. Write my name in the Book of Life, and help me to live for You from this day forward. Amen."
+          </p>
+        </div>
+
+        <div class="next-step animate-fade-up">
+          <p class="next-step__label">What's Next Step</p>
+          <a href="lifegroups.html" class="btn btn--primary btn--lg">
+            <i data-lucide="users"></i> Find Your Lifegroup
+          </a>
+          <p class="next-step__hint">
+            We'd love to help you connect with other believers and grow in your new faith. Find a lifegroup near you today.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- Call to Action Banner -->
-    <section class="section" style="background: linear-gradient(135deg, var(--color-primary) 0%, #1B3802 100%); color: #FFFFFF;" aria-label="Join Call to Action">
-      <div class="container" style="text-align: center;">
-        <h2 style="color: #FFFFFF; margin-bottom: var(--space-md);">Ready to Experience God With Us?</h2>
-        <p style="color: rgba(255,255,255,0.9); max-width: 620px; margin: 0 auto var(--space-xl); font-size: 1.15rem;">
-          Whether you have a prayer request, want to join a ministry, or want to visit this Sunday, we’d love to connect with you.
+    <section class="section section--cta" aria-label="Join Call to Action">
+      <div class="container cta__container text-center">
+        <h2 class="cta__title">Ready to Experience God With Us?</h2>
+        <p class="cta__text">
+          Whether you have a prayer request, want to join a ministry, or want to visit this Sunday, we'd love to connect with you.
         </p>
-        <div style="display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap;">
+        <div class="cta__actions">
           <a href="contact.html" class="btn btn--secondary">
-            <i class="ti ti-pray"></i> Submit Prayer Request
+            <i data-lucide="hand-helping"></i> Submit Prayer Request
           </a>
           <a href="ministries.html" class="btn btn--ghost-white">
-            <i class="ti ti-heart-handshake"></i> Join a Ministry
+            <i data-lucide="heart-handshake"></i> Join a Ministry
           </a>
         </div>
       </div>
@@ -267,14 +308,14 @@
     <div class="container">
       <div class="footer__grid">
         <div class="footer__brand-block">
-          <img src="images/hills_ic.png" alt="Hills of Glory Logo" class="footer__logo" />
+          <img src="images/hills.svg" alt="Hills of Glory Logo" class="footer__logo" />
           <h3 class="footer__church-name">Hills of Glory</h3>
           <p class="footer__tagline">International Christian Center Inc. A welcoming house of prayer, worship, and transformation.</p>
           <div class="footer__social" id="footerSocial">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="ti ti-brand-youtube"></i></a>
-            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="ti ti-brand-x"></i></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i data-lucide="facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i data-lucide="youtube"></i></a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i data-lucide="twitter"></i></a>
           </div>
         </div>
 
@@ -284,7 +325,6 @@
             <a href="index.html">Home</a>
             <a href="about.html">About Us</a>
             <a href="ministries.html">Ministries</a>
-            <a href="sermons.html">Sermons</a>
             <a href="events.html">Events</a>
           </nav>
         </div>
@@ -293,7 +333,7 @@
           <h4 class="footer__heading">Connect</h4>
           <nav class="footer__links" aria-label="Footer Connect Links">
             <a href="lifegroups.html">Lifegroups</a>
-            <a href="locations.html">Locations</a>
+            <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>
           </nav>
@@ -303,15 +343,15 @@
           <h4 class="footer__heading">Contact Info</h4>
           <ul class="footer__contact-list" id="footerContactList">
             <li>
-              <i class="ti ti-map-pin"></i>
+              <i data-lucide="map-pin"></i>
               <span id="footerAddress">Hills of Glory International Christian Center</span>
             </li>
             <li>
-              <i class="ti ti-phone"></i>
+              <i data-lucide="phone"></i>
               <span id="footerPhone">Contact church office</span>
             </li>
             <li>
-              <i class="ti ti-mail"></i>
+              <i data-lucide="mail"></i>
               <span id="footerEmail">info@hillsofglory.org</span>
             </li>
           </ul>

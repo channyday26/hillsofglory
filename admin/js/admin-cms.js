@@ -241,6 +241,10 @@
     }
 
     renderRequestsList(list, tab, data || []);
+
+    // Icons in the freshly-injected rows are <i data-lucide> placeholders;
+    // convert them now that they are in the DOM.
+    if (window.initIcons) window.initIcons();
   }
 
   function renderRequestsList(container, tab, items) {
@@ -258,7 +262,7 @@
           [r.ministry_of_interest, r.contact_info].filter(Boolean).join(' — ') || '';
         const date = r.date_submitted ? new Date(r.date_submitted).toLocaleString() : '';
         const notified = r.notified_at
-          ? '<span class="request-row__badge"><i class="ti ti-mail-check"></i> Emailed</span>'
+          ? '<span class="request-row__badge"><i data-lucide="mail-check"></i> Emailed</span>'
           : '';
 
         return '<div class="card request-row">' +
@@ -272,7 +276,7 @@
             'data-id="' + escAttr(r.id || '') + '" ' +
             'data-table="' + escAttr(tab.table) + '" ' +
             'aria-label="Delete request from ' + escAttr(name) + '">' +
-            '<i class="ti ti-trash"></i> Delete</button>' +
+            '<i data-lucide="trash-2"></i> Delete</button>' +
           '</div>';
       }).join('');
   }
@@ -360,7 +364,7 @@
     }
     const toast = document.createElement('div');
     toast.className = 'toast toast--' + (type === 'error' ? 'error' : 'success');
-    const iconClass = type === 'error' ? 'ti-alert-circle' : 'ti-circle-check';
+    const iconClass = type === 'error' ? 'circle-alert' : 'circle-check';
     const span = document.createElement('span');
     span.textContent = message;
     toast.innerHTML = '<i class="ti ' + iconClass + ' toast__icon"></i>';

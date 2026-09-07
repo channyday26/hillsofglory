@@ -1,0 +1,16 @@
+{
+  "name": "hills-of-glory",
+  "version": "1.0.0",
+  "description": "Hills of Glory International Christian Center Inc. Website & Admin CMS",
+  "scripts": {
+    "dev": "npx serve .",
+    "build:css": "npx sass scss/main.scss css/main.css --no-source-map --style=compressed",
+    "watch:css": "npx sass scss/main.scss css/main.css --watch",
+    "optimize:video": "ffmpeg -y -i videos/hero_video_bg.mp4 -an -vf scale=1280:-2 -c:v libx264 -preset slow -crf 30 -profile:v high -pix_fmt yuv420p -movflags +faststart videos/hero.mp4",
+    "optimize:video:webm": "ffmpeg -y -i videos/hero_video_bg.mp4 -an -vf scale=1280:-2 -c:v libvpx-vp9 -crf 36 -b:v 0 -row-mt 1 videos/hero.webm",
+    "optimize:poster": "ffmpeg -y -i videos/hero_video_bg.mp4 -ss 00:00:01 -frames:v 1 -vf scale=1280:-2 -q:v 4 images/hero-poster.jpg"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
