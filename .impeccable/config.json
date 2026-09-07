@@ -1,0 +1,38 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "springin",
+        "createdAt": "2026-09-04T02:29:40.617Z",
+        "reason": "intentional spring overshoot animation per design system"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "var(--spring-snappy)",
+        "createdAt": "2026-09-04T02:32:03.231Z",
+        "reason": "spring-snappy resolves to cubic-bezier(0.32, 0.72, 0, 1) which is a proper deceleration curve, not bounce"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "*",
+        "files": [
+          "scss/_variables.scss"
+        ],
+        "createdAt": "2026-09-04T02:33:43.002Z",
+        "reason": "intentional spring wobble curve per Emil Kowalski design guidance"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "scss/_components.scss"
+        ],
+        "createdAt": "2026-09-04T02:34:17.160Z",
+        "reason": "standard UX notification toast pattern"
+      }
+    ]
+  }
+}

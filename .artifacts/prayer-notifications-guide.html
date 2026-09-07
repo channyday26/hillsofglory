@@ -1,0 +1,699 @@
+<title>Prayer Request Notifications – Deployment Guide</title>
+<style>
+  :root {
+    --color-bg: #FAFAFA;
+    --color-surface: #FFFFFF;
+    --color-text: #1C1917;
+    --color-text-secondary: #57534E;
+    --color-text-muted: #78716C;
+    --color-primary: #2D5A03;
+    --color-primary-light: #4D8B08;
+    --color-accent: #E19D37;
+    --color-border: #E7E5E4;
+    --color-code-bg: #F5F5F4;
+    --color-success: #16A34A;
+    --color-warning: #EA580C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-bg: #18181B;
+      --color-surface: #27272A;
+      --color-text: #F5F5F4;
+      --color-text-secondary: #D6D3D1;
+      --color-text-muted: #A8A29E;
+      --color-primary: #52B71A;
+      --color-primary-light: #8AE655;
+      --color-accent: #F59E0B;
+      --color-border: #3F3F46;
+      --color-code-bg: #1C1C1E;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --color-bg: #18181B;
+    --color-surface: #27272A;
+    --color-text: #F5F5F4;
+    --color-text-secondary: #D6D3D1;
+    --color-text-muted: #A8A29E;
+    --color-primary: #52B71A;
+    --color-primary-light: #8AE655;
+    --color-accent: #F59E0B;
+    --color-border: #3F3F46;
+    --color-code-bg: #1C1C1E;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    color: var(--color-primary);
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    color: var(--color-text);
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    color: var(--color-primary);
+  }
+
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow);
+  }
+
+  .warning {
+    background: var(--color-surface);
+    border-left: 4px solid var(--color-warning);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+  }
+
+  .success {
+    background: var(--color-surface);
+    border-left: 4px solid var(--color-success);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  code {
+    font-family: 'Monaco', 'Courier New', monospace;
+    background: var(--color-code-bg);
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.875em;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+  }
+
+  ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin: 0.5rem 0;
+  }
+
+  ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-primary-light);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    background: var(--color-code-bg);
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  tr:hover {
+    background: var(--color-code-bg);
+  }
+</style>
+
+<div class="container">
+  <h1>Prayer Request Notifications</h1>
+  <p class="subtitle">Deployment guide for email notifications and admin deletion features</p>
+
+  <div class="card">
+    <p><strong>What you're adding:</strong></p>
+    <ul>
+      <li><strong>Email notifications</strong> — When a visitor submits a prayer request, the church receives an email</li>
+      <li><strong>Admin delete</strong> — Admins can remove prayer and ministry-join requests from the dashboard</li>
+      <li><strong>Notification settings</strong> — Control email notifications from the admin panel (on/off + recipient address)</li>
+    </ul>
+  </div>
+
+  <h2>Prerequisites</h2>
+
+  <div class="card">
+    <p><strong>Before you start, confirm these are complete:</strong></p>
+    <ol>
+      <li>Migrations 004 and 005 have been run in your Supabase project</li>
+      <li>You have an admin user seeded via <code>seed_admin.sql</code></li>
+      <li>You can log in to the admin dashboard and save settings</li>
+      <li>You have a <a href="https://resend.com" target="_blank">Resend.com</a> account (free tier supports 100 emails/day, 3,000/month)</li>
+    </ol>
+  </div>
+
+  <h2>Step 1: Database Schema</h2>
+
+  <p><span class="badge">Migration 006</span> adds the notification settings table and the deletion policy.</p>
+
+  <div class="card">
+    <h3>What it does</h3>
+    <ul>
+      <li>Creates <code>notification_settings</code> — a singleton, admin-only table</li>
+      <li>Adds <code>prayer_requests.notified_at</code> to prevent double-sends</li>
+      <li>Confirms the admin DELETE policy (added in 004, re-created for idempotency)</li>
+      <li>Tightens the visitor INSERT grant to column-scoped (they cannot forge <code>notified_at</code>)</li>
+    </ul>
+
+    <h3>Run in Supabase Dashboard → SQL Editor</h3>
+    <pre><code>-- File: supabase/006_prayer_notifications.sql
+-- Already created in your project directory
+-- Run the whole file once</code></pre>
+
+    <div class="warning">
+      <strong>⚠ Why a separate table?</strong><br>
+      <code>church_settings</code> has a "Public can view settings" policy — it feeds the footer, contact, and give pages. Putting the notification recipient there would publish that address to anyone with the anon key (visible in page source). <code>notification_settings</code> is admin-only.
+    </div>
+  </div>
+
+  <h2>Step 2: Email Service Setup</h2>
+
+  <h3>2.1 Create Resend Account</h3>
+
+  <div class="card">
+    <ol>
+      <li>Go to <a href="https://resend.com/signup" target="_blank">resend.com/signup</a></li>
+      <li>Create an account (free tier: 100 emails/day, 3,000/month)</li>
+      <li>Verify your domain OR use Resend's sandbox domain for testing
+        <ul>
+          <li><strong>Sandbox:</strong> works immediately, delivers only to your account email</li>
+          <li><strong>Custom domain:</strong> requires DNS records (TXT for verification, MX/TXT/CNAME for sending)</li>
+        </ul>
+      </li>
+      <li>Navigate to <strong>API Keys</strong> → <strong>Create API Key</strong></li>
+      <li>Name it "Hills of Glory Notifications", select "Full Access"</li>
+      <li>Copy the key — it's shown once</li>
+    </ol>
+  </div>
+
+  <h3>2.2 Deploy the Edge Function</h3>
+
+  <div class="card">
+    <p>The function is already written at:</p>
+    <pre><code>supabase/functions/notify-prayer-request/index.ts</code></pre>
+
+    <p><strong>Install the Supabase CLI</strong> if you haven't:</p>
+    <pre><code>npm install -g supabase</code></pre>
+
+    <p><strong>Link your project:</strong></p>
+    <pre><code>supabase login
+supabase link --project-ref YOUR_PROJECT_REF</code></pre>
+
+    <p class="badge" style="margin-top: 1rem;">Find YOUR_PROJECT_REF</p>
+    <p>Supabase Dashboard → Settings → General → Reference ID</p>
+
+    <p><strong>Set the secrets:</strong></p>
+    <pre><code># The Resend API key you just copied
+supabase secrets set RESEND_API_KEY=re_...
+
+# A long random string — you'll use this when configuring the webhook
+supabase secrets set NOTIFY_WEBHOOK_SECRET=$(openssl rand -hex 32)
+
+# The verified sender address
+# Sandbox: "onboarding@resend.dev"
+# Custom domain: "noreply@hillsofglory.org"
+supabase secrets set NOTIFY_FROM_EMAIL=noreply@hillsofglory.org</code></pre>
+
+    <p><strong>Deploy:</strong></p>
+    <pre><code>cd supabase/functions
+supabase functions deploy notify-prayer-request --no-verify-jwt</code></pre>
+
+    <p><code>--no-verify-jwt</code> is required — the webhook is not an authenticated user. The shared secret you set above is what authenticates the caller.</p>
+
+    <div class="success">
+      <strong>✓ Function deployed</strong><br>
+      Copy the function URL from the output — you'll need it for the webhook.
+    </div>
+  </div>
+
+  <h3>2.3 Configure the Database Webhook</h3>
+
+  <div class="card">
+    <p>Supabase Dashboard → Database → Webhooks → <strong>Create a new hook</strong></p>
+
+    <table>
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td><strong>Name</strong></td>
+        <td>Notify prayer request</td>
+      </tr>
+      <tr>
+        <td><strong>Table</strong></td>
+        <td>prayer_requests</td>
+      </tr>
+      <tr>
+        <td><strong>Events</strong></td>
+        <td>Insert ✓ (only)</td>
+      </tr>
+      <tr>
+        <td><strong>Type</strong></td>
+        <td>HTTP Request</td>
+      </tr>
+      <tr>
+        <td><strong>Method</strong></td>
+        <td>POST</td>
+      </tr>
+      <tr>
+        <td><strong>URL</strong></td>
+        <td>https://YOUR_PROJECT_REF.supabase.co/functions/v1/notify-prayer-request</td>
+      </tr>
+      <tr>
+        <td><strong>HTTP Headers</strong></td>
+        <td>
+          <code>x-webhook-secret</code> → the value you generated with <code>openssl rand -hex 32</code><br>
+          (Retrieve it: <code>supabase secrets list</code>)
+        </td>
+      </tr>
+    </table>
+
+    <p><strong>Save the webhook.</strong></p>
+
+    <div class="warning">
+      <strong>⚠ The x-webhook-secret header is critical</strong><br>
+      Without it, the function is a public email relay. The function checks this header on every request and rejects calls that don't match.
+    </div>
+  </div>
+
+  <h3>2.4 Test the Integration</h3>
+
+  <div class="card">
+    <p><strong>Option A: Submit via the contact page</strong></p>
+    <ol>
+      <li>Open your website → Contact page</li>
+      <li>Fill in the prayer request form and submit</li>
+      <li>Check the recipient email inbox (sandbox sends only to your Resend account email)</li>
+    </ol>
+
+    <p><strong>Option B: Insert directly in SQL Editor</strong></p>
+    <pre><code>INSERT INTO public.prayer_requests (visitor_name, request_text)
+VALUES ('Test User', 'This is a test request to verify email delivery.');</code></pre>
+
+    <p><strong>What to check:</strong></p>
+    <ul>
+      <li>Email arrives within 10 seconds</li>
+      <li>Subject: "Prayer request from Test User"</li>
+      <li>Body contains the request text, properly escaped</li>
+      <li>The row's <code>notified_at</code> column is stamped (query it or check in the Table Editor)</li>
+    </ul>
+
+    <p><strong>Troubleshooting:</strong></p>
+    <ul>
+      <li><strong>No email + <code>notified_at</code> still NULL:</strong> Check the function logs (Dashboard → Edge Functions → notify-prayer-request → Logs)</li>
+      <li><strong>"Unauthorized" in logs:</strong> The webhook secret doesn't match</li>
+      <li><strong>"Mailer not configured":</strong> <code>RESEND_API_KEY</code> or <code>NOTIFY_FROM_EMAIL</code> not set</li>
+      <li><strong>Resend rejects:</strong> Check the sender is verified (or use the sandbox domain)</li>
+    </ul>
+  </div>
+
+  <h2>Step 3: Admin UI for Notifications</h2>
+
+  <p>Add a notification settings card to the admin dashboard.</p>
+
+  <div class="card">
+    <h3>File: admin/dashboard.html</h3>
+    <p>Insert this <strong>after</strong> the Church Settings section, before Leadership:</p>
+
+    <pre><code>&lt;!-- Section: Notification Settings --&gt;
+&lt;section class="admin-section" id="section-notifications" hidden&gt;
+  &lt;div class="admin-card"&gt;
+    &lt;h2 class="section-title"&gt;Email Notification Settings&lt;/h2&gt;
+    &lt;form id="notifyForm" class="admin-form"&gt;
+      &lt;div class="form__group"&gt;
+        &lt;label class="form__label"&gt;
+          &lt;input type="checkbox" id="notifyEnabled" name="prayer_notify_enabled" style="margin-right: 0.5rem;"&gt;
+          Send email when prayer requests are submitted
+        &lt;/label&gt;
+      &lt;/div&gt;
+      &lt;div class="form__group"&gt;
+        &lt;label for="notifyEmail" class="form__label"&gt;Recipient Email&lt;/label&gt;
+        &lt;input type="email" id="notifyEmail" name="prayer_notify_email" class="form__input" placeholder="pastor@hillsofglory.org"&gt;
+        &lt;p style="font-size:0.875rem;color:var(--color-text-muted);margin-top:0.5rem;"&gt;
+          This address is admin-only. It will never appear on the public site.
+        &lt;/p&gt;
+      &lt;/div&gt;
+      &lt;button type="submit" class="btn btn--primary"&gt;
+        &lt;i class="ti ti-device-floppy"&gt;&lt;/i&gt; Save Notification Settings
+      &lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+
+    <p><strong>Add the sidebar link:</strong> Inside <code>&lt;nav class="sidebar__nav"&gt;</code>, after Settings:</p>
+
+    <pre><code>&lt;button class="sidebar__link" data-section="notifications"&gt;
+  &lt;i class="ti ti-mail"&gt;&lt;/i&gt; Notifications
+&lt;/button&gt;</code></pre>
+  </div>
+
+  <h2>Step 4: Admin UI for Request Deletion</h2>
+
+  <p>The delete button and handler are already in place from the consolidated requests block, but you need to add the CSS for the new layout.</p>
+
+  <div class="card">
+    <h3>File: scss/_admin.scss</h3>
+    <p>Add at the end of the file:</p>
+
+    <pre><code>// Request rows with delete buttons
+.request-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__text {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--color-accent-glow);
+    color: var(--color-primary);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    .ti {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.admin-list__heading {
+  margin-bottom: var(--space-md);
+  font-size: 1.1rem;
+}</code></pre>
+
+    <p><strong>Rebuild CSS:</strong></p>
+    <pre><code>npm run build:css</code></pre>
+  </div>
+
+  <h2>Step 5: Complete the JavaScript</h2>
+
+  <p>The notification settings save handler needs to be added to <code>admin/js/admin-cms.js</code>.</p>
+
+  <div class="card">
+    <p>Insert this after the <code>valueOf</code> function (around line 458):</p>
+
+    <pre><code>  // --- Notification Settings Form ---
+  const notifyForm = document.getElementById('notifyForm');
+  if (notifyForm) {
+    notifyForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const submitBtn = notifyForm.querySelector('[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const emailEl = document.getElementById('notifyEmail');
+      const enabledEl = document.getElementById('notifyEnabled');
+
+      const payload = {
+        prayer_notify_email: emailEl ? emailEl.value.trim() : '',
+        prayer_notify_enabled: enabledEl ? enabledEl.checked : true,
+      };
+
+      const { data, error } = await supabase
+        .from('notification_settings')
+        .upsert(Object.assign({ id: SETTINGS_ID }, payload))
+        .select('id')
+        .single();
+
+      if (submitBtn) submitBtn.disabled = false;
+
+      if (error) {
+        showToast(error.code === '42501'
+          ? 'Permission denied — your account needs role = admin.'
+          : 'Could not save notification settings.', 'error');
+        console.error(error);
+      } else {
+        showToast('Notification settings saved!', 'success');
+        loadNotificationSettings();
+      }
+    });
+  }</code></pre>
+
+    <p>Then add the call to <code>wireRequestControls()</code>. Find the auth check block (around line 80) and add it after <code>initCMSData();</code>:</p>
+
+    <pre><code>      initCMSData();
+      wireRequestControls();  // ← ADD THIS LINE</code></pre>
+  </div>
+
+  <h2>Step 6: Verify Everything Works</h2>
+
+  <div class="card">
+    <h3>Checklist</h3>
+
+    <p><strong>✓ Database</strong></p>
+    <ul>
+      <li>Run <code>SELECT * FROM notification_settings;</code> — one row exists</li>
+      <li>Run <code>SELECT id, visitor_name, notified_at FROM prayer_requests ORDER BY date_submitted DESC LIMIT 5;</code> — <code>notified_at</code> column exists</li>
+    </ul>
+
+    <p><strong>✓ Admin panel → Notifications section</strong></p>
+    <ul>
+      <li>Form loads with the current settings</li>
+      <li>Saving updates the row and shows "Notification settings saved!"</li>
+      <li>Unchecking "Send email" and saving turns notifications off</li>
+    </ul>
+
+    <p><strong>✓ Admin panel → Requests section</strong></p>
+    <ul>
+      <li>Prayer requests list with Delete buttons</li>
+      <li>Clicking Delete asks for confirmation, then removes the row</li>
+      <li>Tab switches between Prayer / Ministry Join requests</li>
+      <li>Emailed requests show a badge</li>
+    </ul>
+
+    <p><strong>✓ Email delivery</strong></p>
+    <ul>
+      <li>Submit a prayer request from the contact page</li>
+      <li>Email arrives within 10 seconds</li>
+      <li>Visitor-supplied text is escaped (try submitting <code>&lt;b&gt;bold&lt;/b&gt;</code> — it should render as literal text, not formatted)</li>
+      <li>The request row in the admin panel shows the "Emailed" badge</li>
+    </ul>
+
+    <p><strong>✓ Idempotency</strong></p>
+    <ul>
+      <li>Webhook replays don't send duplicates (re-trigger the webhook in Dashboard → Database → Webhooks → click the row → Send test event — only one email arrives even if you fire it 5 times)</li>
+    </ul>
+  </div>
+
+  <h2>Troubleshooting</h2>
+
+  <div class="card">
+    <table>
+      <tr>
+        <th>Problem</th>
+        <th>Likely Cause</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>No email sent</td>
+        <td>Notifications disabled</td>
+        <td>Admin panel → Notifications → check the box, save</td>
+      </tr>
+      <tr>
+        <td>No email sent</td>
+        <td>No recipient configured</td>
+        <td>Admin panel → Notifications → fill in the email, save</td>
+      </tr>
+      <tr>
+        <td>No email sent</td>
+        <td>Function error</td>
+        <td>Dashboard → Edge Functions → notify-prayer-request → Logs</td>
+      </tr>
+      <tr>
+        <td>"Permission denied" when deleting</td>
+        <td>Not an admin</td>
+        <td>Check <code>SELECT * FROM profiles WHERE id = auth.uid();</code> — role must be 'admin'</td>
+      </tr>
+      <tr>
+        <td>Delete button does nothing</td>
+        <td>Migration 006 not run</td>
+        <td>Run <code>006_prayer_notifications.sql</code></td>
+      </tr>
+      <tr>
+        <td>Notification form won't load</td>
+        <td>RLS blocks read</td>
+        <td>You're not an admin yet — seed via <code>seed_admin.sql</code></td>
+      </tr>
+      <tr>
+        <td>Duplicate emails</td>
+        <td>Multiple webhooks configured</td>
+        <td>Dashboard → Database → Webhooks — delete duplicates</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Backfilling Unsent Notifications</h2>
+
+  <div class="card">
+    <p>If you had prayer requests submitted <strong>before</strong> the webhook was configured, their <code>notified_at</code> is NULL and no email was sent.</p>
+
+    <p><strong>To send emails for old requests:</strong></p>
+
+    <pre><code>-- List unsent requests
+SELECT id, visitor_name, date_submitted
+FROM prayer_requests
+WHERE notified_at IS NULL
+ORDER BY date_submitted;
+
+-- Trigger the function manually for each one by calling the webhook URL
+-- (use curl, Postman, or the Supabase Dashboard's "Send test event")</code></pre>
+
+    <p>The function's idempotency check prevents double-sends: once <code>notified_at</code> is stamped, re-invoking the webhook for that row does nothing.</p>
+  </div>
+
+  <h2>Production Checklist</h2>
+
+  <div class="success">
+    <p><strong>Before going live:</strong></p>
+    <ol>
+      <li>✓ Verify your sending domain in Resend (sandbox blocks external recipients)</li>
+      <li>✓ Test with a real email address (not the sandbox)</li>
+      <li>✓ Confirm the recipient address in notification settings is correct</li>
+      <li>✓ Check Resend → Emails to confirm delivery rate is 100%</li>
+      <li>✓ Verify the webhook secret is set and matches</li>
+      <li>✓ Test deletion from the admin panel</li>
+      <li>✓ Commit and deploy</li>
+    </ol>
+  </div>
+
+  <h2>Cost & Limits</h2>
+
+  <div class="card">
+    <p><strong>Resend Free Tier</strong></p>
+    <ul>
+      <li>100 emails/day</li>
+      <li>3,000 emails/month</li>
+      <li>1 custom domain</li>
+    </ul>
+
+    <p>If your church expects more than ~95 prayer requests per day, consider the Pro plan ($20/month for 50,000 emails).</p>
+
+    <p><strong>Supabase Edge Functions</strong></p>
+    <ul>
+      <li>Free tier: 500,000 invocations/month</li>
+      <li>2M CPU-seconds/month</li>
+    </ul>
+
+    <p>The notify function uses ~100ms per call, so even at the free tier you can handle 20M prayer requests/month before hitting the CPU limit.</p>
+  </div>
+
+  <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-muted); font-size: 0.875rem;">
+    <p>Hills of Glory International Christian Center Inc. – Generated 2026-09-04</p>
+  </div>
+</div>
