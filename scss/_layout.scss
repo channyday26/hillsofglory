@@ -290,39 +290,48 @@
   filter: saturate(1.15) brightness(0.9);
 }
 
-// Page hero — Topographic / Layered Color Transitions
+// Page hero gradient background
 .page-hero {
   position: relative;
+  background: var(--hero-gradient);
+  background-attachment: fixed;
   min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4xl) 0;
   overflow: hidden;
-  background-image:
-    radial-gradient(40rem 28rem at 50% 46%, rgba(247, 186, 107, 0.22) 0%, rgba(247, 186, 107, 0) 60%),
-    repeating-radial-gradient(circle at 30% 70%, rgba(233, 166, 92, 0) 0 1.4rem, rgba(233, 166, 92, 0.09) 1.4rem 1.42rem),
-    repeating-radial-gradient(circle at 72% 30%, rgba(90, 155, 50, 0) 0 2.2rem, rgba(90, 155, 50, 0.1) 2.2rem 2.23rem),
-    linear-gradient(152deg,
-      #0d1b07 0%,
-      #16330c 20%,
-      #1f4a11 38%,
-      #2c5d17 50%,
-      #3f6f1e 60%,
-      #7d8329 70%,
-      #c4903a 82%,
-      #e6b45a 92%,
-      #f7cd7f 100%);
 
   .container {
     text-align: center;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hero-overlay-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1;
+
+    @media (prefers-reduced-transparency: reduce) {
+      background: rgba(13, 20, 10, 0.85);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
   }
 }
 
 .hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(20, 45, 2, 0.78) 0%, rgba(30, 25, 15, 0.7) 50%, rgba(180, 105, 15, 0.65) 100%);
+  background: var(--hero-overlay-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 
