@@ -310,15 +310,27 @@
     if (!schedules.length) return; // keep static fallback markup
 
     grid.innerHTML = schedules.map(function (s) {
-      return '<div class="card glass-card hover-lift animate-fade-up">' +
-        '<div class="schedule-badge"><i data-lucide="calendar-check"></i> ' + esc(s.service_name || 'Service') + '</div>' +
-        '<h3 class="card__title">' + esc(s.service_name || 'Service') + '</h3>' +
-        '<p class="card__text"><strong>' + esc(s.day || '') + '</strong> &mdash; ' + esc(s.time || '') + '</p>' +
-        '<div class="card__footer">' +
-        '<span class="card__tag">Worship &amp; Word</span>' +
-        '<a href="locations.html" class="btn btn--outline btn--sm">Outreaches &rarr;</a>' +
-        '</div></div>';
+      const time = esc(s.time || '');
+      return '<li class="schedule-row">' +
+        '<span class="schedule-row__day">' + esc(s.day || '') + '</span>' +
+        '<span class="schedule-row__service">' + esc(s.service_name || 'Service') + '</span>' +
+        '<time class="schedule-row__time" datetime="' + escAttr(s.time || '') + '">' + time + '</time>' +
+        '<a href="locations.html" class="schedule-row__link" aria-label="View service details">' +
+        '<i data-lucide="arrow-up-right"></i></a>' +
+        '</li>';
     }).join('');
+
+    // Spotlight headline follows the first service when data is present.
+    const dayEl = document.getElementById('homeScheduleDay');
+    const timeEl = document.getElementById('homeScheduleTime');
+    const first = schedules[0];
+    if (dayEl && first.day) dayEl.textContent = first.day;
+    if (timeEl && first.time) {
+      timeEl.textContent = first.time;
+      timeEl.setAttribute('datetime', first.time);
+    }
+
+    initIcons();
   }
 
   // ============================================
@@ -357,8 +369,33 @@
   }
 
   // ============================================
-  // Home — Latest Sermons (limit 3)
+  // Home — Latest Sermons (limit 3; single sermon spans the grid)
   // ============================================
+  function renderFeaturedSermon(s) {
+    const videoId = extractYouTubeId(s.youtube_url);
+    const thumb = videoId
+      ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg'
+      : 'images/preach.png';
+    const watchBtn = videoId
+      ? '<button type="button" class="btn btn--primary sermon-play" data-youtube="' + escAttr(videoId) + '"><i data-lucide="play"></i> Watch Now</button>'
+      : (s.youtube_url
+          ? '<a href="' + escAttr(s.youtube_url) + '" target="_blank" rel="noopener" class="btn btn--primary"><i data-lucide="play"></i> Watch Now</a>'
+          : '');
+    return '<div class="card card--featured hover-lift animate-fade-up" data-youtube="' + escAttr(videoId || '') + '">' +
+      '<div class="card__media">' +
+      '<img src="' + escAttr(thumb) + '" alt="' + escAttr(s.title || 'Sermon') + '" loading="lazy" />' +
+      '</div>' +
+      '<div class="card__body">' +
+      '<span class="card__tag">' + esc(formatDate(s.date) || 'Latest Message') + '</span>' +
+      '<h3 class="card__title">' + esc(s.title || '') + '</h3>' +
+      '<p class="card__text">' + esc(s.speaker || 'Guest Speaker') + (s.description ? ' &bull; ' + esc(s.description) : '') + '</p>' +
+      '<div class="card__footer">' +
+      watchBtn +
+      '<a href="sermons.html" class="btn btn--outline"><i data-lucide="library"></i> Browse All Sermons</a>' +
+      '</div>' +
+      '</div></div>';
+  }
+
   async function loadHomeSermons() {
     const grid = document.getElementById('homeSermonsGrid');
     if (!grid) return;
@@ -368,7 +405,12 @@
     });
     if (!sermons.length) return; // keep static fallback
 
-    grid.innerHTML = sermons.map(renderSermonCard).join('');
+    grid.classList.toggle('grid-single', sermons.length === 1);
+    if (sermons.length === 1) {
+      grid.innerHTML = renderFeaturedSermon(sermons[0]);
+    } else {
+      grid.innerHTML = sermons.map(renderSermonCard).join('');
+    }
     wireSermonPlayButtons();
     initIcons();
   }

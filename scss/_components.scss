@@ -253,6 +253,81 @@
   justify-content: space-between;
 }
 
+// Featured sermon card (single-sermon home spotlight)
+.card--featured {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+
+  .card__media {
+    margin: 0;
+    height: 100%;
+    min-height: 360px;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.85rem;
+    padding: clamp(1.5rem, 3.5vw, 2.75rem);
+  }
+
+  .card__tag {
+    margin-bottom: 0;
+  }
+
+  .card__title {
+    font-size: clamp(1.6rem, 3vw, 2.35rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 0;
+  }
+
+  .card__text {
+    font-size: 1.05rem;
+    margin-bottom: 0;
+  }
+
+  .card__footer {
+    margin-top: 0.35rem;
+    padding-top: 0;
+    border-top: 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+
+    .card__media {
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius-md);
+    }
+
+    .card__body {
+      padding: 1.4rem 0 0.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+
+    .card__body {
+      gap: 0.75rem;
+    }
+  }
+}
+
 // --- Section Grids ---
 .grid-cards {
   display: grid;
@@ -275,6 +350,15 @@
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
+  }
+}
+
+// Single item variant: the lone sermon spans the full three-column grid.
+.grid-single {
+  grid-template-columns: 1fr;
+
+  > .card {
+    grid-column: 1 / -1;
   }
 }
 
@@ -653,13 +737,282 @@
   }
 }
 
-// --- Schedule Showcase Image ---
-.services-image {
-  display: block;
-  width: 100%;
-  margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
-  border-radius: var(--radius-lg);
+// --- Schedule Showcase (home spotlight) ---
+.section--schedules {
+  overflow: hidden;
+  z-index: 0;
+}
+
+.schedule-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-glass-border);
+  background: var(--color-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-card-hover);
+  overflow: hidden;
+
+  @media (prefers-reduced-transparency: reduce) {
+    background: var(--color-surface-solid);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Visual side: editorial "this week" spotlight
+.schedule-showcase__visual {
+  position: relative;
+  min-height: 480px;
+  overflow: hidden;
+  isolation: isolate;
+
+  @media (max-width: 720px) {
+    min-height: 380px;
+  }
+}
+
+.schedule-showcase__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.schedule-showcase__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 20, 4, 0.18) 0%, rgba(9, 20, 4, 0.45) 55%, rgba(9, 20, 4, 0.85) 100%),
+    linear-gradient(110deg, rgba(45, 90, 3, 0.18) 0%, rgba(45, 90, 3, 0) 55%);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background: linear-gradient(180deg, rgba(9, 20, 4, 0.55) 0%, rgba(9, 20, 4, 0.85) 100%);
+  }
+}
+
+.schedule-showcase__spotlight {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  min-height: inherit;
+  gap: 0.15rem;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  color: #FFFFFF;
+}
+
+.schedule-showcase__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  @media (prefers-reduced-transparency: reduce) {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .ti,
+  .lucide {
+    width: 0.95em;
+    height: 0.95em;
+    flex-shrink: 0;
+  }
+}
+
+.schedule-showcase__day {
+  font-family: var(--font-brand);
+  font-weight: 900;
+  font-size: clamp(3rem, 6.5vw, 4.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-shadow: var(--hero-heading-text-shadow);
+}
+
+.schedule-showcase__time {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  color: var(--color-secondary-light);
+  text-shadow: var(--hero-heading-text-shadow);
+}
+
+.schedule-showcase__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.88);
+
+  .ti,
+  .lucide {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+}
+
+// List side: vertical timetable rows
+.schedule-showcase__panel {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.schedule-showcase__list {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 8fr) auto auto;
+  align-items: center;
+  gap: 0.75rem 1.1rem;
+  padding: 1.05rem 0.75rem;
+  border-radius: var(--radius-md);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background-color: var(--color-accent-glow);
+
+    .schedule-row__link {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #FFFFFF;
+      transform: translateY(-2px);
+
+      .lucide {
+        transform: translate(2px, -2px);
+      }
+    }
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'day     link'
+      'service time';
+    row-gap: 0.2rem;
+
+    .schedule-row__day { grid-area: day; }
+    .schedule-row__service { grid-area: service; }
+    .schedule-row__time { grid-area: time; justify-self: end; }
+    .schedule-row__link { grid-area: link; justify-self: end; }
+  }
+}
+
+.schedule-row__day {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.schedule-row__service {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schedule-row__time {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--color-primary);
+  white-space: nowrap;
+
+  @media (max-width: 560px) {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+.schedule-row__link {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  transition: transform var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast);
+
+  .ti,
+  .lucide {
+    width: 1.15em;
+    height: 1.15em;
+    transition: transform var(--transition-fast);
+  }
+}
+
+.schedule-showcase__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: auto;
+  padding: 1.25rem 0.5rem 0;
+  border-top: 1px solid var(--color-border);
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.87rem;
+    color: var(--color-text-secondary);
+
+    .ti,
+    .lucide {
+      width: 1em;
+      height: 1em;
+      flex-shrink: 0;
+    }
+  }
 }
 
 // --- HLA Image Gallery ---
