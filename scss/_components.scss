@@ -94,14 +94,14 @@
 }
 
 .btn--ghost-white {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.24);
     border-color: #FFFFFF;
     color: #FFFFFF;
   }

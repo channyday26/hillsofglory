@@ -102,6 +102,9 @@ Stick to this layout for all code and assets. Standard HTML routing with explici
 - Use semantic HTML5 elements (`<header>`, `<main>`, `<section>`, `<article>`, `<footer>`, `<nav>`).
 - Always include standard accessibility attributes (`aria-label`, `alt` tags on images).
 
+### Icons
+- **Proportional Sizing:** All Lucide icons must be sized proportionally and consistently relative to their accompanying text. Use `width` and `height` values that scale with the font-size of the surrounding content (e.g., `1em`, `1.2em`, or matching the line-height of the adjacent text). Avoid arbitrary fixed pixel sizes for icons that sit inline with text.
+
 ### Sass / CSS
 - Write modular Sass files.
 - Store color codes, theme settings, and font settings inside Sass variables (`_variables.scss`), and map them to CSS custom properties (`:root` and `[data-theme="dark"]`) to handle real-time theme switching.

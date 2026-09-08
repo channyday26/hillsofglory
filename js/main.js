@@ -338,8 +338,8 @@
       '<p class="card__text">' + esc(s.speaker || 'Guest Speaker') + (s.description ? ' &bull; ' + esc(s.description) : '') + '</p>' +
       '<div class="card__footer">' +
       (videoId
-        ? '<button type="button" class="btn btn--primary btn--sm sermon-play" data-youtube="' + escAttr(videoId) + '"><i class="ti ti-player-play"></i> Watch</button>'
-        : (s.youtube_url ? '<a href="' + escAttr(s.youtube_url) + '" target="_blank" rel="noopener" class="btn btn--primary btn--sm"><i class="ti ti-player-play"></i> Watch</a>' : '')) +
+        ? '<button type="button" class="btn btn--primary btn--sm sermon-play" data-youtube="' + escAttr(videoId) + '"><i data-lucide="play"></i> Watch</button>'
+        : (s.youtube_url ? '<a href="' + escAttr(s.youtube_url) + '" target="_blank" rel="noopener" class="btn btn--primary btn--sm"><i data-lucide="play"></i> Watch</a>' : '')) +
       '</div></div>';
   }
 

@@ -290,20 +290,44 @@
   filter: saturate(1.15) brightness(0.9);
 }
 
+// Page hero — Topographic / Layered Color Transitions
+.page-hero {
+  position: relative;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4xl) 0;
+  overflow: hidden;
+  background-image:
+    radial-gradient(40rem 28rem at 50% 46%, rgba(247, 186, 107, 0.22) 0%, rgba(247, 186, 107, 0) 60%),
+    repeating-radial-gradient(circle at 30% 70%, rgba(233, 166, 92, 0) 0 1.4rem, rgba(233, 166, 92, 0.09) 1.4rem 1.42rem),
+    repeating-radial-gradient(circle at 72% 30%, rgba(90, 155, 50, 0) 0 2.2rem, rgba(90, 155, 50, 0.1) 2.2rem 2.23rem),
+    linear-gradient(152deg,
+      #0d1b07 0%,
+      #16330c 20%,
+      #1f4a11 38%,
+      #2c5d17 50%,
+      #3f6f1e 60%,
+      #7d8329 70%,
+      #c4903a 82%,
+      #e6b45a 92%,
+      #f7cd7f 100%);
+
+  .container {
+    text-align: center;
+  }
+}
+
 .hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(20, 45, 2, 0.78) 0%,
-    rgba(30, 25, 15, 0.7) 50%,
-    rgba(180, 105, 15, 0.65) 100%
-  );
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: linear-gradient(135deg, rgba(20, 45, 2, 0.78) 0%, rgba(30, 25, 15, 0.7) 50%, rgba(180, 105, 15, 0.65) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   @media (prefers-reduced-transparency: reduce) {
-    background: rgba(20, 25, 20, 0.88);
+    background: rgba(13, 20, 10, 0.85);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -315,7 +339,7 @@
   text-align: center;
   max-width: 860px;
   margin: 0 auto;
-  color: #FFFFFF;
+  color: var(--hero-text-color);
 }
 
 .hero__badge {
@@ -324,11 +348,11 @@
   gap: 0.5rem;
   padding: 0.4rem 1.1rem;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: var(--color-secondary-light);
+  color: #F7BA6B;
   font-family: var(--font-brand);
   font-weight: 700;
   font-size: 0.9rem;
@@ -341,19 +365,19 @@
   font-size: clamp(2.4rem, 6vw, 4.4rem);
   font-weight: 800;
   line-height: 1.15;
-  color: #FFFFFF;
+  color: var(--hero-text-color);
   margin-bottom: var(--space-md);
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  text-shadow: var(--hero-heading-text-shadow);
 
   .text-highlight {
-    color: var(--color-secondary-light);
+    color: #F7BA6B;
   }
 }
 
 .hero__subtitle {
   font-size: clamp(1.1rem, 2.2vw, 1.45rem);
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--hero-text-secondary);
   max-width: 680px;
   margin: 0 auto var(--space-2xl);
 }
@@ -366,28 +390,23 @@
   gap: var(--space-md);
 }
 
-// --- Page Hero (Inner Pages) ---
-.page-hero {
-  position: relative;
-  padding: clamp(3rem, 6vw, 5rem) 0;
-  background: linear-gradient(135deg, var(--color-accent-glow) 0%, rgba(217, 130, 43, 0.08) 100%);
-  border-bottom: 1px solid var(--color-border);
-  text-align: center;
-  overflow: hidden;
-}
-
 .page-hero__title {
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   font-weight: 800;
-  color: var(--color-text);
+  color: #FFFFFF;
   margin-bottom: 0.5rem;
+  text-shadow: var(--hero-heading-text-shadow);
 }
 
 .page-hero__lead {
   font-size: clamp(1rem, 2vw, 1.25rem);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.88);
   max-width: 640px;
   margin: 0 auto;
+}
+
+.page-hero .section-badge {
+  color: #F7BA6B;
 }
 
 // --- Footer ---
