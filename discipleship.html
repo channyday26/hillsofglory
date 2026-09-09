@@ -41,8 +41,56 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link navbar__link--active">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Outreaches</a>
+        <div class="navbar__mega">
+          <a href="locations.html" class="navbar__link navbar__mega__trigger">
+            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+          </a>
+                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Church Locations</span>
+              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
+                <i data-lucide="map-pin"></i> Main Campus
+              </a>
+              <div id="megaLocationList">
+                <a href="locations.html#outreach-locations" class="navbar__mega__link">
+                  <i data-lucide="tent"></i> Outreach Centers
+                </a>
+              </div>
+              <a href="locations.html" class="navbar__mega__link">
+                <i data-lucide="navigation"></i> View All Locations
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Outreach Programs</span>
+              <div id="megaProgramList">
+                <a href="ministries.html" class="navbar__mega__link">
+                  <i data-lucide="users"></i> Ministries
+                </a>
+                <a href="discipleship.html" class="navbar__mega__link">
+                  <i data-lucide="book-open"></i> Discipleship
+                </a>
+                <a href="lifegroups.html" class="navbar__mega__link">
+                  <i data-lucide="users-round"></i> Lifegroups
+                </a>
+              </div>
+              <a href="ministries.html" class="navbar__mega__link">
+                <i data-lucide="sparkles"></i> View All Ministries
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Get Involved</span>
+              <a href="events.html" class="navbar__mega__link">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+              <a href="give.html" class="navbar__mega__link">
+                <i data-lucide="heart"></i> Give Online
+              </a>
+              <a href="contact.html" class="navbar__mega__link">
+                <i data-lucide="phone"></i> Contact Info
+              </a>
+            </div>
+          </div>
+        </div>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
@@ -70,47 +118,58 @@
       </div>
     </section>
 
-    <!-- Discipleship Vision -->
-    <section class="section">
+<!-- Discipleship Approach -->
+    <section class="section approach" aria-labelledby="approachTitle">
       <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge">Our Approach</span>
-          <h2 class="section-title">Growing Strong in Faith</h2>
+          <h2 class="section-title" id="approachTitle">Growing Strong in Faith</h2>
           <p class="section-subtitle">
             Discipleship is at the heart of everything we do. We believe every believer is called to grow deeper in their relationship with Christ and to become equipped to make disciples themselves.
           </p>
         </div>
 
-        <div class="grid-3">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i data-lucide="book-open-text" class=""></i> Biblical Foundation</div>
-            <h3 class="card__title">Scripture Study</h3>
-            <p class="card__text">
+        <div class="approach-plane animate-fade-up stagger-1">
+          <span class="approach-plane__watermark" aria-hidden="true">Discipleship</span>
+
+          <article class="approach-card">
+            <span class="approach-card__medallion" aria-hidden="true">
+              <i data-lucide="book-open-text"></i>
+            </span>
+            <span class="approach-card__tag">Biblical Foundation</span>
+            <h3 class="approach-card__title">Scripture Study</h3>
+            <p class="approach-card__text">
               Systematic study of Scripture to build a solid foundation in God's Word, equipping believers with truth and wisdom for everyday life.
             </p>
-          </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i data-lucide="users"></i> Mentorship</div>
-            <h3 class="card__title">Personal Discipleship</h3>
-            <p class="card__text">
+          <article class="approach-card approach-card--gold">
+            <span class="approach-card__medallion" aria-hidden="true">
+              <i data-lucide="users"></i>
+            </span>
+            <span class="approach-card__tag">Mentorship</span>
+            <h3 class="approach-card__title">Personal Discipleship</h3>
+            <p class="approach-card__text">
               One-on-one and small group mentorship where experienced believers guide new Christians in their walk of faith and spiritual growth.
             </p>
-          </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="card__tag"><i data-lucide="trophy" class=""></i> Leadership Training</div>
-            <h3 class="card__title">Developing Leaders</h3>
-            <p class="card__text">
+          <article class="approach-card">
+            <span class="approach-card__medallion" aria-hidden="true">
+              <i data-lucide="trophy"></i>
+            </span>
+            <span class="approach-card__tag">Leadership Training</span>
+            <h3 class="approach-card__title">Developing Leaders</h3>
+            <p class="approach-card__text">
               Structured leadership development programs that raise up the next generation of servant leaders for ministry and marketplace influence.
             </p>
-          </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Hills Leadership Academy Featured Section -->
-    <section class="section section--alt" aria-label="Hills Leadership Academy">
+<!-- Hills Leadership Academy Featured Section -->
+    <section class="section section--alt academy" aria-label="Hills Leadership Academy">
       <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge"><i data-lucide="graduation-cap"></i> Leadership Training</span>
@@ -120,23 +179,25 @@
           </p>
         </div>
 
-        <div class="card glass-card hover-lift card--narrow">
-          <div class="card__media hla-featured-logo">
-            <img src="images/hla_logo.svg" alt="Hills Leadership Academy Logo" loading="lazy" />
+        <div class="academy-tablet animate-fade-up stagger-1">
+          <div class="academy-seal">
+            <img src="images/hla_logo.svg" alt="Hills Leadership Academy emblem" loading="lazy" />
           </div>
-          <div class="card__body">
-            <h3 class="card__title card__title--lg">Transform Your Leadership Journey</h3>
-            <p class="card__text card__text--lg">
-              Hills Leadership Academy (HLA) is a specialized discipleship track that equips believers with biblical knowledge, practical ministry skills, and leadership competencies. Through intensive teaching, hands-on training, and personal mentorship, HLA graduates emerge as confident, capable leaders ready to serve in church ministry and their communities.
-            </p>
-            <div class="cta__actions cta__actions--left">
-              <a href="hla.html" class="btn btn--primary">
-                <i data-lucide="arrow-right" class=""></i> Learn More About HLA
-              </a>
-              <a href="contact.html" class="btn btn--outline">
-                <i data-lucide="mail"></i> Enroll Now
-              </a>
-            </div>
+
+          <span class="academy-tablet__rule" aria-hidden="true"></span>
+
+          <h3 class="academy-tablet__title">Transform Your Leadership Journey</h3>
+          <p class="academy-tablet__text">
+            Hills Leadership Academy (HLA) is a specialized discipleship track that equips believers with biblical knowledge, practical ministry skills, and leadership competencies. Through intensive teaching, hands-on training, and personal mentorship, HLA graduates emerge as confident, capable leaders ready to serve in church ministry and their communities.
+          </p>
+
+          <div class="academy-tablet__actions">
+            <a href="hla.html" class="btn btn--primary">
+              <i data-lucide="arrow-right"></i> Learn More About HLA
+            </a>
+            <a href="contact.html" class="btn btn--outline">
+              <i data-lucide="mail"></i> Enroll Now
+            </a>
           </div>
         </div>
       </div>
@@ -189,8 +250,7 @@
 
         <div>
           <h4 class="footer__heading">Connect</h4>
-          <nav class="footer__links" aria-label="Footer Connect Links">
-            <a href="lifegroups.html">Lifegroups</a>
+            <nav class="footer__links" aria-label="Footer Connect Links">
             <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>

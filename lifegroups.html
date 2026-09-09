@@ -41,8 +41,56 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <a href="lifegroups.html" class="navbar__link navbar__link--active">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Outreaches</a>
+        <div class="navbar__mega">
+          <a href="locations.html" class="navbar__link navbar__mega__trigger">
+            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+          </a>
+                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Church Locations</span>
+              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
+                <i data-lucide="map-pin"></i> Main Campus
+              </a>
+              <div id="megaLocationList">
+                <a href="locations.html#outreach-locations" class="navbar__mega__link">
+                  <i data-lucide="tent"></i> Outreach Centers
+                </a>
+              </div>
+              <a href="locations.html" class="navbar__mega__link">
+                <i data-lucide="navigation"></i> View All Locations
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Outreach Programs</span>
+              <div id="megaProgramList">
+                <a href="ministries.html" class="navbar__mega__link">
+                  <i data-lucide="users"></i> Ministries
+                </a>
+                <a href="discipleship.html" class="navbar__mega__link">
+                  <i data-lucide="book-open"></i> Discipleship
+                </a>
+                <a href="lifegroups.html" class="navbar__mega__link">
+                  <i data-lucide="users-round"></i> Lifegroups
+                </a>
+              </div>
+              <a href="ministries.html" class="navbar__mega__link">
+                <i data-lucide="sparkles"></i> View All Ministries
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Get Involved</span>
+              <a href="events.html" class="navbar__mega__link">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+              <a href="give.html" class="navbar__mega__link">
+                <i data-lucide="heart"></i> Give Online
+              </a>
+              <a href="contact.html" class="navbar__mega__link">
+                <i data-lucide="phone"></i> Contact Info
+              </a>
+            </div>
+          </div>
+        </div>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
@@ -126,8 +174,7 @@
 
         <div>
           <h4 class="footer__heading">Connect</h4>
-          <nav class="footer__links" aria-label="Footer Connect Links">
-            <a href="lifegroups.html">Lifegroups</a>
+            <nav class="footer__links" aria-label="Footer Connect Links">
             <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>

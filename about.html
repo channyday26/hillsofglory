@@ -41,8 +41,56 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Outreaches</a>
+        <div class="navbar__mega">
+          <a href="locations.html" class="navbar__link navbar__mega__trigger">
+            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+          </a>
+                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Church Locations</span>
+              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
+                <i data-lucide="map-pin"></i> Main Campus
+              </a>
+              <div id="megaLocationList">
+                <a href="locations.html#outreach-locations" class="navbar__mega__link">
+                  <i data-lucide="tent"></i> Outreach Centers
+                </a>
+              </div>
+              <a href="locations.html" class="navbar__mega__link">
+                <i data-lucide="navigation"></i> View All Locations
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Outreach Programs</span>
+              <div id="megaProgramList">
+                <a href="ministries.html" class="navbar__mega__link">
+                  <i data-lucide="users"></i> Ministries
+                </a>
+                <a href="discipleship.html" class="navbar__mega__link">
+                  <i data-lucide="book-open"></i> Discipleship
+                </a>
+                <a href="lifegroups.html" class="navbar__mega__link">
+                  <i data-lucide="users-round"></i> Lifegroups
+                </a>
+              </div>
+              <a href="ministries.html" class="navbar__mega__link">
+                <i data-lucide="sparkles"></i> View All Ministries
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Get Involved</span>
+              <a href="events.html" class="navbar__mega__link">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+              <a href="give.html" class="navbar__mega__link">
+                <i data-lucide="heart"></i> Give Online
+              </a>
+              <a href="contact.html" class="navbar__mega__link">
+                <i data-lucide="phone"></i> Contact Info
+              </a>
+            </div>
+          </div>
+        </div>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
@@ -65,131 +113,232 @@
         <span class="section-badge"><i data-lucide="info" class=""></i> Our Story &amp; Leadership</span>
         <h1 class="page-hero__title">About Hills of Glory</h1>
         <p class="page-hero__lead">
-          Called by God to raise a glorious generation, preach the uncompromised Gospel, and manifest God's love to all nations.
+          Our life mission is to honor God and disciple the next generation.
         </p>
       </div>
     </section>
 
+    <!-- Church History -->
+    <section class="section church-history">
+      <div class="container">
+        <div class="history-feature animate-fade-up">
+          <div class="history-feature__story">
+            <span class="section-badge"><i data-lucide="landmark"></i> Church History</span>
+            <h2 class="section-title">Rooted Since <span class="history-feature__accent">July 2004</span></h2>
+            <p class="history-feature__summary">
+              <!-- PLACEHOLDER: Replace this paragraph with a brief historical summary of the church. -->
+              Hills of Glory International Christian Center was founded in July 2004 with one calling — to honor God and disciple the next generation. [Insert the church's story here: the founding vision, key milestones, and the journey unfolding to this day.]
+            </p>
+          </div>
+
+          <div class="history-seal" role="img" aria-label="Hills of Glory was founded in July 2004">
+            <span class="history-seal__est">Est.</span>
+            <span class="history-seal__year" aria-hidden="true">2004</span>
+            <span class="history-seal__month">July</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Mission, Vision & Values -->
-    <section class="section">
+    <section class="section about-purpose">
       <div class="container">
-        <div class="grid-3">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i data-lucide="target" class=""></i> Purpose</div>
-            <h3 class="card__title">Our Mission</h3>
-            <p class="card__text" id="missionText">
-              To proclaim the Gospel of Jesus Christ with power, equip believers for effective ministry, build disciples across generations, and impact cities with the tangible love and grace of God.
-            </p>
-          </div>
-
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i data-lucide="eye"></i> Looking Forward</div>
-            <h3 class="card__title">Our Vision</h3>
-            <p class="card__text" id="visionText">
-              To be a vibrant, multi-campus house of prayer for all nations, raising up leaders and families who honor Jesus Christ and transform communities globally.
-            </p>
-          </div>
-
-          <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="card__tag"><i data-lucide="heart"></i> Foundations</div>
-            <h3 class="card__title">Core Values</h3>
-            <p class="card__text">
-              Passionate Worship, Biblical Authority, Unwavering Faith, Sacrificial Love, Holy Spirit Empowerment, and Generous Community Service.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Statement of Faith / Beliefs -->
-    <section class="section section--alt">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-badge"><i data-lucide="book-open"></i> What We Believe</span>
-          <h2 class="section-title">Statement of Belief</h2>
-          <p class="section-subtitle">The unchanging truths upon which our faith and ministry are established.</p>
-        </div>
-
-        <div class="grid-2">
-          <div class="card hover-lift">
-            <h3 class="card__title"><i data-lucide="scroll-text" class="card__icon card__icon--primary"></i> The Holy Scriptures</h3>
-            <p class="card__text">
-              We believe the Bible is the inspired, infallible, and authoritative Word of God, serving as the supreme rule for all faith and Christian practice.
-            </p>
-          </div>
-
-          <div class="card hover-lift">
-            <h3 class="card__title"><i data-lucide="sparkles" class="card__icon card__icon--secondary"></i> The Holy Trinity</h3>
-            <p class="card__text">
-              We believe in one eternal God, existing in three co-equal persons: the Father, the Son (Jesus Christ), and the Holy Spirit.
-            </p>
-          </div>
-
-          <div class="card hover-lift">
-            <h3 class="card__title"><i data-lucide="cross" class="card__icon card__icon--primary"></i> Salvation Through Christ</h3>
-            <p class="card__text">
-              We believe salvation is a free gift received through repentance and faith in Jesus Christ's shed blood, victorious resurrection, and ascension.
-            </p>
-          </div>
-
-          <div class="card hover-lift">
-            <h3 class="card__title"><i data-lucide="flame" class="card__icon card__icon--secondary"></i> The Holy Spirit</h3>
-            <p class="card__text">
-              We believe in the baptism and ongoing infilling of the Holy Spirit, empowering every believer with spiritual gifts to witness and bear fruit.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Pastoral & Leadership Team -->
-    <section class="section">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-badge"><i data-lucide="users"></i> Pastoral Oversight</span>
-          <h2 class="section-title">Leadership Team</h2>
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="sparkles"></i> Our Foundations</span>
+          <h2 class="section-title">Mission, Vision &amp; Values</h2>
           <p class="section-subtitle">
-            Dedicated men and women of God who shepherd, teach, and guide the church family.
+            Three living convictions that shape every service, every gathering, and every life we are privileged to steward.
           </p>
         </div>
 
-        <div class="grid-cards" id="leadershipGrid">
-          <!-- Default fallback cards (rendered dynamically from Supabase if available) -->
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/senior_pastor&deputy_pastor.jpg" alt="Senior Pastors" loading="lazy" />
+        <div class="covenant-plane animate-fade-up stagger-1">
+          <span class="covenant-plane__watermark" aria-hidden="true">Covenant</span>
+
+          <article class="covenant-tenet covenant-tenet--mission">
+            <span class="covenant-tenet__index" aria-hidden="true">01</span>
+            <h3 class="covenant-tenet__title">Our Mission</h3>
+            <p class="covenant-tenet__text" id="missionText">
+              To proclaim the Gospel of Jesus Christ with power, equip believers for effective ministry, build disciples across generations, and impact cities with the tangible love and grace of God.
+            </p>
+          </article>
+
+          <article class="covenant-tenet covenant-tenet--vision">
+            <span class="covenant-tenet__index" aria-hidden="true">02</span>
+            <h3 class="covenant-tenet__title">Our Vision</h3>
+            <p class="covenant-tenet__text" id="visionText">
+              To be a vibrant, multi-campus house of prayer for all nations, raising up leaders and families who honor Jesus Christ and transform communities globally.
+            </p>
+          </article>
+
+          <article class="covenant-tenet covenant-tenet--values">
+            <span class="covenant-tenet__index" aria-hidden="true">03</span>
+            <h3 class="covenant-tenet__title">Core Values</h3>
+            <p class="covenant-tenet__text">
+              Six heart-commitments we guard in every season, because what we revere shapes who we become.
+            </p>
+            <ul class="covenant-tenet__chips">
+              <li>Passionate Worship</li>
+              <li>Biblical Authority</li>
+              <li>Unwavering Faith</li>
+              <li>Sacrificial Love</li>
+              <li>Holy Spirit Empowerment</li>
+              <li>Generous Community Service</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statement of Belief & Nicene Creed -->
+    <section class="section section--alt about-faith">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="book-open"></i> What We Believe</span>
+          <h2 class="section-title">Statement of Belief</h2>
+          <p class="section-subtitle">
+            The unchanging truths upon which our faith and ministry are established, affirmed with the Church in every generation.
+          </p>
+        </div>
+
+        <div class="faith-editorial">
+          <div class="faith-doctrine animate-fade-up stagger-1">
+            <article class="faith-article">
+              <span class="faith-article__index" aria-hidden="true">01</span>
+              <div class="faith-article__body">
+                <h4 class="faith-article__title"><i data-lucide="scroll-text"></i> The Holy Scriptures</h4>
+                <p class="faith-article__text">
+                  We believe the Bible is the inspired, infallible, and authoritative Word of God, serving as the supreme rule for all faith and Christian practice.
+                </p>
+              </div>
+            </article>
+
+            <article class="faith-article">
+              <span class="faith-article__index" aria-hidden="true">02</span>
+              <div class="faith-article__body">
+                <h4 class="faith-article__title"><i data-lucide="sparkles"></i> The Holy Trinity</h4>
+                <p class="faith-article__text">
+                  We believe in one eternal God, existing in three co-equal persons: the Father, the Son (Jesus Christ), and the Holy Spirit.
+                </p>
+              </div>
+            </article>
+
+            <article class="faith-article">
+              <span class="faith-article__index" aria-hidden="true">03</span>
+              <div class="faith-article__body">
+                <h4 class="faith-article__title"><i data-lucide="cross"></i> Salvation Through Christ</h4>
+                <p class="faith-article__text">
+                  We believe salvation is a free gift received through repentance and faith in Jesus Christ's shed blood, victorious resurrection, and ascension.
+                </p>
+              </div>
+            </article>
+
+            <article class="faith-article">
+              <span class="faith-article__index" aria-hidden="true">04</span>
+              <div class="faith-article__body">
+                <h4 class="faith-article__title"><i data-lucide="flame"></i> The Holy Spirit</h4>
+                <p class="faith-article__text">
+                  We believe in the baptism and ongoing infilling of the Holy Spirit, empowering every believer with spiritual gifts to witness and bear fruit.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <aside class="creed-tablet animate-fade-up stagger-2" aria-label="The Nicene Creed">
+            <span class="creed-tablet__orb creed-tablet__orb--gold" aria-hidden="true"></span>
+            <span class="creed-tablet__orb creed-tablet__orb--green" aria-hidden="true"></span>
+
+            <span class="creed-tablet__kicker">We Believe</span>
+            <h3 class="creed-tablet__title">The Nicene Creed</h3>
+            <div class="creed-tablet__rule" aria-hidden="true"></div>
+
+            <div class="creed-tablet__text">
+              <p>
+                We believe in one God, the Father almighty,<br />
+                maker of heaven and earth,<br />
+                of all things visible and invisible.
+              </p>
+              <p>
+                And in one Lord Jesus Christ, the only-begotten Son of God,<br />
+                begotten of the Father before all ages;<br />
+                God of God, Light of Light, very God of very God;<br />
+                begotten, not made, being of one substance with the Father;<br />
+                through whom all things were made;<br />
+                who for us and for our salvation came down from heaven<br />
+                and was incarnate of the Holy Spirit and the Virgin Mary, and became man;<br />
+                and was crucified for us under Pontius Pilate;<br />
+                He suffered, died, and was buried;<br />
+                and the third day He rose again according to the Scriptures,<br />
+                and ascended into heaven, and is seated at the right hand of the Father;<br />
+                and He shall come again in glory to judge the living and the dead;<br />
+                whose kingdom shall have no end.
+              </p>
+              <p>
+                And in the Holy Spirit, the Lord, the Giver of Life,<br />
+                who proceeds from the Father and the Son;<br />
+                who with the Father and the Son together is worshiped and glorified;<br />
+                who spoke through the prophets.<br />
+                And in one holy, catholic (universal), and apostolic Church;<br />
+                we confess one baptism for the remission of sins;<br />
+                and we look for the resurrection of the dead,<br />
+                and the life of the world to come.
+              </p>
+              <span class="creed-tablet__amen">Amen.</span>
             </div>
-            <span class="card__tag">Senior Pastoral Team</span>
-            <h3 class="card__title">Senior Pastors</h3>
-            <p class="card__subtitle">Senior Pastor &amp; Deputy Pastor</p>
-            <p class="card__text">
-              Providing spiritual oversight, visionary leadership, and faithful apostolic ministry to the entire church congregation.
+
+            <div class="creed-tablet__affirmation">
+              <i data-lucide="heart-handshake" aria-hidden="true"></i>
+              <p>
+                <strong>Our affirmation:</strong> With the Church of every age, we hold this ancient confession — Christ is Lord, the Holy Spirit is alive in us today, and our hope rests in the resurrection to come.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pastoral Leadership -->
+    <section class="section about-leadership">
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="users"></i> Pastoral Oversight</span>
+          <h2 class="section-title">Bishop Mark &amp; Pastor Gwen</h2>
+          <p class="section-subtitle">
+            One calling, one covenant — shepherding Hills of Glory together as a family.
+          </p>
+        </div>
+
+        <div class="leadership-feature">
+          <div class="leadership-copy animate-fade-up stagger-1">
+            <span class="leadership-copy__rule" aria-hidden="true"></span>
+            <h3 class="leadership-copy__name">Bishop Mark Punzalan</h3>
+            <p class="leadership-copy__role">Bishop · Senior Pastor</p>
+            <p class="leadership-copy__text">
+              Bishop Mark Punzalan leads Hills of Glory with a pastor's heart and a builder's resolve. Called to raise a house of prayer for all nations, he stewards every campus, ministry, and family under his care — preaching the Word with clarity, raising leaders across generations, and carrying the vision of the church with tireless devotion.
+            </p>
+
+            <span class="leadership-copy__rule leadership-copy__rule--gold" aria-hidden="true"></span>
+            <h3 class="leadership-copy__name">Pastor Gwen Punzalan</h3>
+            <p class="leadership-copy__role">Deputy Pastor · Co-Shepherd</p>
+            <p class="leadership-copy__text">
+              Alongside him, Pastor Gwen Punzalan brings a mothering grace and a steadfast heart to the church family. Her devotion to worship, discipleship, and the faithful details of daily shepherding keeps the house of God both warm and well-ordered — a quiet strength that anchors the next generation.
             </p>
           </div>
 
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/senior_pastor1.jpg" alt="Senior Pastor" loading="lazy" />
-            </div>
-            <span class="card__tag card__tag--secondary">Pastoral Leadership</span>
-            <h3 class="card__title">Lead Pastor</h3>
-            <p class="card__subtitle">Pastoral Care &amp; Teaching</p>
-            <p class="card__text">
-              Leading the preaching ministry and shepherding the spiritual growth of our members and families.
-            </p>
-          </div>
-
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/worshipteam.jpg" alt="Worship & Creative Ministry" loading="lazy" />
-            </div>
-            <span class="card__tag">Creative &amp; Worship</span>
-            <h3 class="card__title">Worship Leaders</h3>
-            <p class="card__subtitle">Worship &amp; Music Ministry</p>
-            <p class="card__text">
-              Directing spirit-filled musical praise, choral worship, and media operations across all services.
-            </p>
-          </div>
+          <figure class="leadership-portrait animate-fade-up stagger-2">
+            <span class="leadership-portrait__arch">
+              <img src="images/main_leadership.jpg" alt="Bishop Mark Punzalan and Pastor Gwen Punzalan" loading="lazy" />
+            </span>
+            <span class="leadership-portrait__chip leadership-portrait__chip--vision" aria-hidden="true">
+              <i data-lucide="eye"></i> Visionary Oversight
+            </span>
+            <span class="leadership-portrait__chip leadership-portrait__chip--shepherd" aria-hidden="true">
+              <i data-lucide="heart-handshake"></i> Shepherding Hearts
+            </span>
+            <figcaption class="leadership-portrait__caption">
+              <strong>Bishop Mark &amp; Pastor Gwen Punzalan</strong>
+              <span>Senior Pastoral Couple</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -223,8 +372,7 @@
 
         <div>
           <h4 class="footer__heading">Connect</h4>
-          <nav class="footer__links" aria-label="Footer Connect Links">
-            <a href="lifegroups.html">Lifegroups</a>
+            <nav class="footer__links" aria-label="Footer Connect Links">
             <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>

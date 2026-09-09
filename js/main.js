@@ -179,6 +179,42 @@
   }
 
   // ============================================
+  // Mega Menu (Outreaches) — persistent hover bridge
+  // ============================================
+  // The panel is full-viewport width but the trigger is one link on the right
+  // side of the nav, so moving the cursor diagonally from the trigger to a
+  // panel row on the left would cross navbar space that isn't part of
+  // `.navbar__mega`. A pure CSS :hover menu would drop the open state mid-
+  // traversal and close before the cursor ever reaches the panel. A short
+  // grace period keeps `.is-open` set while the cursor is in flight; re-entering
+  // the wrapper (trigger or panel) cancels the pending close.
+  const megaMenus = document.querySelectorAll('.navbar__mega');
+  let megaCloseTimer = null;
+
+  megaMenus.forEach(function (mega) {
+    mega.addEventListener('mouseenter', function () {
+      clearTimeout(megaCloseTimer);
+      mega.classList.add('is-open');
+    });
+
+    mega.addEventListener('mouseleave', function () {
+      clearTimeout(megaCloseTimer);
+      megaCloseTimer = setTimeout(function () {
+        mega.classList.remove('is-open');
+      }, 300);
+    });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      clearTimeout(megaCloseTimer);
+      megaMenus.forEach(function (mega) {
+        mega.classList.remove('is-open');
+      });
+    }
+  });
+
+  // ============================================
   // HTML escaping helper (guard against injection)
   // ============================================
   function esc(value) {
@@ -599,19 +635,19 @@
       if (!grid) return;
       const items = all.filter(function (m) { return m.category === category; });
       if (!items.length) {
-        grid.innerHTML = '<p class="card__text">No ministries in this category yet.</p>';
+        grid.innerHTML = '<p class="ministry-card__text">No ministries in this category yet.</p>';
         return;
       }
       grid.innerHTML = items.map(function (m) {
-        return '<div class="glass-card hover-lift animate-fade-up">' +
+        return '<article class="ministry-card animate-fade-up">' +
           (m.image_url
-            ? '<div class="card__media"><img src="' + escAttr(m.image_url) + '" alt="' + escAttr(m.name || '') + '" loading="lazy" /></div>'
+            ? '<div class="ministry-card__media"><img src="' + escAttr(m.image_url) + '" alt="' + escAttr(m.name || '') + '" loading="lazy" /></div>'
             : '') +
-          '<h3 class="card__title">' + esc(m.name || '') + '</h3>' +
-          '<p class="card__text">' + esc(m.description || '') + '</p>' +
-          (m.target_school ? '<p class="card__subtitle"><i data-lucide="graduation-cap"></i> ' + esc(m.target_school) + '</p>' : '') +
-          (m.contact_person ? '<div class="card__footer"><span class="card__text"><i data-lucide="user"></i> ' + esc(m.contact_person) + '</span></div>' : '') +
-          '</div>';
+          '<h3 class="ministry-card__title">' + esc(m.name || '') + '</h3>' +
+          '<p class="ministry-card__text">' + esc(m.description || '') + '</p>' +
+          (m.target_school ? '<span class="ministry-card__school"><i data-lucide="graduation-cap"></i> ' + esc(m.target_school) + '</span>' : '') +
+          (m.contact_person ? '<span class="ministry-card__meta"><i data-lucide="user"></i> ' + esc(m.contact_person) + '</span>' : '') +
+          '</article>';
       }).join('');
     });
 
@@ -902,6 +938,46 @@
   }
 
   // ============================================
+  // Mega Menu — church locations & outreach programs (live lists)
+  // ============================================
+  const MEGA_MENU_MAX = 4;
+
+  async function loadMegaMenu() {
+    const locationList = document.getElementById('megaLocationList');
+    const programList = document.getElementById('megaProgramList');
+    if (!locationList && !programList) return;
+
+    if (locationList) {
+      const locations = await fetchTable('locations', function (q) {
+        return q.eq('status', 'Active').order('sort_order', { ascending: true });
+      });
+      const outreaches = locations.filter(function (l) {
+        return l.location_type !== 'Main';
+      });
+      if (outreaches.length) {
+        locationList.innerHTML = outreaches.slice(0, MEGA_MENU_MAX).map(function (loc) {
+          return '<a href="locations.html#outreach-locations" class="navbar__mega__link">' +
+            '<i data-lucide="tent"></i> ' + esc(loc.name || 'Outreach Center') + '</a>';
+        }).join('');
+      }
+    }
+
+    if (programList) {
+      const programs = await fetchTable('ministries', function (q) {
+        return q.eq('is_active', true).order('sort_order', { ascending: true });
+      });
+      if (programs.length) {
+        programList.innerHTML = programs.slice(0, MEGA_MENU_MAX).map(function (m) {
+          return '<a href="ministries.html" class="navbar__mega__link">' +
+            '<i data-lucide="users"></i> ' + esc(m.name || 'Ministry') + '</a>';
+        }).join('');
+      }
+    }
+
+    initIcons();
+  }
+
+  // ============================================
   // Wait for Supabase SDK, then initialize
   // ============================================
   function waitForSupabase(callback, attempts) {
@@ -938,6 +1014,7 @@
       loadLeadership();
       loadMinistries();
       loadLocations();
+      loadMegaMenu();
       loadLifegroups(false);
       loadGive();
     });

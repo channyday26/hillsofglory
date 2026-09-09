@@ -33,6 +33,7 @@ $light-primary-rgb: 45, 90, 3;
 $light-secondary: #D9822B;
 $light-secondary-hover: #C07020;
 $light-secondary-light: #F7BA6B;
+$light-secondary-rgb: 217, 130, 43;  // keep in sync with $light-secondary
 $light-accent-glow: rgba(45, 90, 3, 0.12);
 $light-secondary-glow: rgba(217, 130, 43, 0.15);
 $light-glass: rgba(255, 255, 255, 0.65);
@@ -58,6 +59,7 @@ $dark-primary-rgb: 82, 183, 26;   // keep in sync with $dark-primary
 $dark-secondary: #F59E0B;
 $dark-secondary-hover: #FBBF24;
 $dark-secondary-light: #FDE68A;
+$dark-secondary-rgb: 245, 158, 11;   // keep in sync with $dark-secondary
 $dark-accent-glow: rgba(82, 183, 26, 0.2);
 $dark-secondary-glow: rgba(245, 158, 11, 0.2);
 $dark-glass: rgba(26, 28, 32, 0.75);
@@ -84,6 +86,7 @@ $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82
   --color-secondary: #{$light-secondary};
   --color-secondary-hover: #{$light-secondary-hover};
   --color-secondary-light: #{$light-secondary-light};
+  --color-secondary-rgb: #{$light-secondary-rgb};
   --color-accent-glow: #{$light-accent-glow};
   --color-secondary-glow: #{$light-secondary-glow};
   --color-glass: #{$light-glass};
@@ -143,6 +146,7 @@ $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82
   --color-secondary: #{$dark-secondary};
   --color-secondary-hover: #{$dark-secondary-hover};
   --color-secondary-light: #{$dark-secondary-light};
+  --color-secondary-rgb: #{$dark-secondary-rgb};
   --color-accent-glow: #{$dark-accent-glow};
   --color-secondary-glow: #{$dark-secondary-glow};
   --color-glass: #{$dark-glass};

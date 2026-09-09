@@ -40,8 +40,56 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Outreaches</a>
+        <div class="navbar__mega">
+          <a href="locations.html" class="navbar__link navbar__mega__trigger">
+            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+          </a>
+                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Church Locations</span>
+              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
+                <i data-lucide="map-pin"></i> Main Campus
+              </a>
+              <div id="megaLocationList">
+                <a href="locations.html#outreach-locations" class="navbar__mega__link">
+                  <i data-lucide="tent"></i> Outreach Centers
+                </a>
+              </div>
+              <a href="locations.html" class="navbar__mega__link">
+                <i data-lucide="navigation"></i> View All Locations
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Outreach Programs</span>
+              <div id="megaProgramList">
+                <a href="ministries.html" class="navbar__mega__link">
+                  <i data-lucide="users"></i> Ministries
+                </a>
+                <a href="discipleship.html" class="navbar__mega__link">
+                  <i data-lucide="book-open"></i> Discipleship
+                </a>
+                <a href="lifegroups.html" class="navbar__mega__link">
+                  <i data-lucide="users-round"></i> Lifegroups
+                </a>
+              </div>
+              <a href="ministries.html" class="navbar__mega__link">
+                <i data-lucide="sparkles"></i> View All Ministries
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Get Involved</span>
+              <a href="events.html" class="navbar__mega__link">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+              <a href="give.html" class="navbar__mega__link">
+                <i data-lucide="heart"></i> Give Online
+              </a>
+              <a href="contact.html" class="navbar__mega__link">
+                <i data-lucide="phone"></i> Contact Info
+              </a>
+            </div>
+          </div>
+        </div>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
@@ -96,40 +144,51 @@
     </section>
 
     <!-- Welcome & Core Values -->
-    <section class="section" aria-label="About Summary">
+    <section class="section identity" aria-labelledby="identityTitle">
       <div class="container">
         <div class="section-header animate-fade-up">
-          <span class="section-badge">Who We Are</span>
-          <h2 class="section-title">A Community of Believers</h2>
+          <span class="section-badge"><i data-lucide="users"></i> Who We Are</span>
+          <h2 class="section-title" id="identityTitle">A Community of Believers</h2>
           <p class="section-subtitle">
             Rooted in the Word of God, moving in the power of the Holy Spirit, and reaching communities with the love of Jesus.
           </p>
         </div>
 
-        <div class="grid-3">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i data-lucide="music"></i> Spirit-led Worship</div>
-            <h3 class="card__title">Inspiring Encounters</h3>
-            <p class="card__text">
+        <div class="identity-plane animate-fade-up stagger-1">
+          <span class="identity-plane__watermark" aria-hidden="true">Family</span>
+
+          <article class="identity-card">
+            <span class="identity-card__medallion"><i data-lucide="music"></i></span>
+            <span class="identity-card__tag">Spirit-led Worship</span>
+            <h3 class="identity-card__title">Inspiring Encounters</h3>
+            <p class="identity-card__text">
               Passionate, spirit-led praise and worship that connects hearts directly to the presence and glory of God.
             </p>
-          </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i data-lucide="book"></i> Biblical Truth</div>
-            <h3 class="card__title">Transforming Word</h3>
-            <p class="card__text">
+          <article class="identity-card identity-card--gold">
+            <span class="identity-card__medallion"><i data-lucide="book"></i></span>
+            <span class="identity-card__tag">Biblical Truth</span>
+            <h3 class="identity-card__title">Transforming Word</h3>
+            <p class="identity-card__text">
               Practical, life-applicable teachings from the Holy Scriptures designed to build faith and empower everyday living.
             </p>
-          </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="card__tag"><i data-lucide="users-round"></i> Lifegroups</div>
-            <h3 class="card__title">Genuine Community</h3>
-            <p class="card__text">
+          <article class="identity-card">
+            <span class="identity-card__medallion"><i data-lucide="users-round"></i></span>
+            <span class="identity-card__tag">Lifegroups</span>
+            <h3 class="identity-card__title">Genuine Community</h3>
+            <p class="identity-card__text">
               Small fellowship groups where believers grow together, support one another in prayer, and form lifelong bonds.
             </p>
-          </div>
+          </article>
+        </div>
+
+        <div class="identity-story animate-fade-up stagger-3">
+          <a href="about.html" class="btn btn--outline">
+            Continue Reading Our Story <i data-lucide="arrow-up-right"></i>
+          </a>
         </div>
       </div>
     </section>
@@ -146,40 +205,64 @@
         </div>
 
         <div class="schedule-showcase animate-fade-up">
-          <div class="schedule-showcase__visual">
-            <img src="images/services.jpg" alt="Worship gathering at Hills of Glory" class="schedule-showcase__img" loading="lazy" />
-            <div class="schedule-showcase__wash" aria-hidden="true"></div>
-            <div class="schedule-showcase__spotlight">
-              <span class="schedule-showcase__eyebrow"><i data-lucide="calendar-clock"></i> This Week</span>
-              <span class="schedule-showcase__day" id="homeScheduleDay">Sunday</span>
-              <time class="schedule-showcase__time" id="homeScheduleTime" datetime="10:00">10:00 AM</time>
-              <span class="schedule-showcase__meta"><i data-lucide="map-pin"></i> In-person &amp; Online Gatherings</span>
+          <div class="schedule-showcase__visual-wrap">
+            <span class="schedule-showcase__flair" aria-hidden="true"></span>
+            <div class="schedule-showcase__visual">
+              <img src="images/services.jpg" alt="Worship gathering at Hills of Glory" class="schedule-showcase__img" loading="lazy" />
+              <div class="schedule-showcase__wash" aria-hidden="true"></div>
+              <div class="schedule-showcase__spotlight">
+                <span class="schedule-showcase__eyebrow"><i data-lucide="calendar-clock"></i> This Week</span>
+                <span class="schedule-showcase__day" id="homeScheduleDay">Sunday</span>
+                <time class="schedule-showcase__time" id="homeScheduleTime" datetime="10:00">10:00 AM</time>
+                <span class="schedule-showcase__meta"><i data-lucide="map-pin"></i> In-person &amp; Online Gatherings</span>
+              </div>
             </div>
           </div>
 
-          <div class="schedule-showcase__panel">
+          <div class="schedule-showcase__timetable">
+            <div class="schedule-showcase__intro">
+              <span class="schedule-showcase__pill"><i data-lucide="calendar-clock"></i> This Week at Hills</span>
+              <h3 class="schedule-showcase__title">Gathering Times</h3>
+            </div>
+
             <ul class="schedule-showcase__list" id="homeScheduleGrid">
               <li class="schedule-row">
                 <span class="schedule-row__day">Sunday</span>
                 <span class="schedule-row__service">Worship &amp; Word</span>
-                <time class="schedule-row__time" datetime="10:00">10:00 AM</time>
+                <time class="schedule-row__time" datetime="06:00">6:00 AM</time>
+                <a href="locations.html" class="schedule-row__link" aria-label="View Sunday service details">
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+              </li>
+              <li class="schedule-row">
+                <span class="schedule-row__day">Sunday</span>
+                <span class="schedule-row__service">Worship &amp; Word</span>
+                <time class="schedule-row__time" datetime="08:00">8:00 AM</time>
+                <a href="locations.html" class="schedule-row__link" aria-label="View Sunday service details">
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+              </li>
+              <li class="schedule-row">
+                <span class="schedule-row__day">Sunday</span>
+                <span class="schedule-row__service">Worship &amp; Word</span>
+                <time class="schedule-row__time" datetime="10:45">10:45 AM</time>
                 <a href="locations.html" class="schedule-row__link" aria-label="View Sunday service details">
                   <i data-lucide="arrow-up-right"></i>
                 </a>
               </li>
               <li class="schedule-row">
                 <span class="schedule-row__day">Wednesday</span>
-                <span class="schedule-row__service">Prayer &amp; Discipleship</span>
-                <time class="schedule-row__time" datetime="19:00">7:00 PM</time>
+                <span class="schedule-row__service">Prot&eacute;g&eacute; </span>
+                <time class="schedule-row__time" datetime="18:00">6:00 PM</time>
                 <a href="locations.html" class="schedule-row__link" aria-label="View Wednesday service details">
                   <i data-lucide="arrow-up-right"></i>
                 </a>
               </li>
               <li class="schedule-row">
-                <span class="schedule-row__day">Friday</span>
-                <span class="schedule-row__service">Community Night</span>
-                <time class="schedule-row__time" datetime="18:30">6:30 PM</time>
-                <a href="locations.html" class="schedule-row__link" aria-label="View Friday service details">
+                <span class="schedule-row__day">Saturday</span>
+                <span class="schedule-row__service">Prayer Encounter </span>
+                <time class="schedule-row__time" datetime="05:00">5:00 AM</time>
+                <a href="locations.html" class="schedule-row__link" aria-label="View Saturday service details">
                   <i data-lucide="arrow-up-right"></i>
                 </a>
               </li>
@@ -197,81 +280,99 @@
     </section>
 
 <!-- God's Purpose -->
-    <section class="section" aria-label="God's Purpose">
-      <div class="container paragraph-list">
-        <div class="section-header animate-fade-up">
-          <span class="section-badge"><i data-lucide="compass"></i> His Plan For You</span>
-          <h2 class="section-title">God's Purpose</h2>
-          <p class="section-subtitle">
-            From the very beginning, God has had a specific and beautiful purpose for your life. He is able to transform who you are and shape you into the person He designed you to become.
-          </p>
-        </div>
+    <section class="section section--purpose" aria-label="God's Purpose">
+      <div class="container">
+        <div class="purpose-stage animate-fade-up">
+          <span class="purpose-stage__watermark" aria-hidden="true">PURPOSE</span>
+          <span class="purpose-stage__orb purpose-stage__orb--gold" aria-hidden="true"></span>
+          <span class="purpose-stage__orb purpose-stage__orb--green" aria-hidden="true"></span>
 
-        <ol class="purpose-list animate-fade-up">
-          <li>
-            <span class="purpose-list__number">1</span>
-            <div class="purpose-list__content">
-              <h3>Known and Chosen</h3>
-              <p>Before you were formed, God knew you and set you apart. You are not an accident — you were lovingly and intentionally created for a divine assignment.</p>
-            </div>
-          </li>
-          <li>
-            <span class="purpose-list__number">2</span>
-            <div class="purpose-list__content">
-              <h3>Created to Glorify God</h3>
-              <p>Every life is designed to reflect the goodness and glory of God. As you walk with Him, your life becomes a testimony of His faithfulness and love.</p>
-            </div>
-          </li>
-          <li>
-            <span class="purpose-list__number">3</span>
-            <div class="purpose-list__content">
-              <h3>Called to Transformation</h3>
-              <p>God does not leave you as you are. Through His Spirit, He renews your mind and transforms your character, making you whole and thriving in every area of life.</p>
-            </div>
-          </li>
-          <li>
-            <span class="purpose-list__number">4</span>
-            <div class="purpose-list__content">
-              <h3>Empowered to Serve</h3>
-              <p>God equips you with gifts and opportunities to serve others. Your purpose finds its richest expression when you pour out the love you have received.</p>
-            </div>
-          </li>
-          <li>
-            <span class="purpose-list__number">5</span>
-            <div class="purpose-list__content">
-              <h3>Given a Future and Hope</h3>
-              <p>God's plans for you are plans of peace and a future filled with hope. No matter your past, He is committed to completing the good work He began in you.</p>
-            </div>
-          </li>
-        </ol>
+          <div class="section-header">
+            <!-- <span class="section-badge"><i data-lucide="compass"></i> His Plan For You</span> -->
+            <h2 class="section-title">God's Purpose</h2>
+            <p class="section-subtitle">
+              From the very beginning, God has had a specific and beautiful purpose for your life. He is able to transform who you are and shape you into the person He designed you to become.
+            </p>
+          </div>
+
+          <ol class="purpose-manifest">
+            <li class="purpose-manifest__item">
+              <span class="purpose-manifest__index" aria-hidden="true">01</span>
+              <div class="purpose-manifest__content">
+                <h3>Known and Chosen</h3>
+                <p>Before you were formed, God knew you and set you apart. You are not an accident — you were lovingly and intentionally created for a divine assignment.</p>
+              </div>
+            </li>
+            <li class="purpose-manifest__item">
+              <span class="purpose-manifest__index" aria-hidden="true">02</span>
+              <div class="purpose-manifest__content">
+                <h3>Created to Glorify God</h3>
+                <p>Every life is designed to reflect the goodness and glory of God. As you walk with Him, your life becomes a testimony of His faithfulness and love.</p>
+              </div>
+            </li>
+            <li class="purpose-manifest__item">
+              <span class="purpose-manifest__index" aria-hidden="true">03</span>
+              <div class="purpose-manifest__content">
+                <h3>Called to Transformation</h3>
+                <p>God does not leave you as you are. Through His Spirit, He renews your mind and transforms your character, making you whole and thriving in every area of life.</p>
+              </div>
+            </li>
+            <li class="purpose-manifest__item">
+              <span class="purpose-manifest__index" aria-hidden="true">04</span>
+              <div class="purpose-manifest__content">
+                <h3>Empowered to Serve</h3>
+                <p>God equips you with gifts and opportunities to serve others. Your purpose finds its richest expression when you pour out the love you have received.</p>
+              </div>
+            </li>
+            <li class="purpose-manifest__item">
+              <span class="purpose-manifest__index" aria-hidden="true">05</span>
+              <div class="purpose-manifest__content">
+                <h3>Given a Future and Hope</h3>
+                <p>God's plans for you are plans of peace and a future filled with hope. No matter your past, He is committed to completing the good work He began in you.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
 
     <!-- Prayer of Acceptance -->
-    <section class="section section--alt" aria-label="Prayer of Acceptance">
-      <div class="container prayer">
+    <section class="section section--alt" aria-labelledby="acceptanceTitle">
+      <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge"><i data-lucide="heart"></i> A New Beginning</span>
-          <h2 class="section-title">Prayer of Acceptance</h2>
-        </div>
-
-        <div class="prayer__card animate-fade-up">
-          <p class="prayer__text">
-            "Lord Jesus, I come to You and acknowledge that I have sinned and fallen short of Your glory. Thank You for loving me and giving Your life for me. I believe You died and rose again so I could live. Today, I receive You as my Lord and Savior. Forgive my sins, cleanse my heart, and take Your rightful place in my life. Write my name in the Book of Life, and help me to live for You from this day forward. Amen."
+          <h2 class="section-title" id="acceptanceTitle">Prayer of Acceptance</h2>
+          <p class="section-subtitle">
+            Begin your walk with Jesus through this simple prayer of faith &mdash; spoken from the heart, received by grace.
           </p>
         </div>
 
-        <div class="next-step animate-fade-up">
-          <p class="next-step__label">What's Next Step</p>
+        <div class="acceptance-tablet animate-fade-up stagger-1">
+          <span class="acceptance-tablet__emblem" aria-hidden="true">
+            <i data-lucide="heart-handshake"></i>
+          </span>
+
+          <span class="acceptance-tablet__rule" aria-hidden="true"></span>
+
+          <blockquote class="acceptance-tablet__prayer">
+            <p>
+              Lord Jesus, I come to You and acknowledge that I have sinned and fallen short of Your glory. Thank You for loving me and giving Your life for me. I believe You died and rose again so I could live. Today, I receive You as my Lord and Savior. Forgive my sins, cleanse my heart, and take Your rightful place in my life. Write my name in the Book of Life, and help me to live for You from this day forward.
+            </p>
+            <span class="acceptance-tablet__amen">Amen.</span>
+          </blockquote>
+        </div>
+
+        <div class="acceptance-next animate-fade-up stagger-2">
+          <p class="acceptance-next__label">What's Next Step</p>
           <a href="lifegroups.html" class="btn btn--primary btn--lg">
             <i data-lucide="users"></i> Find Your Lifegroup
           </a>
-          <p class="next-step__hint">
+          <p class="acceptance-next__hint">
             We'd love to help you connect with other believers and grow in your new faith. Find a lifegroup near you today.
           </p>
         </div>
       </div>
-</section>
+    </section>
 
     <!-- Latest Sermons Highlight -->
     <section class="section" aria-label="Latest Sermons">
@@ -323,11 +424,6 @@
           </div>
         </div>
 
-        <div class="btn-row">
-          <a href="sermons.html" class="btn btn--secondary">
-            <i data-lucide="video"></i> Browse All Sermons
-          </a>
-        </div>
       </div>
     </section>
 
@@ -379,7 +475,6 @@
         <div>
           <h4 class="footer__heading">Connect</h4>
           <nav class="footer__links" aria-label="Footer Connect Links">
-            <a href="lifegroups.html">Lifegroups</a>
             <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>

@@ -10,7 +10,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Tabler Icons -->
   <!-- Lucide Icons -->
@@ -41,8 +41,56 @@
         <a href="ministries.html" class="navbar__link navbar__link--active">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <a href="lifegroups.html" class="navbar__link">Lifegroups</a>
-        <a href="locations.html" class="navbar__link">Outreaches</a>
+        <div class="navbar__mega">
+          <a href="locations.html" class="navbar__link navbar__mega__trigger">
+            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+          </a>
+                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Church Locations</span>
+              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
+                <i data-lucide="map-pin"></i> Main Campus
+              </a>
+              <div id="megaLocationList">
+                <a href="locations.html#outreach-locations" class="navbar__mega__link">
+                  <i data-lucide="tent"></i> Outreach Centers
+                </a>
+              </div>
+              <a href="locations.html" class="navbar__mega__link">
+                <i data-lucide="navigation"></i> View All Locations
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Outreach Programs</span>
+              <div id="megaProgramList">
+                <a href="ministries.html" class="navbar__mega__link">
+                  <i data-lucide="users"></i> Ministries
+                </a>
+                <a href="discipleship.html" class="navbar__mega__link">
+                  <i data-lucide="book-open"></i> Discipleship
+                </a>
+                <a href="lifegroups.html" class="navbar__mega__link">
+                  <i data-lucide="users-round"></i> Lifegroups
+                </a>
+              </div>
+              <a href="ministries.html" class="navbar__mega__link">
+                <i data-lucide="sparkles"></i> View All Ministries
+              </a>
+            </div>
+            <div class="navbar__mega__col">
+              <span class="navbar__mega__title">Get Involved</span>
+              <a href="events.html" class="navbar__mega__link">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+              <a href="give.html" class="navbar__mega__link">
+                <i data-lucide="heart"></i> Give Online
+              </a>
+              <a href="contact.html" class="navbar__mega__link">
+                <i data-lucide="phone"></i> Contact Info
+              </a>
+            </div>
+          </div>
+        </div>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
@@ -70,39 +118,80 @@
       </div>
     </section>
 
-    <!-- Worship Team -->
-    <section class="section" id="worship-section" aria-label="Worship Team">
+<!-- Worship and Creative Team -->
+    <section class="section approach" id="worship-section" aria-labelledby="worshipTitle">
       <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge"><i data-lucide="music"></i> Praise &amp; Worship</span>
-          <h2 class="section-title">Worship Team</h2>
+          <h2 class="section-title" id="worshipTitle">Worship and Creative Team</h2>
           <p class="section-subtitle">
             Leading the congregation into the presence of God through spirit-filled music, song, and creative arts.
           </p>
         </div>
-        <div class="grid-cards" id="worshipGrid">
-          <!-- Fallback content, replaced dynamically from Supabase -->
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/worshipteam.jpg" alt="Worship Team" loading="lazy" />
+
+        <div class="worship-crew animate-fade-up stagger-1">
+          <article class="worship-crew__team">
+            <header class="worship-crew__team-head">
+              <span class="worship-crew__medallion" aria-hidden="true"><i data-lucide="music"></i></span>
+              <div>
+                <h3 class="worship-crew__team-name">Contagious Band</h3>
+                <p class="worship-crew__team-role">Live Worship Collective</p>
+              </div>
+            </header>
+            <div class="worship-crew__gallery">
+              <figure>
+                <img src="images/worshipteam.jpg" alt="Contagious Band leading worship" loading="lazy" />
+              </figure>
+              <figure>
+                <img src="images/worshipteam2.jpg" alt="Contagious Band in a live worship session" loading="lazy" />
+              </figure>
             </div>
-            <h3 class="card__title">Choir &amp; Vocalists</h3>
-            <p class="card__text">Voices united in harmony, leading passionate praise and worship across every service.</p>
-          </div>
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/music.jpg" alt="Instrumentalists" loading="lazy" />
+            <p class="worship-crew__team-text">
+              The heartbeat of every gathering — vocalists and musicians who lead services with contagious joy and faith-filled praise.
+            </p>
+          </article>
+
+          <article class="worship-crew__team worship-crew__team--gold">
+            <header class="worship-crew__team-head">
+              <span class="worship-crew__medallion" aria-hidden="true"><i data-lucide="palette"></i></span>
+              <div>
+                <h3 class="worship-crew__team-name">Hills Creatives</h3>
+                <p class="worship-crew__team-role">Media &amp; Design</p>
+              </div>
+            </header>
+            <div class="worship-crew__gallery">
+              <figure>
+                <img src="images/media.jpg" alt="Hills Creatives producing service media" loading="lazy" />
+              </figure>
+              <figure>
+                <img src="images/media1.png" alt="Hills Creatives at work backstage" loading="lazy" />
+              </figure>
             </div>
-            <h3 class="card__title">Instrumentalists &amp; Band</h3>
-            <p class="card__text">Skilled musicians creating an atmosphere of glory through instruments and sound.</p>
-          </div>
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/express.jpg" alt="Creative Arts" loading="lazy" />
+            <p class="worship-crew__team-text">
+              Storytellers behind the screens — crafting visuals, content, and creative elements that make every message land.
+            </p>
+          </article>
+
+          <article class="worship-crew__team">
+            <header class="worship-crew__team-head">
+              <span class="worship-crew__medallion" aria-hidden="true"><i data-lucide="volume-2"></i></span>
+              <div>
+                <h3 class="worship-crew__team-name">Hills Audio</h3>
+                <p class="worship-crew__team-role">Sound Engineering</p>
+              </div>
+            </header>
+            <div class="worship-crew__gallery">
+              <figure>
+                <img src="images/techteam1.jpg" alt="Hills Audio mixing at the sound desk" loading="lazy" />
+              </figure>
+              <figure>
+                <img src="images/techteam.jpg" alt="Hills Audio team at a live service" loading="lazy" />
+              </figure>
             </div>
-            <h3 class="card__title">Media &amp; Creative Arts</h3>
-            <p class="card__text">Serving through sound, media, and creative expression to enhance every gathering.</p>
-          </div>
+            <p class="worship-crew__team-text">
+              The ears of the house — engineering clean, powerful sound so every word and note reaches every heart clearly.
+            </p>
+          </article>
         </div>
       </div>
     </section>
@@ -117,54 +206,177 @@
             From children to seniors, our ministries nurture spiritual growth and genuine community at every stage of life.
           </p>
         </div>
-        <div class="grid-cards" id="ministriesGrid">
-          <div class="glass-card hover-lift">
-            <div class="card__media">
+<div class="ministry-plane" id="ministriesGrid">
+          <!-- Fallback content, replaced dynamically from Supabase -->
+          <article class="ministry-card">
+            <div class="ministry-card__media">
               <img src="images/generation.png" alt="Children's Ministry" loading="lazy" />
             </div>
-            <h3 class="card__title">Children's Ministry</h3>
-            <p class="card__text">A safe, fun, and faith-building environment where children learn about Jesus.</p>
-          </div>
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/community.jpg" alt="Outreach Ministry" loading="lazy" />
+            <h3 class="ministry-card__title">Children's Ministry</h3>
+            <p class="ministry-card__text">A safe, fun, and faith-building environment where children learn about Jesus.</p>
+          </article>
+          <article class="ministry-card">
+            <div class="ministry-card__media">
+              <img src="images/community.jpg" alt="Community Outreach Ministry" loading="lazy" />
             </div>
-            <h3 class="card__title">Community Outreach</h3>
-            <p class="card__text">Extending the love of Christ through service, care, and compassion to our community.</p>
-          </div>
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/life.jpg" alt="Women's Ministry" loading="lazy" />
+            <h3 class="ministry-card__title">Community Outreach</h3>
+            <p class="ministry-card__text">Extending the love of Christ through service, care, and compassion to our community.</p>
+          </article>
+          <article class="ministry-card">
+            <div class="ministry-card__media">
+              <img src="images/life.jpg" alt="Men & Women's Fellowship" loading="lazy" />
             </div>
-            <h3 class="card__title">Men &amp; Women's Fellowship</h3>
-            <p class="card__text">Purpose-driven fellowships building strong families and Christ-centered relationships.</p>
-          </div>
+            <h3 class="ministry-card__title">Men &amp; Women's Fellowship</h3>
+            <p class="ministry-card__text">Purpose-driven fellowships building strong families and Christ-centered relationships.</p>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Campus Ministries -->
-    <section class="section" id="campus-section" aria-label="Campus Ministries">
+<!-- Campus and Youth Ministry -->
+    <section class="section protege-collegiate" id="campus-section" aria-labelledby="campusTitle">
+      <div class="protege-collegiate__grain" aria-hidden="true"></div>
+      <div class="protege-collegiate__bg" aria-hidden="true"></div>
+      <div class="protege-collegiate__shape protege-collegiate__shape--ring" aria-hidden="true"></div>
+      <div class="protege-collegiate__shape protege-collegiate__shape--bars" aria-hidden="true"></div>
+      <div class="protege-collegiate__shape protege-collegiate__shape--dots" aria-hidden="true"></div>
+      <div class="protege-collegiate__shape protege-collegiate__shape--tri" aria-hidden="true"></div>
+      <div class="protege-collegiate__shape protege-collegiate__shape--spark" aria-hidden="true"></div>
+
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--n1" aria-label="#ForJesus">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="star"></i> #ForJesus</span>
+      </div>
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--gold protege-collegiate__sticker--n2" aria-label="God's favorite">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="heart"></i> God&rsquo;s Favorite</span>
+      </div>
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--teal protege-collegiate__sticker--n3" aria-label="Prayer warrior">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="shield-check"></i> Prayer Warrior</span>
+      </div>
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--coral protege-collegiate__sticker--n4" aria-label="Called and chosen">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="badge-check"></i> Called &amp; Chosen</span>
+      </div>
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--n5" aria-label="No cap, only Christ">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="crown"></i> No Cap, Only Christ</span>
+      </div>
+      <div class="protege-collegiate__sticker protege-collegiate__sticker--teal protege-collegiate__sticker--n6" aria-label="Forever His">
+        <span class="protege-collegiate__sticker-text"><i data-lucide="infinity"></i> Forever His</span>
+      </div>
+
       <div class="container">
-        <div class="section-header animate-fade-up">
-          <span class="section-badge"><i data-lucide="graduation-cap"></i> Next Generation</span>
-          <h2 class="section-title">Campus Ministries</h2>
-          <p class="section-subtitle">
-            Reaching students on college and university campuses with the transforming Gospel of Jesus Christ.
-          </p>
-        </div>
-        <div class="grid-cards" id="campusGrid">
-          <div class="glass-card hover-lift">
-            <div class="card__media">
-              <img src="images/generation1.png" alt="Campus Fellowship" loading="lazy" />
+        <header class="protege-collegiate__masthead animate-fade-up stagger-1">
+          <div class="protege-collegiate__emblem">
+            <span class="protege-collegiate__emblem-ring">Est. 2024</span>
+            <img src="images/protege.svg" alt="Protégé emblem" class="protege-collegiate__emblem-img" loading="lazy" />
+            <span class="protege-collegiate__emblem-tag"><i data-lucide="sparkles"></i> Generation for Jesus</span>
+          </div>
+          <div class="protege-collegiate__titles">
+            <span class="protege-collegiate__kicker"><i data-lucide="graduation-cap"></i> Campus &amp; Youth Ministry</span>
+            <h2 class="protege-collegiate__headline" id="campusTitle">Generation <em>for Jesus</em></h2>
+            <p class="protege-collegiate__motto">Producing an <strong>Empowered Generation</strong> &mdash; bold in faith, loud in love, and unstoppable in purpose.</p>
+          </div>
+        </header>
+
+        <div class="protege-collegiate__intro animate-fade-up stagger-2">
+          <div class="protege-collegiate__intro-card">
+            <p class="protege-collegiate__intro-lead">
+              Welcome to <strong>Prot&eacute;g&eacute;</strong> &mdash; the heartbeat of our campus and youth movement. We're not just a ministry; we're a <em>village</em> raising up the next generation of leaders.
+            </p>
+            <p class="protege-collegiate__intro-sub">
+              From weekly campus fellowships to intense discipleship sprints, from epic youth rallies to one-on-one mentorship that changes lives &mdash; Prot&eacute;g&eacute; is where faith gets real, fun, and unstoppable.
+            </p>
+          </div>
+          <div class="protege-collegiate__stats">
+            <div class="protege-collegiate__stat">
+              <span class="protege-collegiate__stat-num">500+</span>
+              <span class="protege-collegiate__stat-label">Students Reached</span>
             </div>
-            <h3 class="card__title">Campus Fellowship</h3>
-            <p class="card__text">Weekly gatherings for worship, Bible study, and fellowship on campus.</p>
+            <div class="protege-collegiate__stat">
+              <span class="protege-collegiate__stat-num">12</span>
+              <span class="protege-collegiate__stat-label">Campuses</span>
+            </div>
+            <div class="protege-collegiate__stat">
+              <span class="protege-collegiate__stat-num">85</span>
+              <span class="protege-collegiate__stat-label">Leaders Trained</span>
+            </div>
           </div>
         </div>
+
+        <div class="protege-collegiate__pillars animate-fade-up stagger-3">
+          <div class="protege-collegiate__pillars-head">
+            <span class="protege-collegiate__pillars-label">What We Do</span>
+            <h3 class="protege-collegiate__pillars-title">The Prot&eacute;g&eacute; Experience</h3>
+          </div>
+          <div class="protege-collegiate__pillars-grid">
+            <article class="protege-collegiate__pillar">
+              <div class="protege-collegiate__pillar-icon">
+                <i data-lucide="users"></i>
+              </div>
+              <h4 class="protege-collegiate__pillar-title">Protégé Service</h4>
+              <p class="protege-collegiate__pillar-text">Weekly worship and Word, and community hangouts on campus. Bring a friend, bring your vibe.</p>
+              <span class="protege-collegiate__pillar-badge">Every Week</span>
+            </article>
+            <article class="protege-collegiate__pillar">
+              <div class="protege-collegiate__pillar-icon protege-collegiate__pillar-icon--alt">
+                <i data-lucide="flame"></i>
+              </div>
+              <h4 class="protege-collegiate__pillar-title">Protégé GiG</h4>
+              <p class="protege-collegiate__pillar-text">Epic worship nights, powerful messages, and life-changing encounters with God.</p>
+              <span class="protege-collegiate__pillar-badge protege-collegiate__pillar-badge--alt">Monthly</span>
+            </article>
+            <article class="protege-collegiate__pillar">
+              <div class="protege-collegiate__pillar-icon">
+                <i data-lucide="book-open"></i>
+              </div>
+              <h4 class="protege-collegiate__pillar-title">Activate Conference</h4>
+              <p class="protege-collegiate__pillar-text">Answering the call to purpose begins with a single moment of awakening. The Activate Conference is a gathering designed for youth and campus ministers to encounter the divine, align with their true spiritual calling, and receive the energy needed to transform their communities.</p>
+              <span class="protege-collegiate__pillar-badge">Annual</span>
+            </article>
+            <article class="protege-collegiate__pillar">
+              <div class="protege-collegiate__pillar-icon protege-collegiate__pillar-icon--alt">
+                <i data-lucide="user-check"></i>
+              </div>
+              <h4 class="protege-collegiate__pillar-title">Peer Mentorship</h4>
+              <p class="protege-collegiate__pillar-text">One-on-one guidance from mature leaders who walk the walk and talk the talk.</p>
+              <span class="protege-collegiate__pillar-badge protege-collegiate__pillar-badge--alt">Ongoing</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="protege-collegiate__gallery animate-fade-up stagger-4">
+          <div class="protege-collegiate__sticker protege-collegiate__sticker--coral protege-collegiate__sticker--n7" aria-label="Wave goodbye to sin">
+            <span class="protege-collegiate__sticker-text"><i data-lucide="waves"></i> Wave Goodbye to Sin</span>
+          </div>
+          <figure class="protege-collegiate__gallery-main">
+            <img src="images/protege1.jpg" alt="Protégé campus gathering" loading="lazy" />
+            <figcaption>The Gathering</figcaption>
+          </figure>
+          <div class="protege-collegiate__gallery-grid">
+            <figure><img src="images/protege2.jpg" alt="Worship night" loading="lazy" /></figure>
+            <figure><img src="images/protege3.jpg" alt="Youth rally" loading="lazy" /></figure>
+            <figure><img src="images/protege4.jpg" alt="Discipleship" loading="lazy" /></figure>
+            <figure><img src="images/protege5.jpg" alt="Mentorship" loading="lazy" /></figure>
+          </div>
+        </div>
+
+        <footer class="protege-collegiate__cta animate-fade-up stagger-5">
+          <div class="protege-collegiate__cta-card">
+            <span class="protege-collegiate__cta-label">Ready to Rise?</span>
+            <h3 class="protege-collegiate__cta-title">Join the Movement</h3>
+            <p class="protege-collegiate__cta-text">
+              Whether you're a high school student, college undergrad, or young adult &mdash; there's a place for you in Prot&eacute;g&eacute;. Don't walk alone.
+            </p>
+            <div class="protege-collegiate__cta-actions">
+              <a href="contact.html" class="btn btn--primary btn--lg">
+                <i data-lucide="send"></i> Get Connected
+              </a>
+              <a href="events.html" class="btn btn--outline btn--lg">
+                <i data-lucide="calendar"></i> Upcoming Events
+              </a>
+            </div>
+          </div>
+        </footer>
       </div>
     </section>
-
     <!-- Join a Ministry -->
     <section class="section section--alt" aria-label="Join a Ministry">
       <div class="container">
@@ -242,8 +454,7 @@
 
         <div>
           <h4 class="footer__heading">Connect</h4>
-          <nav class="footer__links" aria-label="Footer Connect Links">
-            <a href="lifegroups.html">Lifegroups</a>
+            <nav class="footer__links" aria-label="Footer Connect Links">
             <a href="locations.html">Outreaches</a>
             <a href="give.html">Give Online</a>
             <a href="contact.html">Prayer Requests</a>
