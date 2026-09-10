@@ -41,64 +41,19 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <div class="navbar__mega">
-          <a href="locations.html" class="navbar__link navbar__link--active navbar__mega__trigger">
-            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
-          </a>
-                    <div class="navbar__mega__panel" aria-label="Church submenu">
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Church Locations</span>
-              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
-                <i data-lucide="map-pin"></i> Main Church
-              </a>
-              <div id="megaLocationList">
-                <a href="locations.html#outreach-locations" class="navbar__mega__link">
-                  <i data-lucide="tent"></i> Outreach Centers
-                </a>
-              </div>
-              <a href="locations.html" class="navbar__mega__link">
-                <i data-lucide="navigation"></i> View All Locations
-              </a>
-            </div>
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Outreach Programs</span>
-              <div id="megaProgramList">
-                <a href="ministries.html" class="navbar__mega__link">
-                  <i data-lucide="users"></i> Ministries
-                </a>
-                <a href="discipleship.html" class="navbar__mega__link">
-                  <i data-lucide="book-open"></i> Discipleship
-                </a>
-                <a href="lifegroups.html" class="navbar__mega__link">
-                  <i data-lucide="users-round"></i> Lifegroups
-                </a>
-              </div>
-              <a href="ministries.html" class="navbar__mega__link">
-                <i data-lucide="sparkles"></i> View All Ministries
-              </a>
-            </div>
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Get Involved</span>
-              <a href="events.html" class="navbar__mega__link">
-                <i data-lucide="calendar"></i> Upcoming Events
-              </a>
-              <a href="give.html" class="navbar__mega__link">
-                <i data-lucide="heart"></i> Give Online
-              </a>
-              <a href="contact.html" class="navbar__mega__link">
-                <i data-lucide="phone"></i> Contact Info
-              </a>
-            </div>
-          </div>
-        </div>
+        <a href="locations.html" class="navbar__link navbar__link--active">Church</a>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
 
       <div class="navbar__actions">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <i data-lucide="sun"></i>
-        </button>
+        <label class="theme-switch" for="themeToggle" title="Toggle dark mode">
+          <input type="checkbox" id="themeToggle" class="theme-switch__input" />
+          <span class="theme-switch__track">
+            <i data-lucide="sun" class="theme-switch__icon theme-switch__icon--light"></i>
+            <i data-lucide="moon" class="theme-switch__icon theme-switch__icon--dark"></i>
+          </span>
+        </label>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>

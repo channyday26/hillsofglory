@@ -210,6 +210,7 @@
         '<h3 class="card__title" style="margin:0;">' + (s.title || '') + '</h3>' +
         '<p class="card__text" style="margin:0;">' + (s.speaker || '') + ' — ' + (s.date || '') + '</p>' +
         '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-sermon" data-id="' + (s.id || '') + '">Edit</button>' +
         '<button class="btn btn--secondary" data-action="delete-sermon" data-id="' + (s.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
@@ -879,7 +880,19 @@
   // --- Sermons CRUD ---
   const sermonsForm = document.getElementById('sermonsForm');
   if (sermonsForm) {
-    // Data loading deferred to initCMSData() after auth.
+    let sermonsEditingId = null;
+    const sermonsSubmit = sermonsForm.querySelector('button[type="submit"]');
+
+    function resetSermonForm() {
+      sermonsEditingId = null;
+      sermonsForm.reset();
+      const cancelEdit = document.getElementById('sermonCancelEdit');
+      if (cancelEdit) cancelEdit.hidden = true;
+      if (sermonsSubmit) {
+        sermonsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Sermon';
+        if (window.initIcons) window.initIcons();
+      }
+    }
 
     sermonsForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -888,25 +901,62 @@
       const date = document.getElementById('sermonDate').value;
       const youtube = document.getElementById('sermonYoutube').value.trim();
       const desc = document.getElementById('sermonDesc').value.trim();
-      const { data, error } = await supabase.from('sermons').insert([{ title, speaker, date, youtube_url: youtube, description: desc }]);
+      const payload = { title, speaker, date, youtube_url: youtube, description: desc };
+
+      let error;
+      if (sermonsEditingId) {
+        ({ error } = await supabase.from('sermons').update(payload).eq('id', sermonsEditingId));
+      } else {
+        ({ error } = await supabase.from('sermons').insert([payload]));
+      }
+
       if (error) {
-        showToast('Error adding sermon.', 'error');
+        showToast('Error saving sermon.', 'error');
         console.error(error);
       } else {
-        showToast('Sermon added!', 'success');
-        sermonsForm.reset();
+        showToast(sermonsEditingId ? 'Sermon updated!' : 'Sermon added!', 'success');
+        resetSermonForm();
         loadSermons();
       }
     });
 
     document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-sermon') {
+        const id = e.target.dataset.id;
+        const { data, error } = await supabase.from('sermons').select('*').eq('id', id).single();
+        if (error || !data) {
+          showToast('Could not load that sermon.', 'error');
+          console.error(error);
+          return;
+        }
+        sermonsEditingId = id;
+        document.getElementById('sermonTitle').value = data.title || '';
+        document.getElementById('sermonSpeaker').value = data.speaker || '';
+        document.getElementById('sermonDate').value = data.date || '';
+        document.getElementById('sermonYoutube').value = data.youtube_url || '';
+        document.getElementById('sermonDesc').value = data.description || '';
+        const cancelEdit = document.getElementById('sermonCancelEdit');
+        if (cancelEdit) cancelEdit.hidden = false;
+        if (sermonsSubmit) {
+          sermonsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Sermon';
+          if (window.initIcons) window.initIcons();
+        }
+        document.getElementById('sermonTitle').focus();
+      }
+
       if (e.target.dataset.action === 'delete-sermon') {
         const id = e.target.dataset.id;
         const { error } = await supabase.from('sermons').delete().eq('id', id);
         if (error) { showToast('Error deleting.', 'error'); }
         else { showToast('Sermon removed.', 'success'); loadSermons(); }
+        if (sermonsEditingId === id) resetSermonForm();
       }
     });
+
+    const cancelEdit = document.getElementById('sermonCancelEdit');
+    if (cancelEdit) {
+      cancelEdit.addEventListener('click', resetSermonForm);
+    }
   }
 
   // --- Special Events CRUD (max two) ---

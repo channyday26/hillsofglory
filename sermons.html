@@ -41,64 +41,19 @@
         <a href="ministries.html" class="navbar__link">Ministries</a>
         <a href="discipleship.html" class="navbar__link">Discipleship</a>
         <a href="events.html" class="navbar__link">Events</a>
-        <div class="navbar__mega">
-          <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
-          </a>
-                    <div class="navbar__mega__panel" aria-label="Church submenu">
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Church Locations</span>
-              <a href="locations.html#mainCampusCard" class="navbar__mega__link">
-                <i data-lucide="map-pin"></i> Main Campus
-              </a>
-              <div id="megaLocationList">
-                <a href="locations.html#outreach-locations" class="navbar__mega__link">
-                  <i data-lucide="tent"></i> Outreach Centers
-                </a>
-              </div>
-              <a href="locations.html" class="navbar__mega__link">
-                <i data-lucide="navigation"></i> View All Locations
-              </a>
-            </div>
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Outreach Programs</span>
-              <div id="megaProgramList">
-                <a href="ministries.html" class="navbar__mega__link">
-                  <i data-lucide="users"></i> Ministries
-                </a>
-                <a href="discipleship.html" class="navbar__mega__link">
-                  <i data-lucide="book-open"></i> Discipleship
-                </a>
-                <a href="lifegroups.html" class="navbar__mega__link">
-                  <i data-lucide="users-round"></i> Lifegroups
-                </a>
-              </div>
-              <a href="ministries.html" class="navbar__mega__link">
-                <i data-lucide="sparkles"></i> View All Ministries
-              </a>
-            </div>
-            <div class="navbar__mega__col">
-              <span class="navbar__mega__title">Get Involved</span>
-              <a href="events.html" class="navbar__mega__link">
-                <i data-lucide="calendar"></i> Upcoming Events
-              </a>
-              <a href="give.html" class="navbar__mega__link">
-                <i data-lucide="heart"></i> Give Online
-              </a>
-              <a href="contact.html" class="navbar__mega__link">
-                <i data-lucide="phone"></i> Contact Info
-              </a>
-            </div>
-          </div>
-        </div>
+        <a href="locations.html" class="navbar__link">Church</a>
         <a href="give.html" class="navbar__link">Give</a>
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
 
       <div class="navbar__actions">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <i data-lucide="sun"></i>
-        </button>
+        <label class="theme-switch" for="themeToggle" title="Toggle dark mode">
+          <input type="checkbox" id="themeToggle" class="theme-switch__input" />
+          <span class="theme-switch__track">
+            <i data-lucide="sun" class="theme-switch__icon theme-switch__icon--light"></i>
+            <i data-lucide="moon" class="theme-switch__icon theme-switch__icon--dark"></i>
+          </span>
+        </label>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
@@ -118,66 +73,156 @@
       </div>
     </section>
 
-    <!-- Sermons Grid -->
+    <!-- Sermons Library -->
     <section class="section" aria-label="Sermon Library">
       <div class="container">
-        <div class="grid-cards" id="sermonsListGrid">
-          <!-- Fallback content, replaced dynamically from Supabase -->
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/preach.png" alt="Sermon thumbnail" loading="lazy" />
+        <!-- Search & Filter Toolbar -->
+        <div class="sermons-toolbar">
+          <div class="sermons-toolbar__header">
+            <span class="sermons-toolbar__eyebrow"><i data-lucide="library"></i> Sermon Archive</span>
+            <h2 class="sermons-toolbar__headline">Search Our <span class="sermons-toolbar__accent">Message Library</span></h2>
+            <p class="sermons-toolbar__lead">Find teachings by title, speaker, or date. Be encouraged and equipped by the Word of God.</p>
+          </div>
+
+          <div class="sermons-toolbar__search-wrapper">
+            <div class="sermons-toolbar__search">
+              <i data-lucide="search" class="sermons-toolbar__search-icon" aria-hidden="true"></i>
+              <input type="search" id="sermonSearch" class="sermons-toolbar__input" placeholder="Search by title, speaker, or keyword..." aria-label="Search sermons" />
+              <button type="button" id="sermonSearchClear" class="sermons-toolbar__clear" aria-label="Clear search" hidden>
+                <i data-lucide="x"></i>
+              </button>
             </div>
-            <span class="card__tag">Recent Message</span>
-            <h3 class="card__title">Walking in Kingdom Authority</h3>
-            <p class="card__text">Pastor &bull; Faith &amp; Victory Series</p>
-            <div class="card__footer">
-              <span class="card__text">Sermons will appear here once posted.</span>
+
+            <!-- Desktop Filters (visible on larger screens) -->
+            <div class="sermons-toolbar__filters-desktop">
+              <div class="sermons-toolbar__filter-group">
+                <label for="sermonDateFilter" class="sermons-toolbar__filter-label">
+                  <i data-lucide="calendar" aria-hidden="true"></i> Date
+                </label>
+                <select id="sermonDateFilter" class="sermons-toolbar__select">
+                  <option value="all">All Time</option>
+                  <option value="this-week">This Week</option>
+                  <option value="this-month">This Month</option>
+                  <option value="last-3-months">Last 3 Months</option>
+                  <option value="this-year">This Year</option>
+                </select>
+              </div>
+
+              <div class="sermons-toolbar__filter-group">
+                <label for="sermonSpeakerFilter" class="sermons-toolbar__filter-label">
+                  <i data-lucide="user" aria-hidden="true"></i> Speaker
+                </label>
+                <select id="sermonSpeakerFilter" class="sermons-toolbar__select">
+                  <option value="all">All Speakers</option>
+                </select>
+              </div>
+
+              <button type="button" id="sermonFiltersReset" class="btn btn--outline sermons-toolbar__reset-btn">
+                <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                <span>Reset</span>
+              </button>
             </div>
           </div>
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/congregation.jpg" alt="Sermon thumbnail" loading="lazy" />
+
+          <!-- Mobile Filter Toggle (visible only on mobile) -->
+          <button type="button" id="sermonFilterToggle" class="sermons-toolbar__filter-toggle" aria-label="Open filters" aria-expanded="false">
+            <i data-lucide="filter" aria-hidden="true"></i>
+            <span>Filters</span>
+          </button>
+        </div>
+
+        <!-- Mobile Filter Drawer -->
+        <div class="sermons-drawer" id="sermonFiltersDrawer" hidden>
+          <div class="sermons-drawer__overlay"></div>
+          <div class="sermons-drawer__panel">
+            <div class="sermons-drawer__header">
+              <h3 class="sermons-drawer__title">Filter Sermons</h3>
+              <button type="button" id="sermonFilterClose" class="sermons-drawer__close" aria-label="Close filters">
+                <i data-lucide="x" aria-hidden="true"></i>
+              </button>
             </div>
-            <span class="card__tag card__tag--secondary">Series Message</span>
-            <h3 class="card__title">The Power of Persistent Prayer</h3>
-            <p class="card__text">Pastor &bull; Prayer Series</p>
-            <div class="card__footer">
-              <span class="card__text">Sermons will appear here once posted.</span>
+
+            <div class="sermons-drawer__content">
+              <div class="sermons-drawer__filter-group">
+                <label for="sermonDateFilterMobile" class="sermons-drawer__label">
+                  <i data-lucide="calendar" aria-hidden="true"></i>
+                  Date Range
+                </label>
+                <select id="sermonDateFilterMobile" class="sermons-drawer__select">
+                  <option value="all">All Time</option>
+                  <option value="this-week">This Week</option>
+                  <option value="this-month">This Month</option>
+                  <option value="last-3-months">Last 3 Months</option>
+                  <option value="this-year">This Year</option>
+                </select>
+              </div>
+
+              <div class="sermons-drawer__filter-group">
+                <label for="sermonSpeakerFilterMobile" class="sermons-drawer__label">
+                  <i data-lucide="user" aria-hidden="true"></i>
+                  Speaker
+                </label>
+                <select id="sermonSpeakerFilterMobile" class="sermons-drawer__select">
+                  <option value="all">All Speakers</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="card hover-lift">
-            <div class="card__media">
-              <img src="images/music2.png" alt="Worship thumbnail" loading="lazy" />
-            </div>
-            <span class="card__tag">Worship Night</span>
-            <h3 class="card__title">An Atmosphere of Glory</h3>
-            <p class="card__text">Worship Team &bull; Worship Gathering</p>
-            <div class="card__footer">
-              <span class="card__text">Sermons will appear here once posted.</span>
+
+            <div class="sermons-drawer__footer">
+              <button type="button" id="sermonFilterResetMobile" class="btn btn--outline sermons-drawer__btn-reset">
+                <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                Reset Filters
+              </button>
+              <button type="button" id="sermonFilterApply" class="btn btn--primary sermons-drawer__btn-apply">
+                Apply Filters
+              </button>
             </div>
           </div>
         </div>
 
+        <!-- Results Count -->
+        <div class="sermons-results" id="sermonsResultsInfo" hidden>
+          <span id="sermonsResultsCount"></span>
+        </div>
+
+        <!-- Sermons Grid -->
+        <div class="grid-cards" id="sermonsListGrid">
+          <!-- Sermons loaded dynamically from Supabase -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="sermons-empty" id="sermonsEmptyState" hidden>
+          <div class="sermons-empty__icon">
+            <i data-lucide="video-off"></i>
+          </div>
+          <h3 class="sermons-empty__title">No sermons found</h3>
+          <p class="sermons-empty__text">Try adjusting your search terms or filters to find what you're looking for.</p>
+          <button type="button" id="sermonsEmptyReset" class="btn btn--primary">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+            Clear All Filters
+          </button>
+        </div>
+
+        <!-- See More Sermons -->
         <div class="load-more-wrap">
-          <button type="button" class="btn btn--outline load-more" id="sermonsLoadMore" data-label="Load more sermons" hidden>
+          <button type="button" class="btn btn--primary load-more" id="sermonsLoadMore" data-label="See More Sermons" hidden>
             <i data-lucide="plus" class="load-more__icon" aria-hidden="true"></i>
-            <span class="load-more__label">Load more sermons</span>
+            <span class="load-more__label">See More Sermons</span>
           </button>
         </div>
       </div>
     </section>
 
     <!-- CTA -->
-    <section class="section section--alt" aria-label="Subscribe CTA">
+    <section class="section sermons-cta-minimal" aria-label="Subscribe CTA">
       <div class="container">
-        <div class="section-header text-center animate-fade-up">
-          <span class="section-badge"><i data-lucide="bell" class=""></i> Never Miss a Message</span>
-          <h2 class="section-title">Subscribe on YouTube</h2>
-          <p class="section-subtitle">Watch live streams and full sermon archives on our official YouTube channel.</p>
+        <div class="sermons-cta-minimal__content">
+          <h2 class="sermons-cta-minimal__title">Subscribe on YouTube</h2>
+          <p class="sermons-cta-minimal__text">Never miss a sermon. Watch live streams and full archives on our official YouTube channel.</p>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="btn btn--secondary">
+            <i data-lucide="youtube" aria-hidden="true"></i> Subscribe Now
+          </a>
         </div>
-        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="btn btn--secondary">
-          <i data-lucide="youtube"></i> Visit Our Channel
-        </a>
       </div>
     </section>
   </main>

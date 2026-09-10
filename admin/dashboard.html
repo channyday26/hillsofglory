@@ -324,7 +324,10 @@
                 <label for="sermonDesc" class="form__label">Description</label>
                 <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
               </div>
-              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Sermon</button>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Sermon</button>
+                <button type="button" class="btn btn--outline" id="sermonCancelEdit" hidden>Cancel Editing</button>
+              </div>
             </form>
           </div>
           <div class="admin-list" id="sermonsList"></div>

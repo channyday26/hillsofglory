@@ -22,7 +22,7 @@
   }
 
   // ============================================
-  // Theme Toggle (respects system + localStorage)
+  // Theme Toggle Switch (respects system + localStorage)
   // ============================================
   const themeToggle = document.getElementById('themeToggle');
 
@@ -36,13 +36,11 @@
     html.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
     if (themeToggle) {
-      themeToggle.setAttribute('data-theme-active', theme);
-      const icon = themeToggle.querySelector('[data-lucide]');
-      if (icon) {
-        icon.setAttribute('data-lucide', theme === 'light' ? 'sun' : 'moon');
-      }
+      themeToggle.checked = theme === 'dark';
+      const label = themeToggle.closest('.theme-switch');
+      if (label) label.setAttribute('data-theme-active', theme);
     }
-    // Re-render icons so the sun/moon toggle reflects the new theme.
+    // Re-render icons so the sun/moon icons reflect the new theme.
     initIcons();
   }
 
@@ -52,7 +50,7 @@
   initIcons();
 
   if (themeToggle) {
-    themeToggle.addEventListener('click', function () {
+    themeToggle.addEventListener('change', function () {
       const current = html.getAttribute('data-theme');
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
@@ -158,61 +156,23 @@
   });
 
   // ============================================
-  // Navbar scroll shadow
-  // The bar itself stays strictly sticky at the top of the viewport; the only
-  // dynamic behavior is a subtle shadow on desktop once the user scrolls.
+  // Navbar scroll state
+  // The bar is fully transparent at the top of the page; once the user scrolls
+  // past a small threshold it transitions into the compact glassmorphic state
+  // (`.is-scrolled`), handled by CSS with spring easings.
   // ============================================
   if (navbar) {
     let ticking = false;
     window.addEventListener('scroll', function () {
       if (!ticking) {
         window.requestAnimationFrame(function () {
-          // Only apply the scroll shadow on desktop.
-          if (window.innerWidth > 960) {
-            navbar.classList.toggle('is-scrolled', window.scrollY > 8);
-          }
+          navbar.classList.toggle('is-scrolled', window.scrollY > 24);
           ticking = false;
         });
         ticking = true;
       }
     }, { passive: true });
   }
-
-  // ============================================
-  // Mega Menu (Outreaches) — persistent hover bridge
-  // ============================================
-  // The panel is full-viewport width but the trigger is one link on the right
-  // side of the nav, so moving the cursor diagonally from the trigger to a
-  // panel row on the left would cross navbar space that isn't part of
-  // `.navbar__mega`. A pure CSS :hover menu would drop the open state mid-
-  // traversal and close before the cursor ever reaches the panel. A short
-  // grace period keeps `.is-open` set while the cursor is in flight; re-entering
-  // the wrapper (trigger or panel) cancels the pending close.
-  const megaMenus = document.querySelectorAll('.navbar__mega');
-  let megaCloseTimer = null;
-
-  megaMenus.forEach(function (mega) {
-    mega.addEventListener('mouseenter', function () {
-      clearTimeout(megaCloseTimer);
-      mega.classList.add('is-open');
-    });
-
-    mega.addEventListener('mouseleave', function () {
-      clearTimeout(megaCloseTimer);
-      megaCloseTimer = setTimeout(function () {
-        mega.classList.remove('is-open');
-      }, 300);
-    });
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      clearTimeout(megaCloseTimer);
-      megaMenus.forEach(function (mega) {
-        mega.classList.remove('is-open');
-      });
-    }
-  });
 
   // ============================================
   // HTML escaping helper (guard against injection)
@@ -508,37 +468,168 @@
     // hidden through the very first fetch instead of flashing "Loading…".
     if (state !== 'loading') btn.hidden = state === 'exhausted';
     if (label) {
-      label.textContent = state === 'loading' ? 'Loading…' : btn.dataset.label || 'Load more';
+      label.textContent = state === 'loading' ? 'Loading\u2026' : btn.dataset.label || 'See More Sermons';
     }
   }
 
   // ============================================
-  // Sermons Page — paginated list
+  // Sermons Page — search, filters, and paginated list
   // ============================================
-  const sermonsPager = newPager();
+  const SERMONS_PAGE_SIZE = 3;
+  const sermonsPager = newPager(SERMONS_PAGE_SIZE);
+  let sermonsSearchQuery = '';
+  let sermonsDateFilter = 'all';
+  let sermonsSpeakerFilter = 'all';
+  let sermonsAllData = [];
+  let sermonsAvailableSpeakers = [];
+  let sermonsSearchTimer = 0;
+  let sermonsRequestId = 0;
+
+  const SERMON_DATE_RANGES = {
+    'this-week': { start: -7, end: 0 },
+    'this-month': { start: -30, end: 0 },
+    'last-3-months': { start: -90, end: 0 },
+    'this-year': { start: -365, end: 0 }
+  };
+
+  function filterSermonsByDate(data, filter) {
+    if (filter === 'all') return data;
+    const range = SERMON_DATE_RANGES[filter];
+    if (!range) return data;
+    const now = new Date();
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() + range.start);
+    const endDate = new Date(now);
+    endDate.setDate(now.getDate() + range.end);
+    return data.filter(function (s) {
+      if (!s.date) return false;
+      const d = new Date(s.date);
+      return d >= startDate && d <= endDate;
+    });
+  }
+
+  function filterSermonsBySpeaker(data, speaker) {
+    if (speaker === 'all') return data;
+    return data.filter(function (s) {
+      return s.speaker && s.speaker.toLowerCase() === speaker.toLowerCase();
+    });
+  }
+
+  function searchSermons(data, query) {
+    if (!query.trim()) return data;
+    const term = query.toLowerCase().trim();
+    return data.filter(function (s) {
+      return (s.title && s.title.toLowerCase().includes(term)) ||
+             (s.speaker && s.speaker.toLowerCase().includes(term)) ||
+             (s.description && s.description.toLowerCase().includes(term));
+    });
+  }
+
+  async function loadSermonsAll() {
+    return await fetchTable('sermons', function (q) {
+      return q.order('date', { ascending: false, nullsFirst: false });
+    });
+  }
+
+  function renderSermonsSpeakers(speakers) {
+    const selectDesktop = document.getElementById('sermonSpeakerFilter');
+    const selectMobile = document.getElementById('sermonSpeakerFilterMobile');
+    const current = selectDesktop ? selectDesktop.value : 'all';
+    const speakerOptions = speakers.map(function (s) {
+      return '<option value="' + escAttr(s) + '">' + esc(s) + '</option>';
+    }).join('');
+
+    if (selectDesktop) {
+      selectDesktop.innerHTML = '<option value="all">All Speakers</option>' + speakerOptions;
+      if (speakers.includes(current)) selectDesktop.value = current;
+    }
+
+    if (selectMobile) {
+      selectMobile.innerHTML = '<option value="all">All Speakers</option>' + speakerOptions;
+      if (speakers.includes(current)) selectMobile.value = current;
+    }
+  }
+
+  function extractSpeakers(data) {
+    const speakers = new Set();
+    data.forEach(function (s) {
+      if (s.speaker && s.speaker.trim()) {
+        speakers.add(s.speaker.trim());
+      }
+    });
+    return Array.from(speakers).sort();
+  }
+
+  function updateSermonsResultsInfo(count, total) {
+    const container = document.getElementById('sermonsResultsInfo');
+    const countEl = document.getElementById('sermonsResultsCount');
+    if (!container || !countEl) return;
+    if (sermonsSearchQuery || sermonsDateFilter !== 'all' || sermonsSpeakerFilter !== 'all') {
+      container.hidden = false;
+      countEl.textContent = count + (count === total ? '' : ' of ' + total) + ' sermon' + (count === 1 ? '' : 's');
+    } else {
+      container.hidden = true;
+    }
+  }
+
+  function showSermonsEmpty(show) {
+    const empty = document.getElementById('sermonsEmptyState');
+    const grid = document.getElementById('sermonsListGrid');
+    const loadMore = document.getElementById('sermonsLoadMore');
+    if (empty) empty.hidden = !show;
+    if (grid) grid.hidden = show;
+    if (loadMore) loadMore.hidden = true;
+  }
 
   async function loadSermonsList(append) {
     const grid = document.getElementById('sermonsListGrid');
     if (!grid) return;
-    if (sermonsPager.loading) return;
-    if (append && sermonsPager.exhausted) return;
+    if (append && (sermonsPager.loading || sermonsPager.exhausted)) return;
 
     const btn = document.getElementById('sermonsLoadMore');
+    const requestId = ++sermonsRequestId;
+
     sermonsPager.loading = true;
     setLoadMoreState(btn, 'loading');
 
-    const range = pageRange(sermonsPager);
-    const batch = await fetchTable('sermons', function (q) {
-      return q.order('date', { ascending: false, nullsFirst: false }).range(range[0], range[1]);
-    });
-    const sermons = takePage(sermonsPager, batch);
+    if (!sermonsAllData.length) {
+      sermonsAllData = await loadSermonsAll();
+      if (!sermonsAllData.length) {
+        grid.innerHTML = '<p class="card__text">No sermons posted yet. Check back soon.</p>';
+        sermonsPager.loading = false;
+        setLoadMoreState(btn, 'exhausted');
+        return;
+      }
+      sermonsAvailableSpeakers = extractSpeakers(sermonsAllData);
+      renderSermonsSpeakers(sermonsAvailableSpeakers);
+    }
+
+    let filtered = filterSermonsByDate(sermonsAllData, sermonsDateFilter);
+    filtered = filterSermonsBySpeaker(filtered, sermonsSpeakerFilter);
+    filtered = searchSermons(filtered, sermonsSearchQuery);
+
+    if (requestId !== sermonsRequestId) return;
+
+    updateSermonsResultsInfo(filtered.length, sermonsAllData.length);
+
+    if (!filtered.length) {
+      grid.innerHTML = '';
+      showSermonsEmpty(true);
+      sermonsPager.loading = false;
+      setLoadMoreState(btn, 'exhausted');
+      return;
+    }
+
+    showSermonsEmpty(false);
+
+    let pageData = filtered.slice(sermonsPager.offset, sermonsPager.offset + sermonsPager.pageSize);
+    sermonsPager.exhausted = sermonsPager.offset + pageData.length >= filtered.length;
+    sermonsPager.offset += pageData.length;
 
     if (!append) grid.innerHTML = '';
 
-    if (!sermons.length && !append) {
-      grid.innerHTML = '<p class="card__text">No sermons posted yet. Check back soon.</p>';
-    } else if (sermons.length) {
-      grid.insertAdjacentHTML('beforeend', sermons.map(renderSermonCard).join(''));
+    if (pageData.length) {
+      grid.insertAdjacentHTML('beforeend', pageData.map(renderSermonCard).join(''));
       wireSermonPlayButtons();
     }
 
@@ -547,12 +638,191 @@
     setLoadMoreState(btn, sermonsPager.exhausted ? 'exhausted' : 'ready');
   }
 
-  function wireSermonsLoadMore() {
-    const btn = document.getElementById('sermonsLoadMore');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      loadSermonsList(true);
+  function wireSermonsControls() {
+    const search = document.getElementById('sermonSearch');
+    const clear = document.getElementById('sermonSearchClear');
+    const dateFilter = document.getElementById('sermonDateFilter');
+    const speakerFilter = document.getElementById('sermonSpeakerFilter');
+    const dateFilterMobile = document.getElementById('sermonDateFilterMobile');
+    const speakerFilterMobile = document.getElementById('sermonSpeakerFilterMobile');
+    const resetBtn = document.getElementById('sermonFiltersReset');
+    const resetBtnMobile = document.getElementById('sermonFilterResetMobile');
+    const emptyReset = document.getElementById('sermonsEmptyReset');
+    const filterToggle = document.getElementById('sermonFilterToggle');
+    const filterDrawer = document.getElementById('sermonFiltersDrawer');
+    const filterClose = document.getElementById('sermonFilterClose');
+    const filterApply = document.getElementById('sermonFilterApply');
+    const drawerOverlay = document.querySelector('.sermons-drawer__overlay');
+
+    function openFilterDrawer() {
+      if (!filterDrawer) return;
+      filterDrawer.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (filterToggle) filterToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeFilterDrawer() {
+      if (!filterDrawer) return;
+      filterDrawer.hidden = true;
+      document.body.style.overflow = '';
+      if (filterToggle) filterToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function syncMobileFilters() {
+      if (dateFilterMobile) dateFilterMobile.value = sermonsDateFilter;
+      if (speakerFilterMobile) speakerFilterMobile.value = sermonsSpeakerFilter;
+    }
+
+    function syncDesktopFilters() {
+      if (dateFilter) dateFilter.value = sermonsDateFilter;
+      if (speakerFilter) speakerFilter.value = sermonsSpeakerFilter;
+    }
+
+    function resetFilters() {
+      sermonsSearchQuery = '';
+      sermonsDateFilter = 'all';
+      sermonsSpeakerFilter = 'all';
+      sermonsPager.offset = 0;
+      sermonsPager.exhausted = false;
+      if (search) search.value = '';
+      if (clear) clear.hidden = true;
+      syncDesktopFilters();
+      syncMobileFilters();
+      closeFilterDrawer();
+      loadSermonsList(false);
+    }
+
+    if (filterToggle) {
+      filterToggle.addEventListener('click', openFilterDrawer);
+    }
+
+    if (filterClose) {
+      filterClose.addEventListener('click', closeFilterDrawer);
+    }
+
+    if (drawerOverlay) {
+      drawerOverlay.addEventListener('click', closeFilterDrawer);
+    }
+
+    if (filterApply) {
+      filterApply.addEventListener('click', function () {
+        if (dateFilterMobile) sermonsDateFilter = dateFilterMobile.value;
+        if (speakerFilterMobile) sermonsSpeakerFilter = speakerFilterMobile.value;
+        sermonsPager.offset = 0;
+        sermonsPager.exhausted = false;
+        syncDesktopFilters();
+        closeFilterDrawer();
+        loadSermonsList(false);
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && filterDrawer && !filterDrawer.hidden) {
+        closeFilterDrawer();
+      }
     });
+
+    if (search) {
+      search.addEventListener('input', function () {
+        clearTimeout(sermonsSearchTimer);
+        sermonsSearchTimer = setTimeout(function () {
+          const term = search.value.trim();
+          if (term !== sermonsSearchQuery) {
+            sermonsSearchQuery = term;
+            sermonsPager.offset = 0;
+            sermonsPager.exhausted = false;
+            if (clear) clear.hidden = !term;
+            loadSermonsList(false);
+          }
+        }, 200);
+      });
+    }
+
+    if (clear) {
+      clear.addEventListener('click', function () {
+        if (search) {
+          search.value = '';
+          search.focus();
+        }
+        sermonsSearchQuery = '';
+        sermonsPager.offset = 0;
+        sermonsPager.exhausted = false;
+        clear.hidden = true;
+        loadSermonsList(false);
+      });
+    }
+
+    if (dateFilter) {
+      dateFilter.addEventListener('change', function () {
+        if (this.value !== sermonsDateFilter) {
+          sermonsDateFilter = this.value;
+          if (dateFilterMobile) dateFilterMobile.value = this.value;
+          sermonsPager.offset = 0;
+          sermonsPager.exhausted = false;
+          loadSermonsList(false);
+        }
+      });
+    }
+
+    if (speakerFilter) {
+      speakerFilter.addEventListener('change', function () {
+        if (this.value !== sermonsSpeakerFilter) {
+          sermonsSpeakerFilter = this.value;
+          if (speakerFilterMobile) speakerFilterMobile.value = this.value;
+          sermonsPager.offset = 0;
+          sermonsPager.exhausted = false;
+          loadSermonsList(false);
+        }
+      });
+    }
+
+    if (dateFilterMobile) {
+      dateFilterMobile.addEventListener('change', function () {
+        if (this.value !== sermonsDateFilter) {
+          sermonsDateFilter = this.value;
+          if (dateFilter) dateFilter.value = this.value;
+        }
+      });
+    }
+
+    if (speakerFilterMobile) {
+      speakerFilterMobile.addEventListener('change', function () {
+        if (this.value !== sermonsSpeakerFilter) {
+          sermonsSpeakerFilter = this.value;
+          if (speakerFilter) speakerFilter.value = this.value;
+        }
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', resetFilters);
+    }
+
+    if (resetBtnMobile) {
+      resetBtnMobile.addEventListener('click', function () {
+        sermonsSearchQuery = '';
+        sermonsDateFilter = 'all';
+        sermonsSpeakerFilter = 'all';
+        sermonsPager.offset = 0;
+        sermonsPager.exhausted = false;
+        if (search) search.value = '';
+        if (clear) clear.hidden = true;
+        syncDesktopFilters();
+        syncMobileFilters();
+        loadSermonsList(false);
+      });
+    }
+
+    if (emptyReset) {
+      emptyReset.addEventListener('click', resetFilters);
+    }
+
+    const btn = document.getElementById('sermonsLoadMore');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        loadSermonsList(true);
+      });
+    }
   }
 
   // ============================================
@@ -1244,46 +1514,6 @@
   }
 
   // ============================================
-  // Mega Menu — church locations & outreach programs (live lists)
-  // ============================================
-  const MEGA_MENU_MAX = 4;
-
-  async function loadMegaMenu() {
-    const locationList = document.getElementById('megaLocationList');
-    const programList = document.getElementById('megaProgramList');
-    if (!locationList && !programList) return;
-
-    if (locationList) {
-      const locations = await fetchTable('locations', function (q) {
-        return q.eq('status', 'Active').order('sort_order', { ascending: true });
-      });
-      const outreaches = locations.filter(function (l) {
-        return l.location_type !== 'Main';
-      });
-      if (outreaches.length) {
-        locationList.innerHTML = outreaches.slice(0, MEGA_MENU_MAX).map(function (loc) {
-          return '<a href="locations.html#outreach-locations" class="navbar__mega__link">' +
-            '<i data-lucide="tent"></i> ' + esc(loc.name || 'Outreach Center') + '</a>';
-        }).join('');
-      }
-    }
-
-    if (programList) {
-      const programs = await fetchTable('ministries', function (q) {
-        return q.eq('is_active', true).order('sort_order', { ascending: true });
-      });
-      if (programs.length) {
-        programList.innerHTML = programs.slice(0, MEGA_MENU_MAX).map(function (m) {
-          return '<a href="ministries.html" class="navbar__mega__link">' +
-            '<i data-lucide="users"></i> ' + esc(m.name || 'Ministry') + '</a>';
-        }).join('');
-      }
-    }
-
-    initIcons();
-  }
-
-  // ============================================
   // Wait for Supabase SDK, then initialize
   // ============================================
   function waitForSupabase(callback, attempts) {
@@ -1309,7 +1539,7 @@
 
     // Pagination and filter controls are wired once, up front, so a re-query
     // never stacks duplicate listeners.
-    wireSermonsLoadMore();
+    wireSermonsControls();
     wireLifegroupControls();
 
     // Data features wait for the client
@@ -1321,7 +1551,6 @@
       loadLeadership();
       loadMinistries();
       loadLocations();
-      loadMegaMenu();
       loadLifegroups(false);
       loadSpecialEvents();
       loadMonthlyTheme();
