@@ -43,9 +43,9 @@
         <a href="events.html" class="navbar__link navbar__link--active">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
@@ -113,7 +113,7 @@
         <span class="section-badge"><i data-lucide="calendar" class=""></i> Gather &amp; Celebrate</span>
         <h1 class="page-hero__title">Events</h1>
         <p class="page-hero__lead">
-          There's always something happening at Hills of Glory. Join us for worship nights, conferences, and community gatherings.
+          There's always something happening at Hills of Glory. Join us for worship nights, mentoring, and community gatherings.
         </p>
       </div>
     </section>
@@ -122,41 +122,47 @@
     <section class="section" aria-label="Recurring Gatherings">
       <div class="container">
         <div class="section-header animate-fade-up">
-          <span class="section-badge"><i data-lucide="repeat" class=""></i> Weekly Rhythm</span>
+          <span class="section-badge"><i data-lucide="refresh-cw" class=""></i> Monthly Rhythm</span>
           <h2 class="section-title">Recurring Gatherings</h2>
           <p class="section-subtitle">Mark your calendar for these regular moments of worship and fellowship.</p>
         </div>
 
-        <div class="grid-3">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="schedule-badge"><i data-lucide="sun"></i> Every Sunday</div>
-            <h3 class="card__title">Sunday Celebration</h3>
-            <p class="card__text">Our main worship gathering with praise, the Word, and fellowship for the whole family.</p>
-            <div class="card__footer">
-              <span class="card__tag">Worship &amp; Word</span>
-              <a href="locations.html" class="btn btn--outline btn--sm">Times &rarr;</a>
+        <div class="gatherings-grid">
+          <article class="gathering-card hover-lift animate-fade-up stagger-1">
+            <div class="gathering-card__head">
+              <div class="gathering-card__icon" aria-hidden="true"><i data-lucide="moon"></i></div>
+              <span class="gathering-card__when"><i data-lucide="calendar-days" aria-hidden="true"></i> Every last Friday &middot; 6:00 PM</span>
             </div>
-          </div>
+            <div class="gathering-card__body">
+              <h3 class="gathering-card__title">Soaking</h3>
+              <p class="gathering-card__text">Worship night experience.</p>
+              <span class="gathering-card__tag">Worship Night</span>
+            </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="schedule-badge"><i data-lucide="book"></i> Every Wednesday</div>
-            <h3 class="card__title">Midweek Prayer &amp; Word</h3>
-            <p class="card__text">A midweek recharge of prayer and Bible study to strengthen your walk with God.</p>
-            <div class="card__footer">
-              <span class="card__tag card__tag--secondary">Prayer &amp; Study</span>
-              <a href="locations.html" class="btn btn--outline btn--sm">Times &rarr;</a>
+          <article class="gathering-card hover-lift animate-fade-up stagger-2">
+            <div class="gathering-card__head">
+              <div class="gathering-card__icon gathering-card__icon--gold" aria-hidden="true"><i data-lucide="flame"></i></div>
+              <span class="gathering-card__when"><i data-lucide="calendar-days" aria-hidden="true"></i> Every first Saturday &middot; 8:30 AM</span>
             </div>
-          </div>
+            <div class="gathering-card__body">
+              <h3 class="gathering-card__title">Prayer and Fasting</h3>
+              <p class="gathering-card__text">Day of humbling, seeking, and sacrifice.</p>
+              <span class="gathering-card__tag gathering-card__tag--gold">Prayer</span>
+            </div>
+          </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="schedule-badge"><i data-lucide="flame"></i> Every Friday</div>
-            <h3 class="card__title">Generation Glory Youth</h3>
-            <p class="card__text">A vibrant gathering for youth and students full of worship, teaching, and community.</p>
-            <div class="card__footer">
-              <span class="card__tag">Youth &amp; Students</span>
-              <a href="ministries.html" class="btn btn--outline btn--sm">Learn More &rarr;</a>
+          <article class="gathering-card hover-lift animate-fade-up stagger-3">
+            <div class="gathering-card__head">
+              <div class="gathering-card__icon" aria-hidden="true"><i data-lucide="crown"></i></div>
+              <span class="gathering-card__when"><i data-lucide="calendar-days" aria-hidden="true"></i> Every 2nd or 3rd Sunday &middot; 2:00 PM</span>
             </div>
-          </div>
+            <div class="gathering-card__body">
+              <h3 class="gathering-card__title">Life Guide Summit</h3>
+              <p class="gathering-card__text">Gathering of leaders and aspiring leaders for mentorship.</p>
+              <span class="gathering-card__tag">Mentorship</span>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -170,15 +176,17 @@
           <p class="section-subtitle">Conferences, revivals, and special services on the horizon.</p>
         </div>
 
-        <div class="glass-card form-card empty-state">
-          <i data-lucide="calendar-plus" class=""></i>
-          <h3 class="card__title">New Events Coming Soon</h3>
-          <p class="card__text">
-            We're planning something special. Follow us on social media or contact the church office to stay updated on our next big gathering.
-          </p>
-          <div class="empty-state__actions">
-            <a href="contact.html" class="btn btn--primary"><i data-lucide="mail"></i> Get in Touch</a>
-            <a href="index.html" class="btn btn--outline"><i data-lucide="home" class=""></i> Back Home</a>
+        <div class="special-events__grid special-events__grid--single" id="specialEventsGrid">
+          <div class="glass-card form-card empty-state">
+            <i data-lucide="calendar-plus" class=""></i>
+            <h3 class="card__title">New Events Coming Soon</h3>
+            <p class="card__text">
+              We're planning something special. Follow us on social media or contact the church office to stay updated on our next big gathering.
+            </p>
+            <div class="empty-state__actions">
+              <a href="contact.html" class="btn btn--primary"><i data-lucide="mail"></i> Get in Touch</a>
+              <a href="index.html" class="btn btn--outline"><i data-lucide="home" class=""></i> Back Home</a>
+            </div>
           </div>
         </div>
       </div>

@@ -42,9 +42,9 @@
         <a href="events.html" class="navbar__link">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
@@ -95,6 +95,10 @@
       </nav>
 
       <div class="navbar__actions">
+        <button type="button" class="nav-live" id="navLiveButton" hidden>
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>Live</span>
+        </button>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
           <i data-lucide="sun"></i>
         </button>
@@ -158,8 +162,10 @@
           <span class="identity-plane__watermark" aria-hidden="true">Family</span>
 
           <article class="identity-card">
-            <span class="identity-card__medallion"><i data-lucide="music"></i></span>
-            <span class="identity-card__tag">Spirit-led Worship</span>
+            <span class="identity-card__head">
+              <span class="identity-card__medallion"><i data-lucide="music"></i></span>
+              <span class="identity-card__tag">Spirit-led Worship</span>
+            </span>
             <h3 class="identity-card__title">Inspiring Encounters</h3>
             <p class="identity-card__text">
               Passionate, spirit-led praise and worship that connects hearts directly to the presence and glory of God.
@@ -167,8 +173,10 @@
           </article>
 
           <article class="identity-card identity-card--gold">
-            <span class="identity-card__medallion"><i data-lucide="book"></i></span>
-            <span class="identity-card__tag">Biblical Truth</span>
+            <span class="identity-card__head">
+              <span class="identity-card__medallion"><i data-lucide="book"></i></span>
+              <span class="identity-card__tag">Biblical Truth</span>
+            </span>
             <h3 class="identity-card__title">Transforming Word</h3>
             <p class="identity-card__text">
               Practical, life-applicable teachings from the Holy Scriptures designed to build faith and empower everyday living.
@@ -176,8 +184,10 @@
           </article>
 
           <article class="identity-card">
-            <span class="identity-card__medallion"><i data-lucide="users-round"></i></span>
-            <span class="identity-card__tag">Lifegroups</span>
+            <span class="identity-card__head">
+              <span class="identity-card__medallion"><i data-lucide="users-round"></i></span>
+              <span class="identity-card__tag">Lifegroups</span>
+            </span>
             <h3 class="identity-card__title">Genuine Community</h3>
             <p class="identity-card__text">
               Small fellowship groups where believers grow together, support one another in prayer, and form lifelong bonds.
@@ -191,6 +201,11 @@
           </a>
         </div>
       </div>
+    </section>
+
+    <!-- Monthly Theme (dynamic — hidden until the admin publishes a theme) -->
+    <section class="section section--monthly" id="monthlyThemeSection" aria-label="Monthly Theme" hidden>
+      <div class="monthly-theme animate-fade-up" id="monthlyThemeContent"></div>
     </section>
 
 <!-- Service Schedules -->
@@ -208,7 +223,7 @@
           <div class="schedule-showcase__visual-wrap">
             <span class="schedule-showcase__flair" aria-hidden="true"></span>
             <div class="schedule-showcase__visual">
-              <img src="images/services.jpg" alt="Worship gathering at Hills of Glory" class="schedule-showcase__img" loading="lazy" />
+              <img src="images/services.jpg" alt="Worship gathering at Hills of Glory" class="schedule-showcase__img" id="homeSpotlightImage" loading="lazy" />
               <div class="schedule-showcase__wash" aria-hidden="true"></div>
               <div class="schedule-showcase__spotlight">
                 <span class="schedule-showcase__eyebrow"><i data-lucide="calendar-clock"></i> This Week</span>
@@ -276,6 +291,20 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Happening Right Now (live stream, dynamic — hidden unless live) -->
+    <section class="section section--live" id="liveSection" aria-label="Happening Right Now" hidden>
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <span class="section-badge section-badge--live"><i data-lucide="radio"></i> Live on YouTube</span>
+          <h2 class="section-title">Happening Right Now</h2>
+          <p class="section-subtitle">
+            Join us in this moment — worship, prayer, and the Word streaming live from Hills of Glory.
+          </p>
+        </div>
+        <div class="live-showcase animate-fade-up" id="liveShowcase"></div>
       </div>
     </section>
 

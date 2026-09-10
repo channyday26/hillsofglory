@@ -43,13 +43,13 @@
         <a href="events.html" class="navbar__link">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__link--active navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
-                <i data-lucide="map-pin"></i> Main Campus
+                <i data-lucide="map-pin"></i> Main Church
               </a>
               <div id="megaLocationList">
                 <a href="locations.html#outreach-locations" class="navbar__mega__link">
@@ -112,44 +112,61 @@
       <div class="container">
         <span class="section-badge"><i data-lucide="map-pin"></i> Plan Your Visit</span>
         <h1 class="page-hero__title">Locations &amp; Services</h1>
-        <p class="page-hero__lead">
-          We can't wait to worship with you. Find our main campus and outreach locations, and click a campus to view its service schedule.
+<p class="page-hero__lead">
+          We can't wait to worship with you. Find our main church and outreach centers near you, and tap an outreach to view its service schedule.
         </p>
       </div>
     </section>
 
-    <!-- Main Campus -->
-    <section class="section" aria-label="Main Campus">
+<!-- Main Church -->
+    <section class="section main-church" aria-label="Main Church">
       <div class="container">
         <div class="section-header animate-fade-up">
-          <span class="section-badge"><i data-lucide="church" class=""></i> Headquarters</span>
-          <h2 class="section-title">Main Campus</h2>
+          <h2 class="section-title">Main Church</h2>
           <p class="section-subtitle">Our central place of worship and gathering.</p>
         </div>
         <div id="mainCampusCard">
           <!-- Populated dynamically from Supabase -->
-          <div class="glass-card">
-            <span class="card__tag">Main Campus</span>
-            <h3 class="card__title">Hills of Glory Main Campus</h3>
-            <p class="card__text"><i data-lucide="map-pin"></i> Location details coming soon.</p>
+          <div class="main-church__showcase animate-fade-up stagger-1">
+            <div class="main-church__media-wrap">
+              <span class="main-church__ghost" aria-hidden="true"></span>
+              <figure class="main-church__arch">
+                <img src="images/hills_building.png" alt="Hills of Glory Main Church building" loading="lazy" />
+                <span class="main-church__sticker"><i data-lucide="map-pin"></i> Main Church</span>
+              </figure>
+            </div>
+            <div class="main-church__panel">
+              <span class="main-church__eyebrow"><i data-lucide="landmark"></i> Our Central Home</span>
+              <h3 class="main-church__name">Hills of Glory Main Church</h3>
+              <p class="main-church__address"><i data-lucide="map-pin"></i> Location details coming soon.</p>
+              <span class="main-church__rule" aria-hidden="true"></span>
+              <div class="main-church__map">
+                <div class="main-church__map-fallback"><i data-lucide="map"></i><span>Interactive map coming soon.</span></div>
+              </div>
+              <span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Outreach Locations -->
+<!-- Outreach Locations -->
     <section class="section section--alt" id="outreach-locations" aria-label="Outreach Locations">
       <div class="container">
         <div class="section-header animate-fade-up">
-          <span class="section-badge"><i data-lucide="tent" class=""></i> Daughter Churches</span>
           <h2 class="section-title">Outreach Locations</h2>
           <p class="section-subtitle">Our growing family of outreach churches serving communities near and far.</p>
         </div>
-        <div class="grid-cards" id="outreachGrid">
+        <div class="outreach-columns" id="outreachGrid">
           <!-- Populated dynamically from Supabase -->
-          <div class="card">
-            <p class="card__text">Outreach locations will appear here once they are added.</p>
-          </div>
+          <article class="outreach-column animate-fade-up">
+            <div class="outreach-column__head">
+              <span class="outreach-column__index" aria-hidden="true">01</span>
+              <h3 class="outreach-column__name">Outreach Centers</h3>
+            </div>
+            <span class="outreach-column__chip"><i data-lucide="tent"></i> Outreach</span>
+            <p class="outreach-column__address"><i data-lucide="map-pin"></i> Outreach locations will appear here once they are added.</p>
+          </article>
         </div>
       </div>
     </section>

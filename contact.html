@@ -43,9 +43,9 @@
         <a href="events.html" class="navbar__link">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
@@ -118,26 +118,56 @@
       </div>
     </section>
 
-    <!-- Contact Details -->
-    <section class="section" aria-label="Contact Details">
+<!-- Contact Details -->
+    <section class="section contact-channels" aria-label="Contact Details">
       <div class="container">
-        <div class="grid-3">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i data-lucide="map-pin"></i> Visit</div>
-            <h3 class="card__title">Our Address</h3>
-            <p class="card__text" id="contactAddress">Hills of Glory International Christian Center</p>
+        <div class="section-header animate-fade-up">
+          <span class="section-badge"><i data-lucide="map" class=""></i> Contact Details</span>
+          <h2 class="section-title">Reach Us in a Way That Suits You</h2>
+          <p class="section-subtitle">Send a message, give us a call, or visit us in person &mdash; our hearts and our door are open to you.</p>
+        </div>
+
+        <div class="contact-board animate-fade-up stagger-1">
+          <div class="contact-board__intro">
+            <span class="contact-board__emblem"><i data-lucide="door-open"></i></span>
+            <h3 class="contact-board__title">Our door is open.</h3>
+            <p class="contact-board__text">
+              Whether you have a question, need prayer, or want to know more about the church, reach out &mdash; our team would love to connect with you.
+            </p>
+            <a href="#prayerRequestForm" class="btn btn--primary btn--sm">
+              <i data-lucide="heart"></i> Submit a Prayer Request
+            </a>
           </div>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i data-lucide="phone"></i> Call</div>
-            <h3 class="card__title">Phone</h3>
-            <p class="card__text" id="contactPhone">Contact the church office</p>
-          </div>
+          <div class="contact-board__right">
+            <div class="contact-board__channels">
+              <article class="contact-tile">
+                <span class="contact-tile__icon"><i data-lucide="map-pin"></i></span>
+                <span class="contact-tile__label">Visit</span>
+                <h3 class="contact-tile__value" id="contactAddress">Hills of Glory International Christian Center</h3>
+              </article>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-3">
-            <div class="card__tag"><i data-lucide="mail"></i> Email</div>
-            <h3 class="card__title">Email Us</h3>
-            <p class="card__text" id="contactEmail">info@hillsofglory.org</p>
+              <article class="contact-tile contact-tile--gold">
+                <span class="contact-tile__icon"><i data-lucide="phone"></i></span>
+                <span class="contact-tile__label">Call</span>
+                <h3 class="contact-tile__value" id="contactPhone">Contact the church office</h3>
+              </article>
+
+              <article class="contact-tile">
+                <span class="contact-tile__icon"><i data-lucide="mail"></i></span>
+                <span class="contact-tile__label">Email</span>
+                <h3 class="contact-tile__value" id="contactEmail">info@hillsofglory.org</h3>
+              </article>
+            </div>
+
+            <div class="contact-board__foot">
+              <a href="locations.html" class="contact-board__link">
+                <i data-lucide="map-pin"></i> Find a Service or Location
+              </a>
+              <a href="#prayerRequestForm" class="contact-board__link">
+                <i data-lucide="hand-helping"></i> Send a Prayer Request
+              </a>
+            </div>
           </div>
         </div>
       </div>

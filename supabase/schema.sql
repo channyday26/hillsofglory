@@ -36,6 +36,20 @@
 --      key plus CHECK (id = <constant>) — instead of a BEFORE INSERT trigger
 --      that raised P0001. This is what makes `upsert` on that id safe. The old
 --      trigger and its function are dropped if present.
+--   9. lifegroups.group_type accepts 'couple' (alongside men/women/youth/
+--      children) so married and engaged couples can be served like any other
+--      demographic group. Existing check constraint is recreated with the new
+--      value included.
+--  10. special_events: a public table for the two upcoming one-off events the
+--      events page features. A BEFORE INSERT trigger hard-caps it at two
+--      active events, matching the "up to two" rule in the admin UI.
+--  11. monthly_theme + live_status: singleton tables (constant ids ...002 and
+--      ...003, CHECK-constrained like church_settings) backing the homepage
+--      "Monthly Theme" showcase and "Happening Right Now" live stream. Both
+--      sections stay fully hidden until the admin publishes a row.
+--  12. service_schedules.image_url (thumbnail per service row) and
+--      church_settings.home_spotlight_image (CMS-managed schedule showcase
+--      backdrop) were added for the admin-managed schedules and spotlight.
 --
 -- USAGE
 --   Fresh project : run this whole file in the Supabase SQL Editor.
@@ -121,6 +135,7 @@ CREATE TABLE IF NOT EXISTS public.church_settings (
     youtube_url      TEXT,
     x_url            TEXT,
     hero_video_url   TEXT,
+    home_spotlight_image TEXT,
     created_at       TIMESTAMPTZ DEFAULT now(),
     updated_at       TIMESTAMPTZ DEFAULT now()
 );
@@ -132,6 +147,10 @@ ALTER TABLE public.church_settings ENABLE ROW LEVEL SECURITY;
 -- no-op once the table exists, and would silently skip the constraint).
 ALTER TABLE public.church_settings
     ALTER COLUMN id SET DEFAULT '00000000-0000-0000-0000-000000000001';
+
+-- Converges databases that predate the spotlight image column.
+ALTER TABLE public.church_settings
+    ADD COLUMN IF NOT EXISTS home_spotlight_image TEXT;
 
 UPDATE public.church_settings
 SET id = '00000000-0000-0000-0000-000000000001'
@@ -320,12 +339,17 @@ CREATE TABLE IF NOT EXISTS public.service_schedules (
     service_name TEXT NOT NULL,
     day          TEXT NOT NULL,
     time         TEXT NOT NULL,
+    image_url    TEXT,
     sort_order   INTEGER DEFAULT 0,
     created_at   TIMESTAMPTZ DEFAULT now(),
     updated_at   TIMESTAMPTZ DEFAULT now()
 );
 
 ALTER TABLE public.service_schedules ENABLE ROW LEVEL SECURITY;
+
+-- Converges databases that predate the optional per-service image.
+ALTER TABLE public.service_schedules
+    ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 DROP POLICY IF EXISTS "Public can view schedules" ON public.service_schedules;
 CREATE POLICY "Public can view schedules"
@@ -352,7 +376,7 @@ CREATE TABLE IF NOT EXISTS public.lifegroups (
     location     TEXT,
     meeting_time TEXT,
     contact_info TEXT,
-    group_type   TEXT CHECK (group_type IN ('men', 'women', 'youth', 'children')),
+    group_type   TEXT CHECK (group_type IN ('men', 'women', 'youth', 'children', 'couple')),
     sort_order   INTEGER DEFAULT 0,
     is_active    BOOLEAN DEFAULT true,
     created_at   TIMESTAMPTZ DEFAULT now(),
@@ -370,6 +394,144 @@ CREATE POLICY "Public can view lifegroups"
 DROP POLICY IF EXISTS "Admins can manage lifegroups" ON public.lifegroups;
 CREATE POLICY "Admins can manage lifegroups"
     ON public.lifegroups FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+
+-- ============================================================================
+-- 8b. SPECIAL_EVENTS — upcoming one-off events (max two active)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.special_events (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title       TEXT NOT NULL,
+    description TEXT,
+    event_date  DATE NOT NULL,
+    event_time  TEXT,
+    image_url   TEXT,
+    sort_order  INTEGER DEFAULT 0,
+    is_active   BOOLEAN DEFAULT true,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.special_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view special events" ON public.special_events;
+CREATE POLICY "Public can view special events"
+    ON public.special_events FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage special events" ON public.special_events;
+CREATE POLICY "Admins can manage special events"
+    ON public.special_events FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+DROP TRIGGER IF EXISTS trg_special_events_updated_at ON public.special_events;
+-- NOTE: (re)created in section 13 next to handle_updated_at(), which this file
+-- defines after the table sections.
+
+-- Hard cap at two ACTIVE events. Counts committed rows only because the
+-- trigger runs before the insert lands.
+CREATE OR REPLACE FUNCTION public.prevent_extra_special_events()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM public.special_events WHERE is_active = true) >= 2 THEN
+        RAISE EXCEPTION 'Only two active special events are allowed';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_special_events_max_two ON public.special_events;
+CREATE TRIGGER trg_special_events_max_two
+    BEFORE INSERT ON public.special_events
+    FOR EACH ROW EXECUTE FUNCTION public.prevent_extra_special_events();
+
+
+-- ============================================================================
+-- 8c. MONTHLY_THEME — homepage "Monthly Theme" showcase (single row)
+-- ============================================================================
+-- "At most one row" is declarative: constant PRIMARY KEY + CHECK on that id,
+-- mirroring church_settings so the admin CMS can upsert idempotently.
+
+CREATE TABLE IF NOT EXISTS public.monthly_theme (
+    id          UUID PRIMARY KEY DEFAULT '00000000-0000-0000-0000-000000000002',
+    month_label TEXT,
+    scripture   TEXT,
+    title       TEXT,
+    description TEXT,
+    image_url   TEXT,
+    is_active   BOOLEAN DEFAULT true,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.monthly_theme
+    ALTER COLUMN id SET DEFAULT '00000000-0000-0000-0000-000000000002';
+
+ALTER TABLE public.monthly_theme
+    DROP CONSTRAINT IF EXISTS monthly_theme_singleton;
+
+ALTER TABLE public.monthly_theme
+    ADD CONSTRAINT monthly_theme_singleton
+    CHECK (id = '00000000-0000-0000-0000-000000000002');
+
+ALTER TABLE public.monthly_theme ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view monthly theme" ON public.monthly_theme;
+CREATE POLICY "Public can view monthly theme"
+    ON public.monthly_theme FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage monthly theme" ON public.monthly_theme;
+CREATE POLICY "Admins can manage monthly theme"
+    ON public.monthly_theme FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+
+-- ============================================================================
+-- 8d. LIVE_STATUS — "Happening Right Now" live stream (single row)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.live_status (
+    id               UUID PRIMARY KEY DEFAULT '00000000-0000-0000-0000-000000000003',
+    is_live          BOOLEAN DEFAULT false,
+    live_title       TEXT,
+    live_description TEXT,
+    youtube_url      TEXT,
+    created_at       TIMESTAMPTZ DEFAULT now(),
+    updated_at       TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.live_status
+    ALTER COLUMN id SET DEFAULT '00000000-0000-0000-0000-000000000003';
+
+ALTER TABLE public.live_status
+    DROP CONSTRAINT IF EXISTS live_status_singleton;
+
+ALTER TABLE public.live_status
+    ADD CONSTRAINT live_status_singleton
+    CHECK (id = '00000000-0000-0000-0000-000000000003');
+
+ALTER TABLE public.live_status ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view live status" ON public.live_status;
+CREATE POLICY "Public can view live status"
+    ON public.live_status FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage live status" ON public.live_status;
+CREATE POLICY "Admins can manage live status"
+    ON public.live_status FOR ALL
     TO authenticated
     USING (public.is_admin())
     WITH CHECK (public.is_admin());
@@ -584,6 +746,21 @@ CREATE TRIGGER trg_sermons_updated_at
     BEFORE UPDATE ON public.sermons
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
+DROP TRIGGER IF EXISTS trg_special_events_updated_at ON public.special_events;
+CREATE TRIGGER trg_special_events_updated_at
+    BEFORE UPDATE ON public.special_events
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+DROP TRIGGER IF EXISTS trg_monthly_theme_updated_at ON public.monthly_theme;
+CREATE TRIGGER trg_monthly_theme_updated_at
+    BEFORE UPDATE ON public.monthly_theme
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+DROP TRIGGER IF EXISTS trg_live_status_updated_at ON public.live_status;
+CREATE TRIGGER trg_live_status_updated_at
+    BEFORE UPDATE ON public.live_status
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
 
 -- ============================================================================
 -- 14. INDEXES
@@ -600,6 +777,7 @@ CREATE INDEX IF NOT EXISTS idx_sermons_date                  ON public.sermons(d
 -- Supports the paginated public queries (ORDER BY ... LIMIT/OFFSET).
 CREATE INDEX IF NOT EXISTS idx_sermons_date_desc             ON public.sermons(date DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS idx_lifegroups_active_sort        ON public.lifegroups(is_active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_special_events_date           ON public.special_events(event_date);
 
 
 -- ============================================================================
@@ -622,7 +800,10 @@ GRANT SELECT ON
     public.locations,
     public.service_schedules,
     public.lifegroups,
-    public.sermons
+    public.sermons,
+    public.special_events,
+    public.monthly_theme,
+    public.live_status
 TO anon;
 
 -- ...and submit the two visitor forms (insert only; no read-back).

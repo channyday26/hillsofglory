@@ -334,23 +334,36 @@
   }
 
   // ============================================
-  // Home — Service Schedules (all schedules with location)
+  // Home — Service Schedules (main church only)
   // ============================================
   async function loadHomeSchedules() {
     const grid = document.getElementById('homeScheduleGrid');
     if (!grid) return;
 
+    // The homepage schedule features the main church only: resolve the Main
+    // location id first and scope the query with it. Falling back to "show all"
+    // keeps the section populated while a Main location row is still missing.
+    const mainLocations = await fetchTable('locations', function (q) {
+      return q.eq('location_type', 'Main').eq('status', 'Active').limit(1);
+    });
+    const mainId = (mainLocations[0] || {}).id;
+
     const schedules = await fetchTable('service_schedules', function (q) {
-      return q.order('sort_order', { ascending: true });
+      let query = mainId ? q.eq('location_id', mainId) : q;
+      return query.order('sort_order', { ascending: true });
     });
     if (!schedules.length) return; // keep static fallback markup
 
+    // Stream rows with their CMS-uploaded thumbnail beside the day label.
     grid.innerHTML = schedules.map(function (s) {
-      const time = esc(s.time || '');
+      const thumb = s.image_url
+        ? '<img class="schedule-row__thumb" src="' + escAttr(s.image_url) + '" alt="" loading="lazy" />'
+        : '';
       return '<li class="schedule-row">' +
-        '<span class="schedule-row__day">' + esc(s.day || '') + '</span>' +
+        '<span class="schedule-row__day">' + thumb +
+        '<span class="schedule-row__day-text">' + esc(s.day || '') + '</span></span>' +
         '<span class="schedule-row__service">' + esc(s.service_name || 'Service') + '</span>' +
-        '<time class="schedule-row__time" datetime="' + escAttr(s.time || '') + '">' + time + '</time>' +
+        '<time class="schedule-row__time" datetime="' + escAttr(s.time || '') + '">' + esc(s.time || '') + '</time>' +
         '<a href="locations.html" class="schedule-row__link" aria-label="View service details">' +
         '<i data-lucide="arrow-up-right"></i></a>' +
         '</li>';
@@ -364,6 +377,13 @@
     if (timeEl && first.time) {
       timeEl.textContent = first.time;
       timeEl.setAttribute('datetime', first.time);
+    }
+
+    // CMS-managed backdrop for the spotlight card (settings -> home_spotlight_image).
+    const settings = await fetchTable('church_settings');
+    const spotlight = document.getElementById('homeSpotlightImage');
+    if (spotlight && settings.length && settings[0].home_spotlight_image) {
+      spotlight.src = settings[0].home_spotlight_image;
     }
 
     initIcons();
@@ -459,19 +479,22 @@
   // a separate count query.
   const PAGE_SIZE = 9;
 
-  function newPager() {
-    return { offset: 0, exhausted: false, loading: false };
+  // Page size is per-pager so distinct sections (sermons at 9, lifegroups at 3)
+  // can page at their own rhythm without a shared constant.
+  function newPager(pageSize) {
+    return { offset: 0, exhausted: false, loading: false, pageSize: pageSize || PAGE_SIZE };
   }
 
   function pageRange(pager) {
-    return [pager.offset, pager.offset + PAGE_SIZE];
+    return [pager.offset, pager.offset + (pager.pageSize || PAGE_SIZE)];
   }
 
   // Splits a fetched batch into the rows to render, and records whether more
   // remain. Returns the rows to render.
   function takePage(pager, rows) {
-    pager.exhausted = rows.length <= PAGE_SIZE;
-    const page = rows.slice(0, PAGE_SIZE);
+    const size = pager.pageSize || PAGE_SIZE;
+    pager.exhausted = rows.length <= size;
+    const page = rows.slice(0, size);
     pager.offset += page.length;
     return page;
   }
@@ -662,7 +685,7 @@
   }
 
   // ============================================
-  // Locations — Main campus + outreaches with schedule accordion
+  // Locations — Main church showcase + outreach cards
   // ============================================
   async function loadLocations() {
     const mainCampusCard = document.getElementById('mainCampusCard');
@@ -682,32 +705,65 @@
       schedulesByLocation[s.location_id].push(s);
     });
 
-    function locationCard(loc) {
+    function mainCard(loc) {
+      return '<div class="main-church__showcase animate-fade-up stagger-1">' +
+        '<div class="main-church__media-wrap">' +
+        '<span class="main-church__ghost" aria-hidden="true"></span>' +
+        '<figure class="main-church__arch">' +
+        '<img src="images/hills_building.png" alt="' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" />' +
+        '<span class="main-church__sticker"><i data-lucide="map-pin"></i> Main Church</span>' +
+        '</figure>' +
+        '</div>' +
+        '<div class="main-church__panel">' +
+        '<span class="main-church__eyebrow"><i data-lucide="landmark"></i> Our Central Home</span>' +
+        '<h3 class="main-church__name">' + esc(loc.name || 'Hills of Glory Main Church') + '</h3>' +
+        '<p class="main-church__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || 'Location details coming soon.') + '</p>' +
+        '<span class="main-church__rule" aria-hidden="true"></span>' +
+        '<div class="main-church__map">' +
+        (loc.google_maps_embed_link
+          ? '<iframe class="main-church__iframe" src="' + escAttr(loc.google_maps_embed_link) + '" title="Map to ' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'
+          : '<div class="main-church__map-fallback"><i data-lucide="map"></i><span>Interactive map coming soon.</span></div>') +
+        '</div>' +
+        '<span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>' +
+        '</div>' +
+        '</div>';
+    }
+
+    function outreachCard(loc, i) {
       const locSchedules = schedulesByLocation[loc.id] || [];
       const scheduleBody = locSchedules.length
         ? locSchedules.map(function (s) {
-            return '<p class="card__text"><strong>' + esc(s.service_name) + '</strong>: ' + esc(s.day) + ' &mdash; ' + esc(s.time) + '</p>';
+            return '<div class="outreach-column__row"><span>' + esc(s.day) + '</span><strong>' + esc(s.service_name || 'Service') + '</strong><time>' + esc(s.time || '') + '</time></div>';
           }).join('')
         : '<p class="card__text">Service times coming soon.</p>';
 
-      return '<div class="glass-card hover-lift animate-fade-up">' +
-        '<span class="card__tag">' + esc(loc.location_type === 'Main' ? 'Main Campus' : 'Outreach') + '</span>' +
-        '<h3 class="card__title">' + esc(loc.name || '') + '</h3>' +
-        '<p class="card__text"><i data-lucide="map-pin"></i> ' + esc(loc.address || '') + '</p>' +
+      const rank = i + 1;
+      const idx = rank < 10 ? '0' + rank : String(rank);
+
+      return '<article class="outreach-column animate-fade-up">' +
+        '<div class="outreach-column__head">' +
+        '<span class="outreach-column__index" aria-hidden="true">' + idx + '</span>' +
+        '<h3 class="outreach-column__name">' + esc(loc.name || '') + '</h3>' +
+        '</div>' +
+        '<span class="outreach-column__chip"><i data-lucide="tent"></i> Outreach</span>' +
+        '<p class="outreach-column__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || '') + '</p>' +
         '<div class="location-accordion">' +
         '<button type="button" class="location-accordion__trigger" aria-expanded="false">' +
         '<span><i data-lucide="clock"></i> Service Schedule</span><i data-lucide="chevron-down"></i></button>' +
-        '<div class="location-accordion__body" hidden>' + scheduleBody +
-        (loc.google_maps_embed_link ? '<a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a>' : '') +
-        '</div></div></div>';
+        '<div class="location-accordion__body" hidden>' + scheduleBody + '</div>' +
+        '</div>' +
+        (loc.google_maps_embed_link
+          ? '<div class="outreach-column__footer"><a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a></div>'
+          : '') +
+        '</article>';
     }
 
     if (mainCampusCard) {
       const main = locations.find(function (l) { return l.location_type === 'Main'; });
       if (main) {
-        mainCampusCard.innerHTML = locationCard(main);
+        mainCampusCard.innerHTML = mainCard(main);
       } else {
-        mainCampusCard.innerHTML = '<p class="card__text">Main campus details coming soon.</p>';
+        mainCampusCard.innerHTML = '<p class="card__text">Main church details coming soon.</p>';
       }
     }
 
@@ -716,7 +772,9 @@
       if (!outreaches.length) {
         outreachGrid.innerHTML = '<p class="card__text">No outreach locations listed yet.</p>';
       } else {
-        outreachGrid.innerHTML = outreaches.map(locationCard).join('');
+        outreachGrid.innerHTML = outreaches.map(function (loc, i) {
+          return outreachCard(loc, i);
+        }).join('');
       }
     }
 
@@ -745,46 +803,91 @@
   }
 
   // ============================================
-  // Lifegroups — paginated, with type filters
+  // Lifegroups — paginated, with type filters + search
   // ============================================
-  // The filter is applied in the query rather than by hiding rendered cards.
-  // With pagination the two have to agree: hiding cards client-side would show
-  // "3 of 9" results on a page that claims there are more.
-  const lifegroupsPager = newPager();
+  // The filter and the search term are both applied in the query rather than by
+  // hiding rendered cards. With pagination the two have to agree: hiding cards
+  // client-side would show "3 of 9" results on a page that claims there are more.
+  // The directory opens with the first three groups and pages by three; a live
+  // search switches to a single unfiltered-by-pagination view of every match.
+  const lifegroupsPager = newPager(3);
   let lifegroupsFilter = 'all';
+  let lifegroupsQuery = '';
+  // Debounced so a fast typist does not fire one query per keystroke.
+  let lifegroupsSearchTimer = 0;
   // Every load takes a ticket. A reply whose ticket is no longer the latest is
-  // stale — a filter change or a newer page has superseded it — and is dropped
-  // rather than rendered over the top of fresher results.
+  // stale — a filter/search change or a newer page has superseded it — and is
+  // dropped rather than rendered over the top of fresher results.
   let lifegroupsRequestId = 0;
+  // Search mode returns every match in a single pass (no pagination). A firm
+  // cap keeps the directory response bounded even for a very large church.
+  const LIFEGROUPS_SEARCH_LIMIT = 50;
+
+  // Public-facing label/icon per group_type. Anything unseen (legacy values,
+  // hand-edited rows) falls back to a humanised label with a neutral icon.
+  const LIFEGROUP_TYPES = {
+    men:      { label: "Men's Group",    icon: 'person-standing' },
+    women:    { label: "Women's Group",  icon: 'person-standing' },
+    couple:   { label: 'Couples Group',  icon: 'heart' },
+    youth:    { label: 'Youth Group',    icon: 'smile' },
+    children: { label: 'Children Group', icon: 'baby' }
+  };
+
+  function lifegroupMeta(type) {
+    if (LIFEGROUP_TYPES[type]) return LIFEGROUP_TYPES[type];
+    return {
+      label: type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Lifegroup',
+      icon: 'users'
+    };
+  }
+
+  // Escape LIKE wildcards so a search for "100%" matches it literally rather
+  // than every group whose name starts "100". Backslash is Postgres's default
+  // LIKE escape, so it must be escaped first. Commas and parentheses are also
+  // stripped: they are structural in PostgREST's `or(...)` filter string and a
+  // stray `)` in user input would corrupt the combined filter.
+  function escapeLike(term) {
+    const sanitised = term.replace(/[,()"]/g, '');
+    return sanitised.replace(/[\\%_]/g, '\\$&');
+  }
 
   function renderLifegroupCard(g) {
-    return '<div class="card hover-lift animate-fade-up">' +
-      (g.group_type ? '<span class="card__tag">' + esc(g.group_type) + '</span>' : '') +
-      '<h3 class="card__title">' + esc(g.group_name || '') + '</h3>' +
-      (g.leader_name ? '<p class="card__subtitle"><i data-lucide="user"></i> ' + esc(g.leader_name) + '</p>' : '') +
-      '<p class="card__text"><i data-lucide="map-pin"></i> ' + esc(g.location || 'TBA') + '</p>' +
-      '<p class="card__text"><i data-lucide="clock"></i> ' + esc(g.meeting_time || 'TBA') + '</p>' +
-       (g.contact_info ? '<div class="card__footer"><span class="card__text"><i data-lucide="phone"></i> ' + esc(g.contact_info) + '</span></div>' : '') +
-      '</div>';
+    const meta = lifegroupMeta(g.group_type);
+    return '<article class="card hover-lift animate-fade-up lifegroup-card">' +
+      '<span class="lifegroup-card__type"><i data-lucide="' + meta.icon + '" aria-hidden="true"></i> ' + esc(meta.label) + '</span>' +
+      '<h3 class="lifegroup-card__title">' + esc(g.group_name || 'Lifegroup') + '</h3>' +
+      (g.leader_name ? '<p class="lifegroup-card__meta"><i data-lucide="user" aria-hidden="true"></i>' + esc(g.leader_name) + '</p>' : '') +
+      '<p class="lifegroup-card__meta"><i data-lucide="map-pin" aria-hidden="true"></i>' + esc(g.location || 'Location to be announced') + '</p>' +
+      '<p class="lifegroup-card__meta"><i data-lucide="clock" aria-hidden="true"></i>' + esc(g.meeting_time || 'Time to be announced') + '</p>' +
+      (g.contact_info ? '<div class="lifegroup-card__footer"><span class="lifegroup-card__meta"><i data-lucide="phone" aria-hidden="true"></i>' + esc(g.contact_info) + '</span></div>' : '') +
+      '</article>';
   }
 
   async function loadLifegroups(append) {
     const grid = document.getElementById('lifegroupsGrid');
     if (!grid) return;
-    // Only "Load more" is rate-limited. A filter change must never be swallowed
-    // because an earlier request happens to still be open.
+    // Only "Load more" is rate-limited. A filter/search change must never be
+    // swallowed because an earlier request happens to still be open.
     if (append && (lifegroupsPager.loading || lifegroupsPager.exhausted)) return;
 
     const btn = document.getElementById('lifegroupsLoadMore');
     const requestId = ++lifegroupsRequestId;
     const activeFilter = lifegroupsFilter;
+    const term = lifegroupsQuery;
     lifegroupsPager.loading = true;
     setLoadMoreState(btn, 'loading');
 
     const range = pageRange(lifegroupsPager);
+    // Search mode ignores the pager: every match is returned in one pass so the
+    // typed query immediately shows the full matching set without "Load more".
     const batch = await fetchTable('lifegroups', function (q) {
       let query = q.eq('is_active', true);
       if (activeFilter !== 'all') query = query.eq('group_type', activeFilter);
+      if (term) {
+        const like = escapeLike(term);
+        query = query.or('group_name.ilike.%' + like + '%,leader_name.ilike.%' + like + '%,location.ilike.%' + like + '%');
+        return query.order('sort_order', { ascending: true }).limit(LIFEGROUPS_SEARCH_LIMIT);
+      }
       return query.order('sort_order', { ascending: true }).range(range[0], range[1]);
     });
 
@@ -792,14 +895,23 @@
     if (requestId !== lifegroupsRequestId) return;
 
     lifegroupsPager.loading = false;
-    const groups = takePage(lifegroupsPager, batch);
+    const groups = term
+      ? batch.slice(0, LIFEGROUPS_SEARCH_LIMIT)
+      : takePage(lifegroupsPager, batch);
+    if (term) {
+      // A search is a single, complete view of the matches — never paginated.
+      lifegroupsPager.exhausted = true;
+      lifegroupsPager.offset = 0;
+    }
 
     if (!append) grid.innerHTML = '';
 
     if (!groups.length && !append) {
-      grid.innerHTML = activeFilter === 'all'
-        ? '<p class="card__text">No Lifegroups listed yet. Check back soon.</p>'
-        : '<p class="card__text">No ' + esc(activeFilter) + ' groups yet. Try another filter.</p>';
+      grid.innerHTML = term
+        ? '<p class="card__text">No groups match your search. Try a different keyword or clear the filters.</p>'
+        : (activeFilter === 'all'
+            ? '<p class="card__text">No Lifegroups listed yet. Check back soon.</p>'
+            : '<p class="card__text">No ' + esc(lifegroupMeta(activeFilter).label) + ' scheduled yet. Check back soon or contact the church office.</p>');
     } else if (groups.length) {
       grid.insertAdjacentHTML('beforeend', groups.map(renderLifegroupCard).join(''));
     }
@@ -830,12 +942,206 @@
       });
     }
 
+    // Live search: debounced keystrokes reset the pager and re-query, keeping
+    // the search term in sync with what the paginated query actually fetches.
+    const search = document.getElementById('lifegroupSearch');
+    const clear = document.getElementById('lifegroupSearchClear');
+    if (search) {
+      search.addEventListener('input', function () {
+        const term = search.value.trim();
+        clearTimeout(lifegroupsSearchTimer);
+        lifegroupsSearchTimer = setTimeout(function () {
+          if (term === lifegroupsQuery) return;
+          lifegroupsQuery = term;
+          lifegroupsPager.offset = 0;
+          lifegroupsPager.exhausted = false;
+          if (clear) clear.hidden = !term;
+          loadLifegroups(false);
+        }, 150);
+      });
+    }
+
+    if (clear) {
+      clear.addEventListener('click', function () {
+        if (!search) return;
+        search.value = '';
+        clear.hidden = true;
+        lifegroupsQuery = '';
+        lifegroupsPager.offset = 0;
+        lifegroupsPager.exhausted = false;
+        loadLifegroups(false);
+        search.focus();
+      });
+    }
+
     const more = document.getElementById('lifegroupsLoadMore');
     if (more) {
       more.addEventListener('click', function () {
         loadLifegroups(true);
       });
     }
+  }
+
+  // ============================================
+  // Special Events — up to two upcoming one-off events
+  // ============================================
+  // Rendered from special_events. A single result switches the grid to the
+  // full-width variant; zero results keeps the static "coming soon" fallback.
+
+  const EVENT_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Format a DATE (yyyy-mm-dd) as "March 20, 2026" without Date object parsing,
+  // which would shift the day off-by-one in negative-offset timezones.
+  function formatEventDate(dateStr) {
+    const parts = String(dateStr || '').split('T')[0].split('-');
+    if (parts.length !== 3) return String(dateStr || '');
+    const month = parseInt(parts[1], 10) - 1;
+    if (!EVENT_MONTHS[month]) return String(dateStr);
+    return EVENT_MONTHS[month] + ' ' + parseInt(parts[2], 10) + ', ' + parseInt(parts[0], 10);
+  }
+
+  function renderSpecialEvent(ev) {
+    return '<article class="special-event hover-lift animate-fade-up">' +
+      (ev.image_url
+        ? '<div class="special-event__media"><img src="' + escAttr(ev.image_url) +
+          '" alt="' + escAttr(ev.title || 'Special event') + '" loading="lazy" /></div>'
+        : '') +
+      '<div class="special-event__body">' +
+        '<div class="special-event__meta">' +
+          '<span class="special-event__meta-item"><i data-lucide="calendar" aria-hidden="true"></i>' +
+            esc(formatEventDate(ev.event_date)) + '</span>' +
+          (ev.event_time
+            ? '<span class="special-event__meta-item"><i data-lucide="clock" aria-hidden="true"></i>' +
+              esc(ev.event_time) + '</span>'
+            : '') +
+        '</div>' +
+        '<h3 class="special-event__title">' + esc(ev.title || '') + '</h3>' +
+        (ev.description ? '<p class="special-event__text">' + esc(ev.description) + '</p>' : '') +
+      '</div>' +
+    '</article>';
+  }
+
+  async function loadSpecialEvents() {
+    const grid = document.getElementById('specialEventsGrid');
+    if (!grid) return;
+    const events = await fetchTable('special_events', function (q) {
+      return q.eq('is_active', true).order('event_date', { ascending: true }).limit(2);
+    });
+    if (!events.length) return; // keep the static "coming soon" fallback
+
+    // A pair splits the row in two; one event (or the empty-state fallback)
+    // keeps the full-width single-column layout.
+    grid.classList.toggle('special-events__grid--single', events.length !== 2);
+    grid.innerHTML = events.map(renderSpecialEvent).join('');
+    initIcons();
+  }
+
+  // ============================================
+  // Home — Monthly Theme (dynamic showcase, hidden unless published)
+  // ============================================
+  // The section carries the `hidden` attribute in markup. A published row
+  // (monthly_theme.is_active = true) fills the stage and reveals it; with no
+  // row the attribute is left alone and the section never takes up space.
+  function renderMonthlyTheme(t) {
+    return '<div class="monthly-theme__media">' +
+      (t.image_url
+        ? '<img src="' + escAttr(t.image_url) + '" alt="' + escAttr(t.title || 'Monthly Theme') + '" loading="lazy" />'
+        : '') +
+      '<div class="monthly-theme__wash" aria-hidden="true"></div>' +
+      '</div>' +
+      '<div class="monthly-theme__panel">' +
+      '<span class="monthly-theme__eyebrow"><i data-lucide="sparkles" aria-hidden="true"></i>This Month&#39;s Theme</span>' +
+      (t.month_label
+        ? '<span class="monthly-theme__month"><i data-lucide="calendar" aria-hidden="true"></i>' + esc(t.month_label) + '</span>'
+        : '') +
+      (t.title ? '<h2 class="monthly-theme__title">' + esc(t.title) + '</h2>' : '') +
+      (t.description ? '<p class="monthly-theme__text">' + esc(t.description) + '</p>' : '') +
+      (t.scripture
+        ? '<span class="monthly-theme__scripture"><i data-lucide="book-open" aria-hidden="true"></i><span>' + esc(t.scripture) + '</span></span>'
+        : '') +
+      '</div>';
+  }
+
+  async function loadMonthlyTheme() {
+    const section = document.getElementById('monthlyThemeSection');
+    const slot = document.getElementById('monthlyThemeContent');
+    if (!section || !slot) return;
+
+    const themes = await fetchTable('monthly_theme', function (q) {
+      return q.eq('is_active', true).limit(1);
+    });
+    if (!themes.length) return; // no published theme — section stays hidden
+
+    slot.innerHTML = renderMonthlyTheme(themes[0]);
+    section.hidden = false;
+    initIcons();
+  }
+
+  // ============================================
+  // Home — "Happening Right Now" live stream
+  // ============================================
+  // Reveals the live section and the desktop navbar "Live" button only while
+  // live_status.is_live is true AND a YouTube URL exists. Setting the stream
+  // to ended/inactive in the CMS hides both automatically.
+  function renderLiveShowcase(s) {
+    const videoId = extractYouTubeId(s.youtube_url);
+    const media = videoId
+      ? '<div class="live-showcase__video">' +
+        '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(videoId) +
+        '?autoplay=1&amp;rel=0" title="' + escAttr(s.live_title || 'Live stream') +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' +
+        '</div>'
+      : '<div class="live-showcase__cover"><i data-lucide="youtube" aria-hidden="true"></i><span>Watch on YouTube</span></div>';
+
+    return '<div class="live-showcase__media">' + media + '</div>' +
+      '<div class="live-showcase__panel">' +
+      '<span class="live-showcase__badge"><span class="live-dot" aria-hidden="true"></span> Live Now</span>' +
+      (s.live_title ? '<h3 class="live-showcase__title">' + esc(s.live_title) + '</h3>' : '') +
+      (s.live_description ? '<p class="live-showcase__text">' + esc(s.live_description) + '</p>' : '') +
+      '<div class="live-showcase__actions">' +
+      '<a href="' + escAttr(s.youtube_url) + '" target="_blank" rel="noopener nofollow" class="btn btn--secondary">' +
+      '<i data-lucide="youtube" aria-hidden="true"></i> Watch on YouTube</a>' +
+      '</div>' +
+      '</div>';
+  }
+
+  async function loadLiveStatus() {
+    const section = document.getElementById('liveSection');
+    const slot = document.getElementById('liveShowcase');
+    const navBtn = document.getElementById('navLiveButton');
+    if (!section || !slot) return;
+
+    const rows = await fetchTable('live_status', function (q) {
+      return q.limit(1);
+    });
+    const live = rows[0];
+    const isLive = Boolean(live && live.is_live && live.youtube_url);
+
+    // Toggling `hidden` on the section hides it and everything inside it
+    // (the [hidden] { display:none } base rule beats all component displays).
+    section.hidden = !isLive;
+    if (navBtn) navBtn.hidden = !isLive;
+    if (!isLive) return;
+
+    slot.innerHTML = renderLiveShowcase(live);
+    initIcons();
+  }
+
+  // The navbar "Live" entry smooth-scrolls to the visible live section while
+  // a stream is up; reduced-motion users get an instant jump instead.
+  function wireNavLive() {
+    const btn = document.getElementById('navLiveButton');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      const section = document.getElementById('liveSection');
+      if (!section) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        section.scrollIntoView();
+      } else {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   }
 
   // ============================================
@@ -999,6 +1305,7 @@
     // UI-only features run immediately (no Supabase needed)
     initPrayerForm();
     initJoinForm();
+    wireNavLive();
 
     // Pagination and filter controls are wired once, up front, so a re-query
     // never stacks duplicate listeners.
@@ -1016,6 +1323,9 @@
       loadLocations();
       loadMegaMenu();
       loadLifegroups(false);
+      loadSpecialEvents();
+      loadMonthlyTheme();
+      loadLiveStatus();
       loadGive();
     });
   }

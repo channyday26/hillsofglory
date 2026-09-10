@@ -343,6 +343,13 @@
   }
 }
 
+.admin-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 .admin-list {
   display: flex;
   flex-direction: column;

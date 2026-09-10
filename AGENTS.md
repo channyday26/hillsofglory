@@ -81,18 +81,21 @@ Stick to this layout for all code and assets. Standard HTML routing with explici
 - **Row Level Security (RLS):** Public users have read-only access (`SELECT`) to site content, settings, and public records. Only authenticated admin users can insert, update, or delete records.
 - **Database Tables:**
   - `profiles`: Admin user roles and permissions.
-  - `church_settings`: Global single-row configuration (main_address, contact_email, contact_phone, bank_details, facebook_url, instagram_url, youtube_url, x_url).
+  - `church_settings`: Global single-row configuration (main_address, contact_email, contact_phone, bank_details, facebook_url, instagram_url, youtube_url, x_url, hero_video_url, `home_spotlight_image` for the homepage schedule spotlight).
   - `site_content`: Dynamic text blocks and general page settings, including `hero_video_url` for the main landing page.
   - `leadership_team`: Name, role, bio, image_url, sort_order.
   - `ministries`: Name, category (Worship, General, Campus), description, image_url, contact_person, target_school (for campus ministries).
   - `sermons`: Youtube URL, title, speaker, date, description.
   - `lifegroups`: Group name, leader_name, location, meeting_time, contact_info.
-  - `locations`: Campus name, location_type (Main, Outreach), address, Google Maps embed link, status.
-  - `service_schedules`: Day, time, location_id, service_name.
+  - `special_events`: Title, description, event_date, event_time, image_url (capped at two active rows via trigger).
+- `monthly_theme`: Singleton row powering the homepage Monthly Theme showcase (month_label, scripture, title, description, image_url, is_active). The section stays hidden until a published row exists.
+- `live_status`: Singleton row for the "Happening Right Now" live section (is_live, live_title, live_description, youtube_url). Reveals the section + desktop navbar Live button only while live with a YouTube link.
+- `locations`: Campus name, location_type (Main, Outreach), address, Google Maps embed link, status.
+- `service_schedules`: Day, time, location_id, service_name, image_url (optional per-service thumbnail).
   - `prayer_requests`: Visitor name, request text, date submitted (public inserts allowed).
   - `ministry_join_requests`: Visitor name, contact info, ministry_of_interest, date submitted (public inserts allowed).
 - **Storage Buckets:**
-  - `website-images`: Public Supabase bucket for dynamically uploaded content via the CMS (card images, location photos, leadership profiles, ministry images, dynamic hero videos). Static design media belongs in the local `images/` or `videos/` folders.
+  - `website-images`: Public Supabase bucket for dynamically uploaded content via the CMS (card images, location photos, leadership profiles, ministry images, special event images, monthly theme imagery, service schedule thumbnails, dynamic hero videos). Static design media belongs in the local `images/` or `videos/` folders.
 
 ---
 

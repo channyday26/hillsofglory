@@ -390,6 +390,46 @@
   }
 }
 
+// --- Navbar "Live" Button ---
+// Desktop-only signal that a stream is happening right now. It stays hidden
+// entirely until js/main.js finds an active live_status row; on mobile the
+// CSS hides it no matter what, so the CTA never appears in the mobile drawer.
+.nav-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(var(--color-live-rgb), 0.4);
+  background: rgba(var(--color-live-rgb), 0.12);
+  color: var(--color-live);
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform var(--transition-fast),
+              background-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+
+  .lucide {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    background-color: rgba(var(--color-live-rgb), 0.2);
+    box-shadow: 0 8px 18px -8px rgba(var(--color-live-rgb), 0.5);
+  }
+
+  @media (max-width: 960px) {
+    display: none !important;
+  }
+}
+
 // --- Mobile Hamburger Toggle ---
 .mobile-menu-toggle {
   display: none;

@@ -97,6 +97,24 @@
     set('setAddress', data.main_address); set('setPhone', data.contact_phone); set('setEmail', data.contact_email);
     set('setBank', data.bank_details); set('setFacebook', data.facebook_url); set('setInstagram', data.instagram_url);
     set('setYouTube', data.youtube_url); set('setX', data.x_url); set('setHeroVideo', data.hero_video_url);
+
+    // Spotlight image is an upload control: the current URL goes into a hidden
+    // field (so saving without a new file keeps it), and the preview mirrors it.
+    const spotFile = document.getElementById('setSpotlightImage');
+    if (spotFile) spotFile.value = '';
+    set('setSpotlightImageValue', data.home_spotlight_image);
+    const spotPreview = document.getElementById('setSpotlightImagePreview');
+    const spotWrap = document.getElementById('setSpotlightImagePreviewWrap');
+    if (spotPreview && spotWrap) {
+      const url = data.home_spotlight_image || '';
+      if (url) {
+        spotPreview.src = url;
+        spotWrap.hidden = false;
+      } else {
+        spotPreview.removeAttribute('src');
+        spotWrap.hidden = true;
+      }
+    }
   }
 
   // Populates the notification-settings form. Admin-only table (migration 006),
@@ -171,9 +189,11 @@
     list.innerHTML = (data || []).map(function (lg) {
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
         '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + (lg.group_name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">Leader: ' + (lg.leader_name || '') + ' — ' + (lg.location || '') + '</p>' +
+        '<h3 class="card__title" style="margin:0;">' + esc(lg.group_name || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(lg.group_type || 'uncategorised') + ' — Leader: ' +
+          esc(lg.leader_name || '') + ' — ' + esc(lg.location || '') + '</p>' +
         '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-lifegroup" data-id="' + (lg.id || '') + '">Edit</button>' +
         '<button class="btn btn--secondary" data-action="delete-lifegroup" data-id="' + (lg.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
@@ -191,6 +211,146 @@
         '<p class="card__text" style="margin:0;">' + (s.speaker || '') + ' — ' + (s.date || '') + '</p>' +
         '</div>' +
         '<button class="btn btn--secondary" data-action="delete-sermon" data-id="' + (s.id || '') + '">Delete</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Special events (max two) ---
+  function formatAdminDate(dateStr) {
+    const parts = String(dateStr || '').split('T')[0].split('-');
+    if (parts.length !== 3) return String(dateStr || '');
+    return parts[1] + '/' + parts[2] + '/' + parts[0];
+  }
+
+  async function loadSpecialEvents() {
+    const list = document.getElementById('specialEventsList');
+    if (!list) return;
+    const { data, error } = await supabase.from('special_events').select('*').order('event_date', { ascending: true });
+    if (error) { console.error(error); return; }
+    if (!data || !data.length) {
+      list.innerHTML = '<p class="card__text">No special events yet. Add up to two to feature on the events page.</p>';
+      return;
+    }
+    list.innerHTML = data.map(function (ev) {
+      const dateLabel = formatAdminDate(ev.event_date) + (ev.event_time ? ' — ' + ev.event_time : '');
+      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+        (ev.image_url
+          ? '<img src="' + escAttr(ev.image_url) + '" alt="' + escAttr(ev.title || '') +
+            '" style="width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;" />'
+          : '') +
+        '<div style="flex:1;">' +
+        '<h3 class="card__title" style="margin:0;">' + esc(ev.title || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(dateLabel) + '</p>' +
+        '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-special-event" data-id="' + (ev.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-special-event" data-id="' + (ev.id || '') + '">Delete</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Monthly theme (singleton) ------------------------------------------
+  // Remember the live row's real id so "Delete" is honest even if a future
+  // upsert wrote a non-constant id.
+  let monthlyThemeRowId = null;
+
+  async function loadMonthlyTheme() {
+    const list = document.getElementById('monthlyThemeList');
+    if (!list) return;
+    const { data, error } = await supabase.from('monthly_theme').select('*').limit(1).maybeSingle();
+    if (error) { console.error(error); return; }
+    monthlyThemeRowId = data ? data.id : null;
+    if (!data) {
+      list.innerHTML = '<p class="card__text">No monthly theme yet. Add one (Active) to reveal the homepage theme section; delete it to hide the section.</p>';
+      return;
+    }
+    list.innerHTML = '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+      (data.image_url
+        ? '<img src="' + escAttr(data.image_url) + '" alt="' + escAttr(data.title || 'Monthly Theme') +
+          '" style="width:64px;height:64px;border-radius:var(--radius-md);object-fit:cover;" />'
+        : '') +
+      '<div style="flex:1;">' +
+      '<h3 class="card__title" style="margin:0;">' + esc(data.title || 'Monthly Theme') + '</h3>' +
+      '<p class="card__text" style="margin:0;">' + esc(data.month_label || 'No month label') + ' — ' +
+        (data.is_active ? 'Active (visible)' : 'Inactive (hidden)') + '</p>' +
+      '</div>' +
+      '<button class="btn btn--secondary" data-action="edit-monthly-theme">Edit</button>' +
+      '<button class="btn btn--secondary" data-action="delete-monthly-theme">Delete</button>' +
+      '</div>';
+  }
+
+  // --- Live status (singleton) --------------------------------------------
+  let liveStatusRowId = null;
+
+  async function loadLiveStatus() {
+    const list = document.getElementById('liveStatusList');
+    if (!list) return;
+    const { data, error } = await supabase.from('live_status').select('*').limit(1).maybeSingle();
+    if (error) { console.error(error); return; }
+    liveStatusRowId = data ? data.id : null;
+    if (!data) {
+      list.innerHTML = '<p class="card__text">No live status yet. Save one with status Live to reveal the homepage section and navbar Live button.</p>';
+      return;
+    }
+    list.innerHTML = '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+      '<div style="flex:1;">' +
+      '<h3 class="card__title" style="margin:0;">' + esc(data.live_title || 'Live Stream') + '</h3>' +
+      '<p class="card__text" style="margin:0;">' +
+        (data.is_live ? '<span style="color:var(--color-live);font-weight:700;">Live Now</span>'
+                      : 'Not live (hidden)') +
+        (data.youtube_url ? ' — ' + esc(data.youtube_url) : '') +
+      '</p>' +
+      '</div>' +
+      '<button class="btn btn--secondary" data-action="edit-live-status">Edit</button>' +
+      '<button class="btn btn--secondary" data-action="delete-live-status">Delete</button>' +
+      '</div>';
+  }
+
+  // --- Service schedules (full CRUD with location + optional image) -------
+  async function populateLocationSelect(selectedId) {
+    const select = document.getElementById('scLocation');
+    if (!select) return null;
+    const { data, error } = await supabase.from('locations').select('id, name').order('sort_order', { ascending: true });
+    if (error || !data || !data.length) {
+      select.innerHTML = '<option value="">No locations yet — add one in Locations first</option>';
+      return null;
+    }
+    select.innerHTML = data.map(function (l) {
+      return '<option value="' + escAttr(l.id) + '"' + (selectedId === l.id ? ' selected' : '') + '>' +
+        esc(l.name) + '</option>';
+    }).join('');
+    return data;
+  }
+
+  async function loadServiceSchedules() {
+    const list = document.getElementById('schedulesList');
+    if (!list) return;
+
+    const [schedulesRes, locationsRes] = await Promise.all([
+      supabase.from('service_schedules').select('*').order('sort_order', { ascending: true }),
+      supabase.from('locations').select('id, name').order('sort_order', { ascending: true })
+    ]);
+    if (schedulesRes.error) { console.error(schedulesRes.error); return; }
+
+    const nameById = {};
+    (locationsRes.data || []).forEach(function (l) { nameById[l.id] = l.name; });
+
+    if (!schedulesRes.data || !schedulesRes.data.length) {
+      list.innerHTML = '<p class="card__text">No service schedules yet. Add one below.</p>';
+      return;
+    }
+
+    list.innerHTML = schedulesRes.data.map(function (s) {
+      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+        (s.image_url
+          ? '<img src="' + escAttr(s.image_url) + '" alt="" style="width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;" />'
+          : '') +
+        '<div style="flex:1;">' +
+        '<h3 class="card__title" style="margin:0;">' + esc(s.service_name || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(s.day || '') + ' — ' + esc(s.time || '') +
+          ' — ' + esc(nameById[s.location_id] || 'Unknown location') + '</p>' +
+        '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-schedule" data-id="' + escAttr(s.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-schedule" data-id="' + escAttr(s.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
   }
@@ -346,8 +506,13 @@
     loadLeadership();
     loadMinistries();
     loadLocations();
+    loadServiceSchedules();
+    populateLocationSelect();
     loadLifegroups();
     loadSermons();
+    loadSpecialEvents();
+    loadMonthlyTheme();
+    loadLiveStatus();
     loadRequests();
     wireRequestControls();
   }
@@ -450,6 +615,21 @@
       const submitBtn = settingsForm.querySelector('[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
 
+      // Spotlight image is uploaded to Storage; the resulting public URL goes
+      // into home_spotlight_image. No new file selected -> keep the value held
+      // in the hidden field (i.e. the image that is currently live).
+      let spotlightImage = valueOf('setSpotlightImageValue');
+      const spotFileInput = document.getElementById('setSpotlightImage');
+      if (spotFileInput && spotFileInput.files && spotFileInput.files[0]) {
+        try {
+          spotlightImage = await uploadImage(spotFileInput.files[0]);
+        } catch (err) {
+          showToast(err.message, 'error');
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+      }
+
       const payload = {
         main_address: valueOf('setAddress'),
         contact_phone: valueOf('setPhone'),
@@ -460,6 +640,7 @@
         youtube_url: valueOf('setYouTube'),
         x_url: valueOf('setX'),
         hero_video_url: valueOf('setHeroVideo'),
+        home_spotlight_image: spotlightImage,
       };
 
       const result = await saveChurchSettings(payload);
@@ -604,32 +785,95 @@
   if (lifegroupsForm) {
     // Data loading deferred to initCMSData() after auth.
 
+    // Edit state: when null the form adds a new group; otherwise it holds the
+    // id of the row being updated. One form serves both modes.
+    let lifegroupsEditingId = null;
+    const lifegroupsSubmit = lifegroupsForm.querySelector('button[type="submit"]');
+
+    function resetLifegroupForm() {
+      lifegroupsEditingId = null;
+      lifegroupsForm.reset();
+      const cancelEdit = document.getElementById('lifegroupCancelEdit');
+      if (cancelEdit) cancelEdit.hidden = true;
+      if (lifegroupsSubmit) {
+        lifegroupsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Lifegroup';
+        if (window.initIcons) window.initIcons();
+      }
+    }
+
     lifegroupsForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       const name = document.getElementById('lgName').value.trim();
+      const type = document.getElementById('lgType').value;
       const leader = document.getElementById('lgLeader').value.trim();
       const location = document.getElementById('lgLocation').value.trim();
       const time = document.getElementById('lgTime').value.trim();
       const contact = document.getElementById('lgContact').value.trim();
-      const { data, error } = await supabase.from('lifegroups').insert([{ group_name: name, leader_name: leader, location, meeting_time: time, contact_info: contact }]);
+      const payload = {
+        group_name: name,
+        group_type: type,
+        leader_name: leader,
+        location,
+        meeting_time: time,
+        contact_info: contact
+      };
+
+      let error;
+      if (lifegroupsEditingId) {
+        ({ error } = await supabase.from('lifegroups').update(payload).eq('id', lifegroupsEditingId));
+      } else {
+        ({ error } = await supabase.from('lifegroups').insert([payload]));
+      }
+
       if (error) {
-        showToast('Error adding lifegroup.', 'error');
+        showToast('Error saving lifegroup.', 'error');
         console.error(error);
       } else {
-        showToast('Lifegroup added!', 'success');
-        lifegroupsForm.reset();
+        showToast(lifegroupsEditingId ? 'Lifegroup updated!' : 'Lifegroup added!', 'success');
+        resetLifegroupForm();
         loadLifegroups();
       }
     });
 
     document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-lifegroup') {
+        const id = e.target.dataset.id;
+        const { data, error } = await supabase.from('lifegroups').select('*').eq('id', id).single();
+        if (error || !data) {
+          showToast('Could not load that lifegroup.', 'error');
+          console.error(error);
+          return;
+        }
+        lifegroupsEditingId = id;
+        document.getElementById('lgName').value = data.group_name || '';
+        document.getElementById('lgType').value = data.group_type || 'men';
+        document.getElementById('lgLeader').value = data.leader_name || '';
+        document.getElementById('lgLocation').value = data.location || '';
+        document.getElementById('lgTime').value = data.meeting_time || '';
+        document.getElementById('lgContact').value = data.contact_info || '';
+        const cancelEdit = document.getElementById('lifegroupCancelEdit');
+        if (cancelEdit) cancelEdit.hidden = false;
+        if (lifegroupsSubmit) {
+          lifegroupsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Lifegroup';
+          if (window.initIcons) window.initIcons();
+        }
+        document.getElementById('lgName').focus();
+      }
+
       if (e.target.dataset.action === 'delete-lifegroup') {
         const id = e.target.dataset.id;
         const { error } = await supabase.from('lifegroups').delete().eq('id', id);
         if (error) { showToast('Error deleting.', 'error'); }
         else { showToast('Lifegroup removed.', 'success'); loadLifegroups(); }
+        // If the deleted row is the one being edited, drop back to add mode.
+        if (lifegroupsEditingId === id) resetLifegroupForm();
       }
     });
+
+    const cancelEdit = document.getElementById('lifegroupCancelEdit');
+    if (cancelEdit) {
+      cancelEdit.addEventListener('click', resetLifegroupForm);
+    }
   }
 
   // --- Sermons CRUD ---
@@ -661,6 +905,357 @@
         const { error } = await supabase.from('sermons').delete().eq('id', id);
         if (error) { showToast('Error deleting.', 'error'); }
         else { showToast('Sermon removed.', 'success'); loadSermons(); }
+      }
+    });
+  }
+
+  // --- Special Events CRUD (max two) ---
+  const specialEventsForm = document.getElementById('specialEventsForm');
+  if (specialEventsForm) {
+    // Data loading deferred to initCMSData() after auth.
+
+    // Edit state: null = adding a new event; otherwise the row id being
+    // updated. One form serves both modes, mirroring the lifegroups editor.
+    let specialEventsEditingId = null;
+    let specialEventsEditingImage = '';
+    const specialEventsSubmit = specialEventsForm.querySelector('button[type="submit"]');
+
+    function resetSpecialEventsForm() {
+      specialEventsEditingId = null;
+      specialEventsEditingImage = '';
+      specialEventsForm.reset();
+      const cancelEdit = document.getElementById('specialEventCancelEdit');
+      if (cancelEdit) cancelEdit.hidden = true;
+      if (specialEventsSubmit) {
+        specialEventsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Event';
+        if (window.initIcons) window.initIcons();
+      }
+    }
+
+    specialEventsForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const title = document.getElementById('evTitle').value.trim();
+      const date = document.getElementById('evDate').value;
+      const time = document.getElementById('evTime').value.trim();
+      const desc = document.getElementById('evDesc').value.trim();
+      const imageInput = document.getElementById('evImage');
+      const imageFile = imageInput ? imageInput.files[0] : null;
+
+      let imageUrl = specialEventsEditingImage;
+      try {
+        if (imageFile) imageUrl = await uploadImage(imageFile);
+      } catch (err) {
+        showToast(err.message, 'error');
+        return;
+      }
+
+      // Only additions must respect the two-event cap; editing never adds a row.
+      if (!specialEventsEditingId) {
+        const { count, error: countError } = await supabase
+          .from('special_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_active', true);
+        if (countError) console.error(countError);
+        if (!countError && count >= 2) {
+          showToast('Only two events can be featured at a time. Delete one first.', 'error');
+          return;
+        }
+      }
+
+      const payload = { title, event_date: date, event_time: time, description: desc, image_url: imageUrl };
+
+      let error;
+      if (specialEventsEditingId) {
+        ({ error } = await supabase.from('special_events').update(payload).eq('id', specialEventsEditingId));
+      } else {
+        ({ error } = await supabase.from('special_events').insert([payload]));
+      }
+
+      if (error) {
+        // The database trigger re-bounds the same limit as defence in depth.
+        const capped = /special events/i.test(error.message || '');
+        showToast(capped
+          ? 'Only two events can be featured at a time. Delete one first.'
+          : 'Error saving event.', 'error');
+        console.error(error);
+      } else {
+        showToast(specialEventsEditingId ? 'Event updated!' : 'Event added!', 'success');
+        resetSpecialEventsForm();
+        loadSpecialEvents();
+      }
+    });
+
+    document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-special-event') {
+        const id = e.target.dataset.id;
+        const { data, error } = await supabase.from('special_events').select('*').eq('id', id).single();
+        if (error || !data) {
+          showToast('Could not load that event.', 'error');
+          console.error(error);
+          return;
+        }
+        specialEventsEditingId = id;
+        specialEventsEditingImage = data.image_url || '';
+        document.getElementById('evTitle').value = data.title || '';
+        document.getElementById('evDate').value = data.event_date ? String(data.event_date).slice(0, 10) : '';
+        document.getElementById('evTime').value = data.event_time || '';
+        document.getElementById('evDesc').value = data.description || '';
+        const cancelEdit = document.getElementById('specialEventCancelEdit');
+        if (cancelEdit) cancelEdit.hidden = false;
+        if (specialEventsSubmit) {
+          specialEventsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Event';
+          if (window.initIcons) window.initIcons();
+        }
+        document.getElementById('evTitle').focus();
+      }
+
+      if (e.target.dataset.action === 'delete-special-event') {
+        const id = e.target.dataset.id;
+        const { error } = await supabase.from('special_events').delete().eq('id', id);
+        if (error) { showToast('Error deleting.', 'error'); }
+        else { showToast('Event removed.', 'success'); loadSpecialEvents(); }
+        // If the deleted row is the one being edited, drop back to add mode.
+        if (specialEventsEditingId === id) resetSpecialEventsForm();
+      }
+    });
+
+    const cancelEdit = document.getElementById('specialEventCancelEdit');
+    if (cancelEdit) {
+      cancelEdit.addEventListener('click', resetSpecialEventsForm);
+    }
+  }
+
+  // --- Service Schedules CRUD ---
+  const schedulesForm = document.getElementById('schedulesForm');
+  if (schedulesForm) {
+    // Data loading deferred to initCMSData() after auth.
+
+    // Edit state: null = adding; otherwise the row id being updated.
+    let schedulesEditingId = null;
+    let schedulesEditingImage = '';
+    const schedulesSubmit = schedulesForm.querySelector('button[type="submit"]');
+
+    function resetScheduleForm() {
+      schedulesEditingId = null;
+      schedulesEditingImage = '';
+      schedulesForm.reset();
+      const cancelEdit = document.getElementById('scheduleCancelEdit');
+      if (cancelEdit) cancelEdit.hidden = true;
+      if (schedulesSubmit) {
+        schedulesSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Schedule';
+        if (window.initIcons) window.initIcons();
+      }
+    }
+
+    schedulesForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const service_name = document.getElementById('scName').value.trim();
+      const day = document.getElementById('scDay').value.trim();
+      const time = document.getElementById('scTime').value.trim();
+      const location_id = document.getElementById('scLocation').value;
+      const imageInput = document.getElementById('scImage');
+      const imageFile = imageInput ? imageInput.files[0] : null;
+
+      if (!service_name || !day || !time || !location_id) {
+        showToast('Service name, day, time, and location are required.', 'error');
+        return;
+      }
+
+      let image_url = schedulesEditingImage;
+      try {
+        if (imageFile) image_url = await uploadImage(imageFile);
+      } catch (err) {
+        showToast(err.message, 'error');
+        return;
+      }
+
+      const payload = { service_name, day, time, location_id, image_url };
+
+      let error;
+      if (schedulesEditingId) {
+        ({ error } = await supabase.from('service_schedules').update(payload).eq('id', schedulesEditingId));
+      } else {
+        ({ error } = await supabase.from('service_schedules').insert([payload]));
+      }
+
+      if (error) {
+        showToast('Error saving schedule.', 'error');
+        console.error(error);
+      } else {
+        showToast(schedulesEditingId ? 'Schedule updated!' : 'Schedule added!', 'success');
+        resetScheduleForm();
+        loadServiceSchedules();
+      }
+    });
+
+    document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-schedule') {
+        const id = e.target.dataset.id;
+        const { data, error } = await supabase.from('service_schedules').select('*').eq('id', id).single();
+        if (error || !data) {
+          showToast('Could not load that schedule.', 'error');
+          console.error(error);
+          return;
+        }
+        schedulesEditingId = id;
+        schedulesEditingImage = data.image_url || '';
+        document.getElementById('scName').value = data.service_name || '';
+        document.getElementById('scDay').value = data.day || '';
+        document.getElementById('scTime').value = data.time || '';
+        await populateLocationSelect(data.location_id);
+        const cancelEdit = document.getElementById('scheduleCancelEdit');
+        if (cancelEdit) cancelEdit.hidden = false;
+        if (schedulesSubmit) {
+          schedulesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Schedule';
+          if (window.initIcons) window.initIcons();
+        }
+        document.getElementById('scName').focus();
+      }
+
+      if (e.target.dataset.action === 'delete-schedule') {
+        const id = e.target.dataset.id;
+        const { error } = await supabase.from('service_schedules').delete().eq('id', id);
+        if (error) { showToast('Error deleting.', 'error'); console.error(error); }
+        else { showToast('Schedule removed.', 'success'); loadServiceSchedules(); }
+        // If the deleted row is the one being edited, drop back to add mode.
+        if (schedulesEditingId === id) resetScheduleForm();
+      }
+    });
+
+    const scheduleCancelEdit = document.getElementById('scheduleCancelEdit');
+    if (scheduleCancelEdit) {
+      scheduleCancelEdit.addEventListener('click', resetScheduleForm);
+    }
+  }
+
+  // --- Monthly Theme CRUD (singleton upsert) ---
+  // One row, constant id (migration 009): saving upserts idempotently, exactly
+  // like church_settings. Delete removes the row so the homepage hides.
+  const MONTHLY_THEME_ID = '00000000-0000-0000-0000-000000000002';
+  const monthlyThemeForm = document.getElementById('monthlyThemeForm');
+  if (monthlyThemeForm) {
+    let monthlyThemeEditingImage = '';
+
+    monthlyThemeForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const month_label = document.getElementById('mtMonth').value.trim();
+      const title = document.getElementById('mtTitle').value.trim();
+      const description = document.getElementById('mtText').value.trim();
+      const scripture = document.getElementById('mtScripture').value.trim();
+      const is_active = document.getElementById('mtActive').value === 'true';
+      const imageInput = document.getElementById('mtImage');
+      const imageFile = imageInput ? imageInput.files[0] : null;
+
+      let image_url = monthlyThemeEditingImage;
+      try {
+        if (imageFile) image_url = await uploadImage(imageFile);
+      } catch (err) {
+        showToast(err.message, 'error');
+        return;
+      }
+
+      const payload = { month_label, title, description, scripture, image_url, is_active };
+      const { error } = await supabase
+        .from('monthly_theme')
+        .upsert(Object.assign({ id: MONTHLY_THEME_ID }, payload));
+
+      if (error) {
+        showToast('Error saving monthly theme.', 'error');
+        console.error(error);
+      } else {
+        showToast('Monthly theme saved!', 'success');
+        monthlyThemeEditingImage = '';
+        monthlyThemeForm.reset();
+        loadMonthlyTheme();
+      }
+    });
+
+    document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-monthly-theme') {
+        const { data, error } = await supabase.from('monthly_theme').select('*').limit(1).maybeSingle();
+        if (error || !data) {
+          showToast('Could not load the current theme.', 'error');
+          console.error(error);
+          return;
+        }
+        monthlyThemeEditingImage = data.image_url || '';
+        document.getElementById('mtMonth').value = data.month_label || '';
+        document.getElementById('mtTitle').value = data.title || '';
+        document.getElementById('mtText').value = data.description || '';
+        document.getElementById('mtScripture').value = data.scripture || '';
+        document.getElementById('mtActive').value = data.is_active ? 'true' : 'false';
+        document.getElementById('mtTitle').focus();
+      }
+
+      if (e.target.dataset.action === 'delete-monthly-theme') {
+        if (!monthlyThemeRowId) return;
+        if (!window.confirm('Delete the monthly theme? The homepage theme section will be hidden.')) return;
+        const { error } = await supabase.from('monthly_theme').delete().eq('id', monthlyThemeRowId);
+        if (error) {
+          showToast('Error deleting.', 'error');
+          console.error(error);
+        } else {
+          showToast('Monthly theme removed.', 'success');
+          monthlyThemeRowId = null;
+          monthlyThemeEditingImage = '';
+          monthlyThemeForm.reset();
+          loadMonthlyTheme();
+        }
+      }
+    });
+  }
+
+  // --- Live Status CRUD (singleton upsert) ---
+  const LIVE_STATUS_ID = '00000000-0000-0000-0000-000000000003';
+  const liveStatusForm = document.getElementById('liveStatusForm');
+  if (liveStatusForm) {
+    liveStatusForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const is_live = document.getElementById('lsLive').value === 'true';
+      const live_title = document.getElementById('lsTitle').value.trim();
+      const live_description = document.getElementById('lsDesc').value.trim();
+      const youtube_url = document.getElementById('lsYoutube').value.trim();
+
+      const { error } = await supabase
+        .from('live_status')
+        .upsert(Object.assign({ id: LIVE_STATUS_ID }, { is_live, live_title, live_description, youtube_url }));
+
+      if (error) {
+        showToast('Error saving live status.', 'error');
+        console.error(error);
+      } else {
+        showToast('Live status saved!', 'success');
+        loadLiveStatus();
+      }
+    });
+
+    document.addEventListener('click', async function (e) {
+      if (e.target.dataset.action === 'edit-live-status') {
+        const { data, error } = await supabase.from('live_status').select('*').limit(1).maybeSingle();
+        if (error || !data) {
+          showToast('Could not load the live status.', 'error');
+          console.error(error);
+          return;
+        }
+        document.getElementById('lsLive').value = data.is_live ? 'true' : 'false';
+        document.getElementById('lsTitle').value = data.live_title || '';
+        document.getElementById('lsDesc').value = data.live_description || '';
+        document.getElementById('lsYoutube').value = data.youtube_url || '';
+        document.getElementById('lsTitle').focus();
+      }
+
+      if (e.target.dataset.action === 'delete-live-status') {
+        if (!liveStatusRowId) return;
+        if (!window.confirm('Clear the live status? The homepage section and navbar Live button will be hidden.')) return;
+        const { error } = await supabase.from('live_status').delete().eq('id', liveStatusRowId);
+        if (error) {
+          showToast('Error deleting.', 'error');
+          console.error(error);
+        } else {
+          showToast('Live status removed.', 'success');
+          liveStatusRowId = null;
+          loadLiveStatus();
+        }
       }
     });
   }

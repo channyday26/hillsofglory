@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="images/hills.svg" />
   <title>Lifegroups - Hills of Glory International Christian Center Inc.</title>
-  <meta name="description" content="Find a Lifegroup at Hills of Glory — small fellowship groups for men, women, youth, and children where believers grow together in faith and community." />
+  <meta name="description" content="Find a Lifegroup at Hills of Glory — small fellowship groups for men, women, and couples where believers grow together in faith and community." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,9 +43,9 @@
         <a href="events.html" class="navbar__link">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
@@ -118,15 +118,35 @@
       </div>
     </section>
 
-    <!-- Lifegroups Directory -->
+<!-- Lifegroups Directory -->
     <section class="section" aria-label="Lifegroups Directory">
       <div class="container">
-        <div class="filters-bar" id="lifegroupFilters" role="group" aria-label="Filter Lifegroups by type">
-          <button type="button" class="filter-pill filter-pill--active" data-filter="all" aria-pressed="true">All Groups</button>
-          <button type="button" class="filter-pill" data-filter="men" aria-pressed="false"><i data-lucide="person-standing" class=""></i> Men</button>
-          <button type="button" class="filter-pill" data-filter="women" aria-pressed="false"><i data-lucide="person-standing" class=""></i> Women</button>
-          <button type="button" class="filter-pill" data-filter="youth" aria-pressed="false"><i data-lucide="smile" class=""></i> Youth</button>
-          <button type="button" class="filter-pill" data-filter="children" aria-pressed="false"><i data-lucide="baby" class=""></i> Children</button>
+        <div class="lifegroups-toolbar">
+          <div class="lifegroups-toolbar__message animate-fade-up">
+            <span class="lifegroups-toolbar__eyebrow"><i data-lucide="heart" aria-hidden="true"></i> Find your people</span>
+            <h2 class="lifegroups-toolbar__headline">
+              You don't have to be <span class="lifegroups-toolbar__accent">alone.</span>
+            </h2>
+            <p class="lifegroups-toolbar__lead">Search below to find a group where you truly belong.</p>
+          </div>
+
+          <div class="lifegroups-toolbar__search">
+            <i data-lucide="search" class="lifegroups-toolbar__search-icon" aria-hidden="true"></i>
+            <input type="search" id="lifegroupSearch" class="lifegroups-toolbar__input"
+                   placeholder="Search by group, leader, or location…"
+                   autocomplete="off" aria-label="Search lifegroups" />
+            <button type="button" class="lifegroups-toolbar__clear" id="lifegroupSearchClear"
+                    aria-label="Clear search" title="Clear search" hidden>
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="filters-bar" id="lifegroupFilters" role="group" aria-label="Filter Lifegroups by type">
+            <button type="button" class="filter-pill filter-pill--active" data-filter="all" aria-pressed="true">All Groups</button>
+            <button type="button" class="filter-pill" data-filter="men" aria-pressed="false"><i data-lucide="person-standing" class="" aria-hidden="true"></i> Men</button>
+            <button type="button" class="filter-pill" data-filter="women" aria-pressed="false"><i data-lucide="person-standing" class="" aria-hidden="true"></i> Women</button>
+            <button type="button" class="filter-pill" data-filter="couple" aria-pressed="false"><i data-lucide="heart" class="" aria-hidden="true"></i> Couples</button>
+          </div>
         </div>
 
         <div class="grid-cards" id="lifegroupsGrid">

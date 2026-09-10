@@ -43,9 +43,9 @@
         <a href="events.html" class="navbar__link">Events</a>
         <div class="navbar__mega">
           <a href="locations.html" class="navbar__link navbar__mega__trigger">
-            Outreaches <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
+            Church <i data-lucide="chevron-down" class="navbar__mega__chevron"></i>
           </a>
-                    <div class="navbar__mega__panel" aria-label="Outreaches submenu">
+                    <div class="navbar__mega__panel" aria-label="Church submenu">
             <div class="navbar__mega__col">
               <span class="navbar__mega__title">Church Locations</span>
               <a href="locations.html#mainCampusCard" class="navbar__mega__link">
@@ -129,15 +129,44 @@
           </p>
         </div>
 
-        <div class="grid-2">
-          <div class="glass-card hover-lift animate-fade-up stagger-1">
-            <div class="card__tag"><i data-lucide="landmark" class=""></i> Bank Transfer</div>
-            <h3 class="card__title">Tithes &amp; Offerings</h3>
-            <p class="card__text" id="giveDetails">Bank account details will be published here soon. Please contact the church office for giving information.</p>
+<div class="give-methods">
+          <div class="give-methods__cell animate-fade-up stagger-1">
+            <article class="bankcard" aria-labelledby="giveCardTitle">
+              <div class="bankcard__geo bankcard__geo--ring" aria-hidden="true"></div>
+              <div class="bankcard__geo bankcard__geo--glow" aria-hidden="true"></div>
+
+              <header class="bankcard__head">
+                <div class="bankcard__brand">
+                  <span class="bankcard__brand-icon"><i data-lucide="landmark"></i></span>
+                  <span>
+                    <span class="bankcard__brand-name">Hills of Glory</span>
+                    <span class="bankcard__brand-sub">International Christian Center Inc.</span>
+                  </span>
+                </div>
+                <span class="bankcard__type"><i data-lucide="banknote"></i> Bank Transfer</span>
+              </header>
+
+              <div class="bankcard__chip-row">
+                <span class="bankcard__chip" aria-hidden="true"></span>
+                <span class="bankcard__contactless" title="Contactless"><i data-lucide="wifi"></i></span>
+              </div>
+
+              <div class="bankcard__details">
+                <span class="bankcard__details-label" id="giveCardTitle"><i data-lucide="wallet"></i> Tithes &amp; Offerings</span>
+                <span class="bankcard__details-caption">Account Details</span>
+                <p class="bankcard__details-text" id="giveDetails">Bank account details will be published here soon. Please contact the church office for giving information.</p>
+              </div>
+
+              <footer class="bankcard__foot">
+                <span class="bankcard__verse">2 Corinthians&nbsp;9:7</span>
+                <span class="bankcard__secure"><i data-lucide="shield-check"></i> Cheerful Giving</span>
+              </footer>
+            </article>
           </div>
 
-          <div class="glass-card hover-lift animate-fade-up stagger-2">
-            <div class="card__tag card__tag--secondary"><i data-lucide="smartphone" class=""></i> In Person</div>
+          <article class="give-method glass-card hover-lift animate-fade-up stagger-2">
+            <span class="give-method__icon"><i data-lucide="smartphone"></i></span>
+            <span class="card__tag card__tag--secondary"><i data-lucide="map-pin"></i> In Person</span>
             <h3 class="card__title">Give at Service</h3>
             <p class="card__text">
               You are welcome to give during any of our worship services through the offering, or speak with a member of our team about other ways to partner with the ministry.
@@ -145,34 +174,85 @@
             <div class="card__footer">
               <a href="locations.html" class="btn btn--outline btn--sm"><i data-lucide="map-pin"></i> Find a Service</a>
             </div>
-          </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Where Your Gift Goes -->
-    <section class="section section--alt" aria-label="Impact">
+<!-- Where Your Gift Goes -->
+    <section class="section section--alt impact" aria-label="Impact">
       <div class="container">
         <div class="section-header animate-fade-up">
           <span class="section-badge"><i data-lucide="sprout" class=""></i> Kingdom Impact</span>
           <h2 class="section-title">Where Your Gift Goes</h2>
+          <p class="section-subtitle">Every gift is multiplied &mdash; reaching the lost, serving our community, and building His church.</p>
         </div>
-        <div class="grid-3">
-          <div class="card hover-lift">
-            <div class="card__tag"><i data-lucide="globe" class=""></i> Missions</div>
-            <h3 class="card__title">Spreading the Gospel</h3>
-            <p class="card__text">Funding outreach, evangelism, and missions locally and internationally.</p>
+
+        <div class="impact__board animate-fade-up stagger-1">
+          <div class="impact__feature">
+            <span class="impact__eyebrow"><i data-lucide="trending-up"></i> Faithful Stewardship</span>
+            <h3 class="impact__title">One gift. Eternal ripple.</h3>
+            <p class="impact__text">
+              Your generosity flows into three channels of ministry, each one multiplying into worship, discipleship, and transformed lives.
+            </p>
+
+            <div class="impact__strip" role="img" aria-label="Your gift is distributed across missions, community care, and ministry">
+              <span class="impact__strip-seg impact__strip-seg--missions"><i data-lucide="globe"></i></span>
+              <span class="impact__strip-seg impact__strip-seg--community"><i data-lucide="heart-handshake"></i></span>
+              <span class="impact__strip-seg impact__strip-seg--ministry"><i data-lucide="church"></i></span>
+            </div>
+
+            <ul class="impact__legend">
+              <li class="impact__legend-item">
+                <i data-lucide="globe"></i>
+                <span><strong>Missions</strong> &mdash; Spreading the Gospel</span>
+              </li>
+              <li class="impact__legend-item">
+                <i data-lucide="heart-handshake"></i>
+                <span><strong>Community</strong> &mdash; Serving People</span>
+              </li>
+              <li class="impact__legend-item">
+                <i data-lucide="church"></i>
+                <span><strong>Ministry</strong> &mdash; Growing the Church</span>
+              </li>
+            </ul>
           </div>
-          <div class="card hover-lift">
-            <div class="card__tag card__tag--secondary"><i data-lucide="heart-handshake"></i> Community</div>
-            <h3 class="card__title">Serving People</h3>
-            <p class="card__text">Supporting benevolence, charity, and care for those in need.</p>
-          </div>
-          <div class="card hover-lift">
-            <div class="card__tag"><i data-lucide="church" class=""></i> Ministry</div>
-            <h3 class="card__title">Growing the Church</h3>
-            <p class="card__text">Sustaining worship, discipleship, and the daily work of the ministry.</p>
-          </div>
+
+          <ol class="impact__pillars">
+            <li class="impact__pillar">
+              <span class="impact__pillar-num" aria-hidden="true">01</span>
+              <div class="impact__pillar-body">
+                <span class="impact__pillar-icon"><i data-lucide="globe"></i></span>
+                <div>
+                  <h4>Spreading the Gospel</h4>
+                  <p>Funding outreach, evangelism, and missions locally and internationally.</p>
+                </div>
+              </div>
+              <span class="impact__pillar-bar impact__pillar-bar--a" aria-hidden="true"></span>
+            </li>
+            <li class="impact__pillar">
+              <span class="impact__pillar-num" aria-hidden="true">02</span>
+              <div class="impact__pillar-body">
+                <span class="impact__pillar-icon"><i data-lucide="heart-handshake"></i></span>
+                <div>
+                  <h4>Serving People</h4>
+                  <p>Supporting benevolence, charity, and care for those in need.</p>
+                </div>
+              </div>
+              <span class="impact__pillar-bar impact__pillar-bar--b" aria-hidden="true"></span>
+            </li>
+            <li class="impact__pillar">
+              <span class="impact__pillar-num" aria-hidden="true">03</span>
+              <div class="impact__pillar-body">
+                <span class="impact__pillar-icon"><i data-lucide="church"></i></span>
+                <div>
+                  <h4>Growing the Church</h4>
+                  <p>Sustaining worship, discipleship, and the daily work of the ministry.</p>
+                </div>
+              </div>
+              <span class="impact__pillar-bar impact__pillar-bar--c" aria-hidden="true"></span>
+            </li>
+          </ol>
         </div>
       </div>
     </section>

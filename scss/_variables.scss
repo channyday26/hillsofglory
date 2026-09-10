@@ -42,6 +42,8 @@ $light-border: rgba(28, 25, 23, 0.08);
 $light-border-hover: rgba(28, 25, 23, 0.18);
 $light-card-shadow: 0 4px 20px -2px rgba(45, 90, 3, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
 $light-card-shadow-hover: 0 20px 32px -4px rgba(45, 90, 3, 0.14), 0 8px 16px -2px rgba(217, 130, 43, 0.1);
+$light-live: #D9483A;             // Live stream accent (light mode)
+$light-live-rgb: 217, 72, 58;   // keep in sync with $light-live
 
 // --- Dark Mode Palette ---
 $dark-bg: #131415;
@@ -68,6 +70,8 @@ $dark-border: rgba(255, 255, 255, 0.1);
 $dark-border-hover: rgba(255, 255, 255, 0.22);
 $dark-card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82, 183, 26, 0.15);
+$dark-live: #FF5A47;             // Live stream accent (dark mode)
+$dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
 
 // --- CSS Custom Properties via :root and [data-theme="dark"] ---
 :root {
@@ -93,6 +97,8 @@ $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82
   --color-glass-border: #{$light-glass-border};
   --color-border: #{$light-border};
   --color-border-hover: #{$light-border-hover};
+  --color-live: #{$light-live};
+  --color-live-rgb: #{$light-live-rgb};
   --shadow-card: #{$light-card-shadow};
   --shadow-card-hover: #{$light-card-shadow-hover};
 
@@ -153,6 +159,8 @@ $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82
   --color-glass-border: #{$dark-glass-border};
   --color-border: #{$dark-border};
   --color-border-hover: #{$dark-border-hover};
+  --color-live: #{$dark-live};
+  --color-live-rgb: #{$dark-live-rgb};
   --shadow-card: #{$dark-card-shadow};
   --shadow-card-hover: #{$dark-card-shadow-hover};
 

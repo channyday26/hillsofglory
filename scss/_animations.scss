@@ -64,6 +64,32 @@
   }
 }
 
+// Pulsing halo for the "LIVE" indicator — the dot itself stays put while a
+// soft ring expands and fades. Reduced-motion users get a static dot via the
+// global animation-duration override below.
+@keyframes livePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--color-live-rgb), 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--color-live-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--color-live-rgb), 0);
+  }
+}
+
+// Slow, ambient drift for decorative shapes on the monthly-theme stage. Killed
+// globally for reduced-motion users by the override at the bottom of this file.
+@keyframes monthlyFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-14px, 12px, 0) rotate(5deg);
+  }
+}
+
 // Utility Classes
 .animate-fade-up {
   animation: fadeInUp 0.5s var(--spring-snappy) both;

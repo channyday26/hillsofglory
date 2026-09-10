@@ -51,8 +51,12 @@
         <a href="#" class="sidebar__link" data-section="leadership"><i data-lucide="users"></i><span>Leadership</span></a>
         <a href="#" class="sidebar__link" data-section="ministries"><i data-lucide="heart-handshake"></i><span>Ministries</span></a>
         <a href="#" class="sidebar__link" data-section="locations"><i data-lucide="map-pin"></i><span>Locations</span></a>
+        <a href="#" class="sidebar__link" data-section="schedules"><i data-lucide="clock"></i><span>Service Schedules</span></a>
         <a href="#" class="sidebar__link" data-section="lifegroups"><i data-lucide="book"></i><span>Lifegroups</span></a>
         <a href="#" class="sidebar__link" data-section="sermons"><i data-lucide="play"></i><span>Sermons</span></a>
+        <a href="#" class="sidebar__link" data-section="events"><i data-lucide="calendar-days"></i><span>Events</span></a>
+        <a href="#" class="sidebar__link" data-section="monthly"><i data-lucide="sparkles"></i><span>Monthly Theme</span></a>
+        <a href="#" class="sidebar__link" data-section="live"><i data-lucide="radio"></i><span>Live Stream</span></a>
         <a href="#" class="sidebar__link" data-section="requests"><i data-lucide="mail"></i><span>Requests</span></a>
       </nav>
       <div class="sidebar__footer">
@@ -122,6 +126,16 @@
               <div class="form__group">
                 <label for="setHeroVideo" class="form__label">Hero Video URL</label>
                 <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" />
+              </div>
+              <div class="form__group">
+                <label for="setSpotlightImage" class="form__label">Homepage Spotlight Image (Max 2MB)</label>
+                <input type="file" id="setSpotlightImage" name="home_spotlight_image" class="form__input" accept="image/*" aria-describedby="setSpotlightImageHint" />
+                <p class="form__hint" id="setSpotlightImageHint">Backdrop photo for the schedule spotlight. Pick a new file to replace it, or leave empty to keep the image below.</p>
+                <input type="hidden" id="setSpotlightImageValue" />
+                <div class="upload-preview" id="setSpotlightImagePreviewWrap" hidden>
+                  <img id="setSpotlightImagePreview" src="" alt="Homepage spotlight preview" />
+                  <span>Current spotlight image</span>
+                </div>
               </div>
               <button type="submit" class="btn btn--primary"><i data-lucide="save" class=""></i> Save Settings</button>
             </form>
@@ -248,25 +262,36 @@
                   <input type="text" id="lgName" name="group_name" class="form__input" required />
                 </div>
                 <div class="form__group">
-                  <label for="lgLeader" class="form__label">Leader Name</label>
-                  <input type="text" id="lgLeader" name="leader_name" class="form__input" />
+                  <label for="lgType" class="form__label">Group Type</label>
+                  <select id="lgType" name="group_type" class="form__input" required>
+                    <option value="men">Men</option>
+                    <option value="women">Women</option>
+                    <option value="couple">Couples</option>
+                  </select>
                 </div>
               </div>
               <div class="form__row">
                 <div class="form__group">
+                  <label for="lgLeader" class="form__label">Leader Name</label>
+                  <input type="text" id="lgLeader" name="leader_name" class="form__input" />
+                </div>
+                <div class="form__group">
                   <label for="lgLocation" class="form__label">Location</label>
                   <input type="text" id="lgLocation" name="location" class="form__input" />
                 </div>
-                <div class="form__group">
-                  <label for="lgTime" class="form__label">Meeting Time</label>
-                  <input type="text" id="lgTime" name="meeting_time" class="form__input" />
-                </div>
+              </div>
+              <div class="form__group">
+                <label for="lgTime" class="form__label">Meeting Time</label>
+                <input type="text" id="lgTime" name="meeting_time" class="form__input" />
               </div>
               <div class="form__group">
                 <label for="lgContact" class="form__label">Contact Info</label>
                 <input type="text" id="lgContact" name="contact_info" class="form__input" />
               </div>
-              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Lifegroup</button>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Lifegroup</button>
+                <button type="button" class="btn btn--outline" id="lifegroupCancelEdit" hidden>Cancel Editing</button>
+              </div>
             </form>
           </div>
           <div class="admin-list" id="lifegroupsList"></div>
@@ -303,6 +328,162 @@
             </form>
           </div>
           <div class="admin-list" id="sermonsList"></div>
+        </section>
+
+        <!-- Section: Special Events -->
+        <section class="admin-section" id="section-events" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Special Events</h2>
+            <p class="card__text" style="margin-bottom:var(--space-lg);">Feature up to two upcoming events on the events page. Each event can carry an image, title, description, time, and date.</p>
+            <form class="admin-form" id="specialEventsForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="evTitle" class="form__label">Title</label>
+                  <input type="text" id="evTitle" name="title" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="evImage" class="form__label">Event Image (Max 2MB)</label>
+                  <input type="file" id="evImage" name="image" class="form__input" accept="image/*" />
+                </div>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="evDate" class="form__label">Event Date</label>
+                  <input type="date" id="evDate" name="event_date" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="evTime" class="form__label">Event Time</label>
+                  <input type="text" id="evTime" name="event_time" class="form__input" placeholder="e.g. 6:00 PM" />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="evDesc" class="form__label">Description</label>
+                <textarea id="evDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Event</button>
+                <button type="button" class="btn btn--outline" id="specialEventCancelEdit" hidden>Cancel Editing</button>
+              </div>
+            </form>
+          </div>
+          <div class="admin-list" id="specialEventsList"></div>
+        </section>
+
+        <!-- Section: Service Schedules -->
+        <section class="admin-section" id="section-schedules" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Service Schedules</h2>
+            <p class="card__text" style="margin-bottom:var(--space-lg);">Manage the service times shown on the homepage and locations pages, including an optional image per service.</p>
+            <form class="admin-form" id="schedulesForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="scName" class="form__label">Service Name</label>
+                  <input type="text" id="scName" name="service_name" class="form__input" required />
+                </div>
+                <div class="form__group">
+                  <label for="scDay" class="form__label">Day</label>
+                  <input type="text" id="scDay" name="day" class="form__input" placeholder="e.g. Sunday" required />
+                </div>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="scTime" class="form__label">Time</label>
+                  <input type="text" id="scTime" name="time" class="form__input" placeholder="e.g. 10:00 AM" required />
+                </div>
+                <div class="form__group">
+                  <label for="scLocation" class="form__label">Location</label>
+                  <select id="scLocation" name="location_id" class="form__input" required></select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="scImage" class="form__label">Image (Max 2MB)</label>
+                <input type="file" id="scImage" name="image" class="form__input" accept="image/*" />
+              </div>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Schedule</button>
+                <button type="button" class="btn btn--outline" id="scheduleCancelEdit" hidden>Cancel Editing</button>
+              </div>
+            </form>
+          </div>
+          <div class="admin-list" id="schedulesList"></div>
+        </section>
+
+        <!-- Section: Monthly Theme -->
+        <section class="admin-section" id="section-monthly" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Monthly Theme</h2>
+            <p class="card__text" style="margin-bottom:var(--space-lg);">Feature a striking monthly theme on the homepage. Saving an active theme reveals the section; deleting it (or setting it inactive) hides it.</p>
+            <form class="admin-form" id="monthlyThemeForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="mtMonth" class="form__label">Month Label</label>
+                  <input type="text" id="mtMonth" name="month_label" class="form__input" placeholder="e.g. September 2026" />
+                </div>
+                <div class="form__group">
+                  <label for="mtActive" class="form__label">Show Theme</label>
+                  <select id="mtActive" name="is_active" class="form__input">
+                    <option value="true">Active (visible)</option>
+                    <option value="false">Inactive (hidden)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="mtTitle" class="form__label">Theme Title</label>
+                <input type="text" id="mtTitle" name="title" class="form__input" placeholder="e.g. The Month of Breakthrough" />
+              </div>
+              <div class="form__group">
+                <label for="mtText" class="form__label">Message</label>
+                <textarea id="mtText" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="form__group">
+                <label for="mtScripture" class="form__label">Scripture Verse</label>
+                <input type="text" id="mtScripture" name="scripture" class="form__input" placeholder="e.g. Isaiah 43:19" />
+              </div>
+              <div class="form__group">
+                <label for="mtImage" class="form__label">Theme Image (Max 2MB)</label>
+                <input type="file" id="mtImage" name="image" class="form__input" accept="image/*" />
+              </div>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="save" class="" aria-hidden="true"></i> Save Theme</button>
+              </div>
+            </form>
+          </div>
+          <div class="admin-list" id="monthlyThemeList"></div>
+        </section>
+
+        <!-- Section: Live Stream -->
+        <section class="admin-section" id="section-live" hidden>
+          <div class="admin-card">
+            <h2 class="section-title">Manage Live Stream</h2>
+            <p class="card__text" style="margin-bottom:var(--space-lg);">When a stream is running, set the status to Live and paste the YouTube link. The homepage section and desktop navbar Live button appear while active; set it to Not Live to hide them.</p>
+            <form class="admin-form" id="liveStatusForm" novalidate>
+              <div class="form__row">
+                <div class="form__group">
+                  <label for="lsLive" class="form__label">Status</label>
+                  <select id="lsLive" name="is_live" class="form__input">
+                    <option value="false">Not Live (hidden)</option>
+                    <option value="true">Live Now (visible)</option>
+                  </select>
+                </div>
+                <div class="form__group">
+                  <label for="lsYoutube" class="form__label">YouTube Link</label>
+                  <input type="url" id="lsYoutube" name="youtube_url" class="form__input" placeholder="https://youtube.com/watch?v=..." />
+                </div>
+              </div>
+              <div class="form__group">
+                <label for="lsTitle" class="form__label">Live Title</label>
+                <input type="text" id="lsTitle" name="live_title" class="form__input" placeholder="e.g. Sunday Worship Service" />
+              </div>
+              <div class="form__group">
+                <label for="lsDesc" class="form__label">Description</label>
+                <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3"></textarea>
+              </div>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="save" class="" aria-hidden="true"></i> Save Status</button>
+              </div>
+            </form>
+          </div>
+          <div class="admin-list" id="liveStatusList"></div>
         </section>
 
         <!-- Section: Requests -->
