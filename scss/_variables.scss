@@ -44,6 +44,8 @@ $light-card-shadow: 0 4px 20px -2px rgba(45, 90, 3, 0.06), 0 2px 6px -1px rgba(0
 $light-card-shadow-hover: 0 20px 32px -4px rgba(45, 90, 3, 0.14), 0 8px 16px -2px rgba(217, 130, 43, 0.1);
 $light-live: #D9483A;             // Live stream accent (light mode)
 $light-live-rgb: 217, 72, 58;   // keep in sync with $light-live
+$light-nav-glass: rgba(255, 255, 255, 0.78);  // navbar scrolled tint (light)
+$light-nav-shadow: 0 12px 32px -16px rgba(28, 25, 23, 0.28), 0 2px 8px -2px rgba(28, 25, 23, 0.08);
 
 // --- Dark Mode Palette ---
 $dark-bg: #131415;
@@ -72,6 +74,8 @@ $dark-card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82, 183, 26, 0.15);
 $dark-live: #FF5A47;             // Live stream accent (dark mode)
 $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
+$dark-nav-glass: rgba(22, 24, 26, 0.78);  // navbar scrolled tint (dark)
+$dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0, 0, 0.4);
 
 // --- CSS Custom Properties via :root and [data-theme="dark"] ---
 :root {
@@ -129,6 +133,21 @@ $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
   --transition-fast: 160ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-base: 280ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-smooth: 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-nav: 420ms cubic-bezier(0.22, 1, 0.36, 1);      // navbar state swaps
+  --transition-knob: 340ms cubic-bezier(0.34, 1.56, 0.64, 1);  // theme-switch knob (spring overshoot)
+
+  // Navbar geometry — heights drive the overlap margin + hero compensation.
+  --nav-height: 120px;
+  --nav-height-scrolled: 72px;
+
+  // Navbar scrolled-state glass + depth (theme-aware via [data-theme="dark"]).
+  --nav-glass: #{$light-nav-glass};
+  --nav-shadow-scrolled: #{$light-nav-shadow};
+
+  // Navbar scrolled-state colors (light mode only; dark keeps the white Default state).
+  --nav-brand-color-scrolled: #245c52;
+  --nav-brand-sub-color-scrolled: #57534E;
+  --nav-link-color-scrolled: #1a3a0e;
 
   // Hero text
   --hero-text-color: #FFFFFF;
@@ -164,6 +183,10 @@ $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
   --shadow-card: #{$dark-card-shadow};
   --shadow-card-hover: #{$dark-card-shadow-hover};
 
+  // Navbar scrolled-state glass + shadow follow dark aesthetics.
+  --nav-glass: #{$dark-nav-glass};
+  --nav-shadow-scrolled: #{$dark-nav-shadow};
+
   // Hero text (dark mode, consistent with light mode)
   --hero-text-color: #FFFFFF;
   --hero-text-secondary: rgba(255, 255, 255, 0.95);
@@ -180,6 +203,8 @@ $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
     --transition-fast: 0.01ms;
     --transition-base: 0.01ms;
     --transition-smooth: 0.01ms;
+    --transition-nav: 0.01ms;
+    --transition-knob: 0.01ms;
   }
 }
 
@@ -187,5 +212,6 @@ $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
   :root {
     --color-glass: var(--color-surface-solid);
     --color-surface: var(--color-surface-solid);
+    --nav-glass: var(--color-surface-solid);
   }
 }

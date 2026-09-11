@@ -3,46 +3,55 @@
 // ============================================
 
 // --- Navbar (Transparent Hero → Glassmorphic on Scroll) ---
-// Initial state: fully transparent, overlaps hero section, maintains sticky.
-// On scroll (.is-scrolled): transitions to compact glassmorphism.
+// Initial state: fully transparent and taller, overlapping the hero section.
+// On scroll (.is-scrolled): compacts to slim glassmorphism with no bottom border.
 .navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
+  height: var(--nav-height);
+  margin-bottom: calc(-1 * var(--nav-height));
   background-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border-bottom: transparent;
-  transition: background-color var(--transition-base),
-              backdrop-filter var(--transition-base),
-              -webkit-backdrop-filter var(--transition-base),
-              border-color var(--transition-base),
-              box-shadow var(--transition-base),
-              height var(--transition-base),
-              margin-bottom var(--transition-base);
-  height: 100px;
-  margin-bottom: -100px;
+  border-bottom: none;
+  box-shadow: none;
+  transition: background-color var(--transition-nav),
+              backdrop-filter var(--transition-nav),
+              -webkit-backdrop-filter var(--transition-nav),
+              border-bottom-color var(--transition-nav),
+              box-shadow var(--transition-nav),
+              height var(--transition-nav),
+              margin-bottom var(--transition-nav);
 
   &.is-scrolled {
     margin-bottom: 0;
-    background-color: var(--color-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
-    height: 76px;
+    height: var(--nav-height-scrolled);
+    background-color: var(--nav-glass);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border-bottom: none;
+    box-shadow: var(--nav-shadow-scrolled);
   }
 
   @media (max-width: 960px) {
-    height: 76px;
-    margin-bottom: -76px;
-    
+    height: 72px;
+    margin-bottom: -72px;
+
     &.is-scrolled {
       margin-bottom: 0;
-      height: 76px;
+      height: 64px;
     }
-    
+
     box-shadow: none !important;
+  }
+}
+
+// Legibility guard: drop the blur but keep the (now solid) scrolled tint.
+@media (prefers-reduced-transparency: reduce) {
+  .navbar.is-scrolled {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
@@ -52,8 +61,8 @@
   justify-content: space-between;
   height: 100%;
   gap: var(--space-md);
-  padding: 0.75rem 0;
-  transition: padding var(--transition-base);
+  padding: 0.9rem 0 0;
+  transition: padding var(--transition-nav);
 
   .navbar.is-scrolled & {
     padding: 0;
@@ -64,7 +73,8 @@
   }
 
   @media (max-width: 960px) {
-    height: 76px;
+    height: 72px;
+    padding: 0.4rem 0;
   }
 }
 
@@ -75,6 +85,10 @@
   z-index: 1001;
   flex-shrink: 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  .navbar.is-scrolled & {
+    text-shadow: none;
+  }
 }
 
 .navbar__logo {
@@ -123,14 +137,40 @@
       letter-spacing: 0.02em;
     }
   }
+
+  .navbar.is-scrolled & {
+    text-shadow: none;
+
+    span {
+      text-shadow: none;
+    }
+  }
+
+  // Scrolled light mode: the brand flips to the deep-green / grey system
+  // palette (`#245c52` + grey subtitle); scrolled dark mode intentionally
+  // keeps the white Default-state colors untouched.
+  [data-theme='light'] .navbar.is-scrolled & {
+    color: var(--nav-brand-color-scrolled);
+    text-shadow: none;
+
+    span {
+      color: var(--nav-brand-sub-color-scrolled);
+      text-shadow: none;
+    }
+  }
 }
 
 .navbar__nav {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 0.15rem;
   flex-shrink: 1;
   min-width: 0;
+  transition: gap var(--transition-nav);
+
+  .navbar.is-scrolled & {
+    gap: 0.4rem;
+  }
 
   @media (min-width: 961px) {
     margin-right: auto;
@@ -147,14 +187,19 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-xs);
+
+    .navbar.is-scrolled & {
+      gap: var(--space-xs);
+    }
+
     padding: var(--space-sm) var(--space-md) var(--space-md);
     background-color: var(--color-surface-solid);
     border-bottom: 1px solid var(--color-border);
     box-shadow: 0 24px 40px -24px rgba(0, 0, 0, 0.35);
     overflow-y: auto;
     overscroll-behavior: contain;
-    // Keep the panel within the viewport on short screens (navbar is 76px tall).
-    max-height: calc(100dvh - 76px);
+    // Keep the panel within the viewport on short screens (scrolled bar is 64px).
+    max-height: calc(100dvh - 64px);
 
     transform-origin: top center;
     transform: translateY(-6px);
@@ -171,117 +216,159 @@
       visibility: visible;
       pointer-events: auto;
     }
+
+    // Mobile panel sits on the solid theme surface (not the hero), so links
+    // use theme text colors — never the white reserved for the transparent
+    // top-of-page header.
+    .navbar__link {
+      color: var(--color-text);
+      background: transparent;
+      border: none;
+      text-shadow: none;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+
+      &--active {
+        color: var(--color-primary);
+        border-left: 3px solid var(--color-secondary);
+        border-radius: var(--radius-xs);
+      }
+    }
   }
 }
 
 
 .navbar__link {
+  position: relative;
   font-weight: 600;
   font-size: 0.95rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius-md);
+  padding: 0.55rem 0.75rem;
   color: #FFFFFF;
-  position: relative;
-  background-color: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  transition: all var(--transition-fast);
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: color var(--transition-nav),
+              padding var(--transition-nav),
+              text-shadow var(--transition-nav);
 
   .navbar.is-scrolled & {
+    padding: 0.45rem 1rem;
     text-shadow: none;
-    background-color: transparent;
-    backdrop-filter: none;
-    border-color: transparent;
+  }
+
+  // Context-aware underline affordance: hidden by default, revealed on hover,
+  // always visible on the active page where it turns gold.
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 18px;
+    height: 3.5px;
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    border-radius: var(--radius-full);
+    background: var(--color-secondary-light);
+    opacity: 0;
+    transition: transform var(--transition-nav),
+                opacity var(--transition-nav),
+                background-color var(--transition-nav);
+
+    @media (max-width: 960px) {
+      display: none;
+    }
   }
 
   &:hover {
     color: #FFFFFF;
-    background-color: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  &:hover::after {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
   }
 
   &--active {
-    color: #FFFFFF;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
     font-weight: 700;
 
     &::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 16px;
-      height: 2.5px;
-      background: #FFFFFF;
-      border-radius: var(--radius-full);
-
-      @media (max-width: 960px) {
-        display: none;
-      }
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+      background: var(--color-secondary);
+      box-shadow: 0 0 10px rgba(var(--color-secondary-rgb), 0.55);
     }
   }
 
-  [data-theme="dark"] & {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.1);
-    
+  // Scrolled light mode: links flip to the deep leaf green; scrolled dark mode
+  // retains the white Default-state colors by design.
+  [data-theme='light'] .navbar.is-scrolled & {
+    color: var(--nav-link-color-scrolled);
+    text-shadow: none;
+
     &:hover {
-      background-color: rgba(0, 0, 0, 0.3);
-      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--color-primary-hover);
     }
-    
-    &--active {
-      background-color: rgba(0, 0, 0, 0.35);
-      border-color: rgba(255, 255, 255, 0.25);
+
+    &:hover::after {
+      background: rgba(26, 58, 14, 0.35);
     }
   }
 
   @media (max-width: 960px) {
     padding: 0.85rem 1rem;
     font-size: 1.05rem;
+    text-shadow: none;
   }
 }
 
-// --- Theme Toggle Switch ---
+// --- Theme Toggle Switch (modernized) ---
+// Native checkbox stays focusable (opacity, not display:none) so keyboard users
+// can Tab to it; the knob springs between states; icons cross-fade.
 .theme-switch {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  border-radius: 40px;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  padding: 6px;
+  background-color: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: all var(--transition-fast);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base),
+              backdrop-filter var(--transition-base);
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.22);
     border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
-    transform: translateY(-2px);
   }
 
-  [data-theme="dark"] & {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
-    }
+  .navbar.is-scrolled & {
+    background-color: var(--color-surface);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--nav-shadow-scrolled);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  }
+
+  [data-theme='dark'] .navbar.is-scrolled & {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
   }
 }
 
 .theme-switch__input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .theme-switch__track {
@@ -289,72 +376,90 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  width: 64px;
-  height: 32px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border: 2px solid rgba(0, 0, 0, 0.15);
-  border-radius: 32px;
-  padding: 4px;
-  transition: background-color var(--transition-fast);
+  width: 56px;
+  height: 28px;
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.16) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.18);
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base);
   cursor: pointer;
 
   &::after {
     content: '';
     position: absolute;
-    width: 24px;
-    height: 24px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.95) 100%);
+    top: 50%;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0EDE6 100%);
     border-radius: 50%;
-    transition: transform var(--transition-fast);
-    left: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  [data-theme="dark"] & {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    
-    &::after {
-      background: linear-gradient(135deg, rgba(60, 60, 60, 0.9) 0%, rgba(40, 40, 40, 1) 100%);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform var(--transition-knob);
+    transform: translateY(-50%);
   }
 }
 
 .theme-switch__icon {
   position: absolute;
-  width: 1.4em;
-  height: 1.4em;
+  top: 50%;
+  width: 1.25em;
+  height: 1.25em;
   flex-shrink: 0;
-  transition: opacity var(--transition-fast);
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity var(--transition-base);
+  z-index: 10;
 
   &--light {
-    left: 10px;
-    opacity: 1;
+    left: 4px;
+    color: #F7BA6B;
+    opacity: 0;
   }
 
   &--dark {
-    right: 10px;
+    right: 4px;
+    color: #DDE3EA;
+    opacity: 1;
+  }
+}
+
+// Light theme (unchecked): sun covered by the knob, moon hint visible.
+// Dark theme (checked): knob slides right over the moon, sun revealed.
+.theme-switch__input:checked ~ .theme-switch__track {
+  background: linear-gradient(90deg, rgba(45, 90, 3, 0.55) 0%, rgba(217, 130, 43, 0.55) 100%);
+  border-color: rgba(255, 255, 255, 0.28);
+
+  &::after {
+    transform: translate(30px, -50%);
+  }
+
+  .theme-switch__icon--light {
+    opacity: 1;
+  }
+
+  .theme-switch__icon--dark {
     opacity: 0;
   }
 }
 
-.theme-switch__input:checked ~ .theme-switch__track {
-  &::after {
-    transform: translateX(32px);
-  }
+.theme-switch__input:focus-visible ~ .theme-switch__track {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 3px;
 }
 
-.theme-switch__input:checked ~ .theme-switch__track .theme-switch__icon--light {
-  opacity: 0;
-}
-
-.theme-switch__input:checked ~ .theme-switch__track .theme-switch__icon--dark {
-  opacity: 1;
+// --- Navbar Action Cluster ---
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+  z-index: 1001;
 }
 
 // --- Navbar ---
@@ -466,12 +571,14 @@
 .hero {
   position: relative;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(100dvh + var(--nav-height));
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: var(--space-4xl) 0;
+  // Grow the hero top padding past the overlapping navbar so centered content
+  // clears the bar (compensates for the header's negative overlap margin).
+  padding: calc(var(--nav-height) + var(--space-lg)) 0 var(--space-4xl);
 }
 
 .hero__media {
@@ -490,11 +597,12 @@
 // Page hero gradient background — topographic elevation strata
 .page-hero {
   position: relative;
-  min-height: 50vh;
+  min-height: calc(50vh + var(--nav-height));
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4xl) 0;
+  // Same compensation as `.hero`: top padding clears the overlapping navbar.
+  padding: calc(var(--nav-height) + var(--space-lg)) 0 var(--space-4xl);
   overflow: hidden;
   background-color: #10220a;
   background-image:

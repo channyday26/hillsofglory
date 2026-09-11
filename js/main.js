@@ -163,10 +163,19 @@
   // ============================================
   if (navbar) {
     let ticking = false;
+
+    function syncNavbarState() {
+      navbar.classList.toggle('is-scrolled', window.scrollY > 48);
+    }
+
+    // Sync immediately so a reload at mid-scroll doesn't leave the bar stuck in
+    // its transparent top-of-page state.
+    syncNavbarState();
+
     window.addEventListener('scroll', function () {
       if (!ticking) {
         window.requestAnimationFrame(function () {
-          navbar.classList.toggle('is-scrolled', window.scrollY > 24);
+          syncNavbarState();
           ticking = false;
         });
         ticking = true;
