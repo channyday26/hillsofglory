@@ -2473,6 +2473,17 @@
   }
 }
 
+.curriculum-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+
+  @media (max-width: 480px) {
+    margin-bottom: 0.85rem;
+  }
+}
+
 .curriculum-card__medallion {
   display: inline-flex;
   align-items: center;
@@ -2484,7 +2495,6 @@
   background: var(--color-accent-glow);
   border: 1px solid rgba(var(--color-primary-rgb), 0.18);
   color: var(--color-primary);
-  margin-bottom: var(--space-md);
   transition: transform var(--transition-base);
 
   .lucide {
@@ -2495,7 +2505,6 @@
   @media (max-width: 480px) {
     width: 2.5rem;
     height: 2.5rem;
-    margin-bottom: 0.85rem;
   }
 }
 
@@ -2522,11 +2531,16 @@
   color: var(--color-primary);
   background: var(--color-accent-glow);
   border: 1px solid rgba(var(--color-primary-rgb), 0.16);
-  margin-bottom: var(--space-sm);
+
+  // Vertically center the pill against the medallion icon by aligning its
+  // line-height with the icon circle; the surrounding flex head handles gap.
+  min-height: clamp(2.6rem, 5vw, 3rem);
+  line-height: 1;
 
   @media (max-width: 480px) {
     font-size: 0.64rem;
     padding: 0.22rem 0.64rem;
+    min-height: 2.5rem;
   }
 }
 

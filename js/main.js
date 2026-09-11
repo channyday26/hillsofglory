@@ -178,37 +178,14 @@
       navbar.classList.toggle('is-scrolled', window.scrollY > 48);
     }
 
-    // Mobile only: lock the navbar container's height to the header's actual
-    // rendered height as the bar compacts on scroll. The inline px height is
-    // animated by the container's `height` transition; on desktop we clear it
-    // and let the CSS `height: 100%` fill rule take over.
-    const navbarContainer = document.querySelector('.navbar__container');
-    const mobileNavbarQuery = window.matchMedia('(max-width: 960px)');
-
-    function syncContainerHeight() {
-      if (!navbarContainer) return;
-      if (mobileNavbarQuery.matches) {
-        navbarContainer.style.height =
-          Math.round(navbar.getBoundingClientRect().height) + 'px';
-      } else {
-        navbarContainer.style.height = '';
-      }
-    }
-
     // Sync immediately so a reload at mid-scroll doesn't leave the bar stuck in
-    // its transparent top-of-page state, and so the container matches the
-    // header's height on first paint.
+    // its transparent top-of-page state.
     syncNavbarState();
-    syncContainerHeight();
-
-    mobileNavbarQuery.addEventListener('change', syncContainerHeight);
-    window.addEventListener('resize', syncContainerHeight);
 
     window.addEventListener('scroll', function () {
       if (!ticking) {
         window.requestAnimationFrame(function () {
           syncNavbarState();
-          syncContainerHeight();
           ticking = false;
         });
         ticking = true;
