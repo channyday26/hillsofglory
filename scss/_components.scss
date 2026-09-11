@@ -5161,7 +5161,7 @@ $protege-navy: #1b2a4a;
   background-image:
     // Warm gold light from above, green ground glow from below
     radial-gradient(42rem 24rem at 82% -8%, rgba(247, 186, 107, 0.14), transparent 62%),
-    radial-gradient(36rem 26rem at 0% 108%, rgba(82, 183, 26, 0.18), transparent 60%),
+    radial-gradient(36rem 26rem at 0% 108%, rgba(162, 197, 140, 0.18), transparent 60%),
     // Fine contour rings echoing the page-hero strata
     repeating-radial-gradient(circle at 72% 20%, rgba(233, 166, 92, 0) 0 2.6rem, rgba(233, 166, 92, 0.08) 2.6rem 2.64rem),
     repeating-radial-gradient(circle at 28% 80%, rgba(96, 155, 52, 0) 0 2rem, rgba(96, 155, 52, 0.09) 2rem 2.04rem),
@@ -5931,7 +5931,7 @@ $protege-navy: #1b2a4a;
   background-image:
     // Warm gold light from above, green ground glow from below
     radial-gradient(42rem 24rem at 82% -8%, rgba(247, 186, 107, 0.16), transparent 62%),
-    radial-gradient(36rem 26rem at 0% 108%, rgba(82, 183, 26, 0.2), transparent 60%),
+    radial-gradient(36rem 26rem at 0% 108%, rgba(162, 197, 140, 0.2), transparent 60%),
     // Fine contour rings echoing the page-hero strata
     repeating-radial-gradient(circle at 70% 24%, rgba(233, 166, 92, 0) 0 2.6rem, rgba(233, 166, 92, 0.08) 2.6rem 2.64rem),
     repeating-radial-gradient(circle at 26% 78%, rgba(96, 155, 52, 0) 0 2rem, rgba(96, 155, 52, 0.09) 2rem 2.04rem),
@@ -5976,7 +5976,7 @@ $protege-navy: #1b2a4a;
     left: -80px;
     width: 260px;
     height: 260px;
-    background: radial-gradient(circle, rgba(82, 183, 26, 0.3), transparent 72%);
+    background: radial-gradient(circle, rgba(162, 197, 140, 0.3), transparent 72%);
   }
 
   @media (prefers-reduced-transparency: reduce) {

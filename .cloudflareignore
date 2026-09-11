@@ -1,0 +1,10 @@
+node_modules/
+.agents/
+.artifacts/
+.claude/
+.impeccable/
+supabase/
+scss/
+package.json
+package-lock.json
+*.md

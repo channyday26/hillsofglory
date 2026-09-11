@@ -56,24 +56,24 @@ $dark-surface-hover: rgba(38, 41, 46, 0.95);
 $dark-text: #F5F5F4;
 $dark-text-secondary: #D6D3D1;
 $dark-text-muted: #A8A29E;
-$dark-primary: #52B71A;
+$dark-primary: #5E9939;
 $dark-primary-hover: #68D32B;
 $dark-primary-light: #8AE655;
 $dark-primary-pastel: #6F9B5A;        // muted/pastel green (active toggle track)
-$dark-primary-pastel-light: #A2C58C;  // pale pastel green (track gradient end)
-$dark-primary-rgb: 82, 183, 26;   // keep in sync with $dark-primary
-$dark-secondary: #F59E0B;
+$dark-primary-pastel-light: #5E9939;  // pale pastel green (track gradient end)
+$dark-primary-rgb: 162, 197, 140;   // keep in sync with $dark-primary
+$dark-secondary: #D58D13;
 $dark-secondary-hover: #FBBF24;
 $dark-secondary-light: #FDE68A;
-$dark-secondary-rgb: 245, 158, 11;   // keep in sync with $dark-secondary
-$dark-accent-glow: rgba(82, 183, 26, 0.2);
-$dark-secondary-glow: rgba(245, 158, 11, 0.2);
+$dark-secondary-rgb: 213, 141, 19;   // keep in sync with $dark-secondary
+$dark-accent-glow: rgba(162, 197, 140, 0.2);
+$dark-secondary-glow: rgba(213, 141, 19, 0.2);
 $dark-glass: rgba(26, 28, 32, 0.75);
 $dark-glass-border: rgba(255, 255, 255, 0.12);
 $dark-border: rgba(255, 255, 255, 0.1);
 $dark-border-hover: rgba(255, 255, 255, 0.22);
 $dark-card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-$dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(82, 183, 26, 0.15);
+$dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(162, 197, 140, 0.15);
 $dark-live: #FF5A47;             // Live stream accent (dark mode)
 $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
 $dark-nav-glass: rgba(22, 24, 26, 0.78);  // navbar scrolled tint (dark)
