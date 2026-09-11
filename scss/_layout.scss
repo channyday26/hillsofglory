@@ -86,7 +86,8 @@
   height: 100%;
   gap: var(--space-md);
   padding: 0.9rem 0 0;
-  transition: padding var(--transition-nav);
+  transition: padding var(--transition-nav),
+              height var(--transition-nav);
 
   .navbar.is-scrolled & {
     padding: 0;
@@ -97,6 +98,12 @@
   }
 
   @media (max-width: 960px) {
+<<<<<<< HEAD
+=======
+    // Track the header's actual height — js/main.js refines this per frame on
+    // scroll; the percentage fill below is the no-script fallback.
+    height: 100%;
+>>>>>>> f5360c3093704c4d56fb31bb9a953719f3ddf67c
     // Default state: symmetric padding (vertical matches the 1rem horizontal).
     padding: 1rem;
 
@@ -496,7 +503,11 @@
 // Dark theme (checked): knob slides right over the moon, sun revealed. The
 // track shifts to a muted → pale pastel green so it reads calm against dark UI.
 .theme-switch__input:checked ~ .theme-switch__track {
+<<<<<<< HEAD
   background: linear-gradient(90deg, #{$dark-primary-pastel} 0%, #{$dark-primary-pastel-light} 100%);
+=======
+  background: linear-gradient(90deg, rgba(45, 90, 3, 0.6) 0%, rgba(217, 130, 43, 0.6) 100%);
+>>>>>>> f5360c3093704c4d56fb31bb9a953719f3ddf67c
 
   &::after {
     transform: translate(30px, -50%);
@@ -515,11 +526,19 @@
   box-shadow: 0 0 0 5px rgba(var(--color-secondary-rgb), 0.22), inset 0 2px 4px rgba(0, 0, 0, 0.18);
 }
 
+<<<<<<< HEAD
 // Mobile only: in dark mode the checked track drops the green gradient
 // for a solid muted green so the switch reads cleanly against the dark UI.
 @media (max-width: 960px) {
   [data-theme='dark'] .theme-switch__input:checked ~ .theme-switch__track {
     background: #{$dark-primary-pastel};
+=======
+// Mobile only: in dark mode the checked track drops the green→gold gradient
+// for a solid green tint so the switch reads cleanly against the dark UI.
+@media (max-width: 960px) {
+  [data-theme='dark'] .theme-switch__input:checked ~ .theme-switch__track {
+    background: rgba(var(--color-primary-rgb), 0.85);
+>>>>>>> f5360c3093704c4d56fb31bb9a953719f3ddf67c
   }
 }
 
