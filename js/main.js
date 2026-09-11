@@ -64,94 +64,104 @@
   });
 
   // ============================================
-  // Mobile Menu Drawer
+  // Mobile Menu — floating FAB + compact floating modal
   // ============================================
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const navbarNav = document.getElementById('navbarNav');
+  const floatingMenuBtn = document.getElementById('floatingMenuBtn');
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
   const navbar = document.querySelector('.navbar');
 
-  // Remember the scroll position so the fixed-body lock doesn't jump the page.
-  // Crucially, it must be captured BEFORE any style mutation: setting
-  // `position: fixed` on <body> can reset window.scrollY to 0 in some browsers,
-  // which previously caused a scroll-to-top on toggle.
   let savedScrollY = 0;
 
-  // Toggles the hamburger icon to a close (X) icon (and back) by swapping the
-  // Lucide icon name, then re-rendering the icons.
-  function setToggleIcon(icon) {
-    if (!mobileMenuToggle) return;
-    const el = mobileMenuToggle.querySelector('[data-lucide]');
-    if (el) el.setAttribute('data-lucide', icon);
-    mobileMenuToggle.setAttribute(
-      'aria-label',
-      icon === 'x' ? 'Close navigation menu' : 'Open navigation menu'
-    );
-    initIcons();
-  }
-
-  function openMenu() {
-    if (navbarNav) navbarNav.classList.add('is-open');
-    if (navbar) navbar.classList.add('menu-open');
-    if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'true');
-    setToggleIcon('x');
-
-    // Capture the offset first, then lock the page.
+  function openOverlay() {
+    if (mobileMenuOverlay) mobileMenuOverlay.classList.add('is-open');
+    if (floatingMenuBtn) {
+      floatingMenuBtn.setAttribute('aria-expanded', 'true');
+      floatingMenuBtn.setAttribute('aria-label', 'Close navigation menu');
+    }
+    // Lock the viewport WITHOUT repositioning the body. Fixing the body
+    // (`position: fixed` + negative top, or `body { overflow: hidden }`) turns
+    // it into a non-scrolling box, which breaks `position: sticky` on the
+    // navbar: the header stops sticking and slides up out of view — the visible
+    // "scroll jump" on open. Overflow set on the root element propagates to the
+    // viewport and leaves sticky intact. Touch scrolling is already impossible
+    // while the modal is open because the overlay covers the viewport with
+    // `touch-action: none`.
     savedScrollY = window.scrollY || window.pageYOffset || 0;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.top = '-' + savedScrollY + 'px';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+    // Move focus to the first link after the entrance animation starts so the
+    // grow choreography plays without an abrupt focus jump.
+    var firstLink = mobileMenuOverlay && mobileMenuOverlay.querySelector('.mobile-menu-overlay__link');
+    window.setTimeout(function () { if (firstLink) firstLink.focus(); }, 90);
   }
 
-  function closeMenu() {
-    if (navbarNav) navbarNav.classList.remove('is-open');
-    if (navbar) navbar.classList.remove('menu-open');
-    if (mobileMenuToggle) mobileMenuToggle.setAttribute('aria-expanded', 'false');
-    setToggleIcon('menu');
-
-    // Re-enable body scroll and restore the scroll position we saved on open.
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.top = '';
-    window.scrollTo(0, savedScrollY);
+  function closeOverlay() {
+    if (mobileMenuOverlay) mobileMenuOverlay.classList.remove('is-open');
+    if (floatingMenuBtn) {
+      floatingMenuBtn.setAttribute('aria-expanded', 'false');
+      floatingMenuBtn.setAttribute('aria-label', 'Open navigation menu');
+    }
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.overscrollBehavior = '';
+    // The body was never moved, so the offset is untouched; re-pin it instantly
+    // (`html` has `scroll-behavior: smooth`, so a plain scrollTo would animate).
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+    if (floatingMenuBtn) floatingMenuBtn.focus();
   }
 
-  if (mobileMenuToggle && navbarNav) {
-    mobileMenuToggle.addEventListener('click', function (e) {
+  if (floatingMenuBtn && mobileMenuOverlay) {
+    floatingMenuBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (navbarNav.classList.contains('is-open')) {
-        closeMenu();
+      if (mobileMenuOverlay.classList.contains('is-open')) {
+        closeOverlay();
       } else {
-        openMenu();
+        openOverlay();
       }
     });
   }
 
-  // Click outside to close - improved event handling
+  // Clicking the dimmed backdrop (or anywhere outside the card/FAB) closes it.
   document.addEventListener('click', function (e) {
-    if (!navbarNav || !navbarNav.classList.contains('is-open')) return;
-    
-    // Check if click is outside the menu and outside the toggle button
-    const clickedInsideMenu = navbarNav.contains(e.target);
-    const clickedOnToggle = mobileMenuToggle && mobileMenuToggle.contains(e.target);
-    
-    if (!clickedInsideMenu && !clickedOnToggle) {
-      closeMenu();
+    if (!mobileMenuOverlay || !mobileMenuOverlay.classList.contains('is-open')) return;
+    var panel = mobileMenuOverlay.querySelector('.mobile-menu-overlay__panel');
+    var clickedInsidePanel = panel && panel.contains(e.target);
+    var clickedOnFab = floatingMenuBtn && floatingMenuBtn.contains(e.target);
+    if (!clickedInsidePanel && !clickedOnFab) {
+      closeOverlay();
     }
   });
 
-  // Close menu when clicking on navigation links
-  if (navbarNav) {
-    navbarNav.querySelectorAll('.navbar__link').forEach(function (link) {
-      link.addEventListener('click', closeMenu);
+  // Close when tapping a navigation link, pressing Escape, or tabbing past the
+  // dialog (simple focus trap that wraps between the navigation links).
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.querySelectorAll('.mobile-menu-overlay__link').forEach(function (link) {
+      link.addEventListener('click', closeOverlay);
     });
   }
 
-  // Close menu on Escape key
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && navbarNav && navbarNav.classList.contains('is-open')) {
-      closeMenu();
+    if (!mobileMenuOverlay || !mobileMenuOverlay.classList.contains('is-open')) return;
+    if (e.key === 'Escape') {
+      closeOverlay();
+      return;
+    }
+    if (e.key === 'Tab') {
+      var focusables = mobileMenuOverlay.querySelectorAll('.mobile-menu-overlay__link');
+      if (!focusables.length || !mobileMenuOverlay.contains(document.activeElement)) {
+        e.preventDefault();
+        if (focusables[0]) focusables[0].focus();
+        return;
+      }
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   });
 
@@ -299,6 +309,10 @@
             '<i data-lucide="' + item.icon + '"></i></a>';
         }).join('');
       }
+
+      // The social pills were re-injected as <i data-lucide> placeholders;
+      // convert them to inline SVGs or they render as empty, invisible boxes.
+      initIcons();
     }
   }
 

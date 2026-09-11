@@ -59,6 +59,8 @@ $dark-text-muted: #A8A29E;
 $dark-primary: #52B71A;
 $dark-primary-hover: #68D32B;
 $dark-primary-light: #8AE655;
+$dark-primary-pastel: #6F9B5A;        // muted/pastel green (active toggle track)
+$dark-primary-pastel-light: #A2C58C;  // pale pastel green (track gradient end)
 $dark-primary-rgb: 82, 183, 26;   // keep in sync with $dark-primary
 $dark-secondary: #F59E0B;
 $dark-secondary-hover: #FBBF24;
@@ -99,6 +101,12 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
   --color-secondary-glow: #{$light-secondary-glow};
   --color-glass: #{$light-glass};
   --color-glass-border: #{$light-glass-border};
+  // Mobile floating-menu FAB + modal glass surfaces.
+  --fab-bg: rgba(255, 255, 255, 0.64);
+  --fab-icon-color: #{$light-primary};
+  --fab-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.26), 0 3px 10px -2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --modal-panel-bg: rgba(255, 255, 255, 0.82);
+  --modal-backdrop: rgba(24, 32, 36, 0.4);
   --color-border: #{$light-border};
   --color-border-hover: #{$light-border-hover};
   --color-live: #{$light-live};
@@ -176,6 +184,12 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
   --color-secondary-glow: #{$dark-secondary-glow};
   --color-glass: #{$dark-glass};
   --color-glass-border: #{$dark-glass-border};
+  // Mobile floating-menu FAB + modal glass surfaces.
+  --fab-bg: rgba(24, 26, 30, 0.66);
+  --fab-icon-color: #{$dark-secondary};
+  --fab-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.55), 0 3px 10px -2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --modal-panel-bg: rgba(28, 30, 35, 0.86);
+  --modal-backdrop: rgba(6, 8, 10, 0.62);
   --color-border: #{$dark-border};
   --color-border-hover: #{$dark-border-hover};
   --color-live: #{$dark-live};
@@ -213,5 +227,9 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
     --color-glass: var(--color-surface-solid);
     --color-surface: var(--color-surface-solid);
     --nav-glass: var(--color-surface-solid);
+    --fab-bg: var(--color-surface-solid);
+    --fab-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.25);
+    --modal-panel-bg: var(--color-surface-solid);
+    --modal-backdrop: rgba(18, 20, 22, 0.55);
   }
 }

@@ -45,6 +45,8 @@
         <a href="contact.html" class="navbar__link">Contact</a>
       </nav>
 
+
+
       <div class="navbar__actions">
         <button type="button" class="nav-live" id="navLiveButton" hidden>
           <span class="live-dot" aria-hidden="true"></span>
@@ -57,13 +59,37 @@
             <i data-lucide="moon" class="theme-switch__icon theme-switch__icon--dark"></i>
           </span>
         </label>
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-          <i data-lucide="menu"></i>
-        </button>
+        
       </div>
     </div>
   </header>
+<!-- Floating Menu Button (mobile only, replaces hamburger) -->
+      <button type="button" class="floating-menu-btn" id="floatingMenuBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileMenuOverlay">
+        <svg class="floating-menu-btn__icon" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <line class="floating-menu-btn__bar floating-menu-btn__bar--top" x1="4" y1="6" x2="20" y2="6" />
+          <line class="floating-menu-btn__bar floating-menu-btn__bar--mid" x1="4" y1="12" x2="20" y2="12" />
+          <line class="floating-menu-btn__bar floating-menu-btn__bar--bottom" x1="4" y1="18" x2="20" y2="18" />
+        </svg>
+      </button>
 
+      <!-- Mobile Menu Overlay (compact floating modal) -->
+      <div class="mobile-menu-overlay" id="mobileMenuOverlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <div class="mobile-menu-overlay__backdrop" aria-hidden="true"></div>
+        <div class="mobile-menu-overlay__panel">
+          <nav class="mobile-menu-overlay__nav" aria-label="Mobile navigation">
+            <a href="index.html" class="mobile-menu-overlay__link">Home</a>
+            <a href="about.html" class="mobile-menu-overlay__link">About</a>
+            <a href="ministries.html" class="mobile-menu-overlay__link">Ministries</a>
+            <a href="discipleship.html" class="mobile-menu-overlay__link">Discipleship</a>
+            <a href="events.html" class="mobile-menu-overlay__link">Events</a>
+            <a href="locations.html" class="mobile-menu-overlay__link">Church</a>
+            <a href="give.html" class="mobile-menu-overlay__link">Give</a>
+            <a href="contact.html" class="mobile-menu-overlay__link">Contact</a>
+          </nav>
+        </div>
+      </div>
+
+      
   <main>
     <!-- Hero Section -->
     <section class="hero" aria-label="Welcome Hero">
@@ -406,6 +432,10 @@
                <a href="sermons.html" class="btn btn--primary btn--sm"><i data-lucide="play"></i> Watch</a>
             </div>
           </div>
+        </div>
+
+        <div class="btn-row">
+          <a href="sermons.html" class="btn btn--outline"><i data-lucide="library"></i> View More Sermons</a>
         </div>
 
       </div>
