@@ -1264,7 +1264,15 @@
       const is_live = document.getElementById('lsLive').value === 'true';
       const live_title = document.getElementById('lsTitle').value.trim();
       const live_description = document.getElementById('lsDesc').value.trim();
-      const youtube_url = document.getElementById('lsYoutube').value.trim();
+      let youtube_url = document.getElementById('lsYoutube').value.trim();
+      
+      // If user pasted an iframe, extract the src URL
+      if (youtube_url.includes('<iframe')) {
+        const match = youtube_url.match(/src="([^"]+)"/);
+        if (match && match[1]) {
+          youtube_url = match[1];
+        }
+      }
 
       const { error } = await supabase
         .from('live_status')
