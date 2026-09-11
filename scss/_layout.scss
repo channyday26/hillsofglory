@@ -35,8 +35,8 @@
   }
 
   @media (max-width: 960px) {
-    height: 72px;
-    margin-bottom: -72px;
+    height: 76px;
+    margin-bottom: -76px;
 
     &.is-scrolled {
       margin-bottom: 0;
@@ -62,7 +62,8 @@
   height: 100%;
   gap: var(--space-md);
   padding: 0.9rem 0 0;
-  transition: padding var(--transition-nav);
+  transition: padding var(--transition-nav),
+              height var(--transition-nav);
 
   .navbar.is-scrolled & {
     padding: 0;
@@ -73,8 +74,52 @@
   }
 
   @media (max-width: 960px) {
-    height: 72px;
-    padding: 0.4rem 0;
+    // Track the header's actual height — js/main.js refines this per frame on
+    // scroll; the percentage fill below is the no-script fallback.
+    height: 100%;
+    // Default state: symmetric padding (vertical matches the 1rem horizontal).
+    padding: 1rem;
+
+    .navbar.is-scrolled & {
+      padding: 0.1rem 1rem;
+    }
+  }
+}
+
+// --- Mobile only: progressively compact the navbar contents on scroll ---
+// Desktop keeps full-size brand/controls; the slimmer sticky bar on mobile
+// shrinks the logo, wordmark, and control sizes. All rules are scoped to the
+// mobile media query so the desktop layout is untouched.
+@media (max-width: 960px) {
+  .navbar.is-scrolled .navbar__brand {
+    gap: 0.4rem;
+  }
+
+  .navbar.is-scrolled .navbar__logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .navbar.is-scrolled .navbar__title {
+    font-size: 1rem;
+
+    span {
+      font-size: 0.6rem;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .navbar.is-scrolled .theme-switch {
+    padding: 4px;
+  }
+
+  .navbar.is-scrolled .mobile-menu-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar.is-scrolled .navbar__actions {
+    gap: 0.35rem;
   }
 }
 
@@ -96,6 +141,7 @@
   height: 44px;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
+  transition: width var(--transition-nav), height var(--transition-nav);
 }
 
 .navbar__title {
@@ -107,6 +153,7 @@
   letter-spacing: -0.01em;
   text-transform: uppercase;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: font-size var(--transition-nav);
 
   span {
     display: block;
@@ -119,6 +166,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: font-size var(--transition-nav);
   }
 
   @media (max-width: 640px) {
@@ -326,32 +374,30 @@
   }
 }
 
-// --- Theme Toggle Switch (modernized) ---
-// Native checkbox stays focusable (opacity, not display:none) so keyboard users
-// can Tab to it; the knob springs between states; icons cross-fade.
+// --- Theme Toggle Switch (minimal, borderless) ---
+// Clean edge-to-edge glass with no borders or outlines. The native checkbox
+// stays focusable (opacity, not display:none) so keyboard users can Tab to it;
+// the knob springs between states and the icons cross-fade.
 .theme-switch {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   border-radius: var(--radius-full);
   padding: 6px;
-  background-color: rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
   transition: background-color var(--transition-base),
-              border-color var(--transition-base),
               box-shadow var(--transition-base),
-              backdrop-filter var(--transition-base);
+              backdrop-filter var(--transition-base),
+              padding var(--transition-base);
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   .navbar.is-scrolled & {
     background-color: var(--color-surface);
-    border-color: var(--color-border-hover);
     box-shadow: var(--nav-shadow-scrolled);
     backdrop-filter: blur(16px) saturate(1.4);
     -webkit-backdrop-filter: blur(16px) saturate(1.4);
@@ -359,7 +405,6 @@
 
   [data-theme='dark'] .navbar.is-scrolled & {
     background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.16);
   }
 }
 
@@ -380,11 +425,9 @@
   height: 28px;
   padding: 3px;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.16) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.18);
-  transition: background-color var(--transition-base),
-              border-color var(--transition-base);
+  transition: background-color var(--transition-base);
   cursor: pointer;
 
   &::after {
@@ -432,8 +475,7 @@
 // Light theme (unchecked): sun covered by the knob, moon hint visible.
 // Dark theme (checked): knob slides right over the moon, sun revealed.
 .theme-switch__input:checked ~ .theme-switch__track {
-  background: linear-gradient(90deg, rgba(45, 90, 3, 0.55) 0%, rgba(217, 130, 43, 0.55) 100%);
-  border-color: rgba(255, 255, 255, 0.28);
+  background: linear-gradient(90deg, rgba(45, 90, 3, 0.6) 0%, rgba(217, 130, 43, 0.6) 100%);
 
   &::after {
     transform: translate(30px, -50%);
@@ -449,8 +491,248 @@
 }
 
 .theme-switch__input:focus-visible ~ .theme-switch__track {
-  outline: 2px solid var(--color-secondary);
-  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(var(--color-secondary-rgb), 0.22), inset 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+
+// Mobile only: in dark mode the checked track drops the green→gold gradient
+// for a solid green tint so the switch reads cleanly against the dark UI.
+@media (max-width: 960px) {
+  [data-theme='dark'] .theme-switch__input:checked ~ .theme-switch__track {
+    background: rgba(var(--color-primary-rgb), 0.85);
+  }
+}
+
+// --- Mobile Floating Menu FAB + Modal (mobile only, fixed bottom-right) ---
+// Persistent glassmorphic disc. Opening the menu morphs its hamburger glyph
+// into a close glyph (animated SVG bars) and a compact floating card "grows"
+// out of the button (transform-origin bottom-right) above it. Theme-aware.
+// Hidden on desktop by default; the mobile media query below enables them.
+.floating-menu-btn,
+.mobile-menu-overlay {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .floating-menu-btn {
+    position: fixed;
+    bottom: 1.375rem;
+    right: 1.25rem;
+    z-index: 3000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    background: var(--fab-bg);
+    border: 1px solid var(--color-glass-border);
+    color: var(--fab-icon-color);
+    box-shadow: var(--fab-shadow);
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    cursor: pointer;
+    transition: transform var(--transition-fast),
+                box-shadow var(--transition-fast),
+                background-color var(--transition-fast),
+                color var(--transition-fast);
+
+    .floating-menu-btn__icon {
+      width: 1.5em;
+      height: 1.5em;
+      flex-shrink: 0;
+      overflow: visible;
+    }
+
+    // Hamburger → close morph: the outer bars slide into the center and rotate
+    // ±45°, the middle bar dissolves, leaving the crisp X glyph. The spring
+    // curve keeps the motion tactile rather than floaty.
+    .floating-menu-btn__bar {
+      transition: transform 560ms cubic-bezier(0.32, 0.72, 0, 1),
+                  opacity var(--transition-base);
+    }
+
+    .floating-menu-btn__bar--top {
+      transform-origin: 12px 6px;
+    }
+
+    .floating-menu-btn__bar--mid {
+      transform-origin: 12px 12px;
+    }
+
+    .floating-menu-btn__bar--bottom {
+      transform-origin: 12px 18px;
+    }
+
+    &:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: var(--fab-shadow), 0 14px 36px -10px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.96);
+    }
+
+    &[aria-expanded="true"] {
+      transform: scale(1.04);
+
+      .floating-menu-btn__bar--top {
+        transform: translateY(6px) rotate(45deg);
+      }
+
+      .floating-menu-btn__bar--mid {
+        opacity: 0;
+        transition-delay: 150ms;
+      }
+
+      .floating-menu-btn__bar--bottom {
+        transform: translateY(-6px) rotate(-45deg);
+      }
+    }
+  }
+
+  .mobile-menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    visibility: hidden;
+    pointer-events: none;
+    // Block touch-driven panning that could scroll the page behind the modal;
+    // the panel re-enables vertical panning for its own scroll area.
+    touch-action: none;
+    // Stay painted during the panel's exit transform; hide only after it ends.
+    transition: visibility 0s linear 520ms;
+
+    .mobile-menu-overlay__backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--modal-backdrop);
+      backdrop-filter: blur(6px) saturate(1.1);
+      -webkit-backdrop-filter: blur(6px) saturate(1.1);
+      opacity: 0;
+      transition: opacity 320ms cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    // Compact floating card anchored just above the FAB. transform-origin is
+    // bottom-right so the card grows out of the button on open and shrinks
+    // back into it on close (spring curve + blur dissolve for a premium feel).
+    .mobile-menu-overlay__panel {
+      position: absolute;
+      right: 1.25rem;
+      bottom: calc(1.375rem + 56px + 0.75rem);
+      width: clamp(250px, calc(100vw - 2.5rem), 380px);
+      max-height: min(62vh, 480px);
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem 0.75rem 0.85rem;
+      border-radius: var(--radius-xl);
+      background: var(--modal-panel-bg);
+      border: 1px solid var(--color-glass-border);
+      box-shadow: 0 24px 60px -14px rgba(0, 0, 0, 0.4), 0 10px 28px -8px rgba(0, 0, 0, 0.22),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(24px) saturate(1.5);
+      -webkit-backdrop-filter: blur(24px) saturate(1.5);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      transform-origin: bottom right;
+      opacity: 0;
+      transform: scale(0.4) translateY(30px) translateZ(0);
+      transition: opacity 280ms cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 520ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .mobile-menu-overlay__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    // Rows cascade out of the card as it grows (subtle stagger on open).
+    .mobile-menu-overlay__link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: var(--font-brand);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--color-text);
+      padding: 0.7rem 0.8rem;
+      border-radius: var(--radius-md);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 320ms cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 320ms cubic-bezier(0.25, 1, 0.5, 1),
+                  background-color var(--transition-fast),
+                  color var(--transition-fast);
+      position: relative;
+
+      &:hover {
+        background: var(--color-accent-glow);
+        color: var(--color-primary);
+      }
+    }
+
+    // Link entrance stagger when the card opens.
+    @for $i from 1 through 8 {
+      .mobile-menu-overlay__link:nth-child(#{$i}) {
+        transition-delay: #{($i - 1) * 45ms};
+      }
+    }
+  }
+
+  .mobile-menu-overlay.is-open {
+    visibility: visible;
+    pointer-events: auto;
+    transition: visibility 0s;
+
+    .mobile-menu-overlay__backdrop {
+      opacity: 1;
+    }
+
+    .mobile-menu-overlay__panel {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .mobile-menu-overlay__link {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Motion + transparency accessibility: strip the blur/grow choreography.
+  @media (prefers-reduced-motion: reduce) {
+    .floating-menu-btn__bar,
+    .mobile-menu-overlay__panel,
+    .mobile-menu-overlay__link,
+    .mobile-menu-overlay__backdrop {
+      transition-duration: 0.01ms;
+    }
+
+    .mobile-menu-overlay__link {
+      transition-delay: 0ms;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .floating-menu-btn,
+    .mobile-menu-overlay__panel {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .floating-menu-btn {
+      border-color: var(--color-border);
+    }
+
+    .mobile-menu-overlay__backdrop {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 }
 
 // --- Navbar Action Cluster ---
@@ -528,7 +810,9 @@
   }
 
   @media (max-width: 960px) {
-    display: none !important;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
   }
 }
 
@@ -544,7 +828,10 @@
   border: 1px solid var(--color-border);
   color: var(--color-text);
   cursor: pointer;
-  transition: transform var(--transition-fast), background-color var(--transition-fast);
+  transition: transform var(--transition-fast),
+              background-color var(--transition-fast),
+              width var(--transition-nav),
+              height var(--transition-nav);
 
   &:hover {
     background-color: var(--color-surface-hover);
