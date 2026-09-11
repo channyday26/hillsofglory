@@ -1116,6 +1116,7 @@
     color: var(--color-text-secondary);
     font-weight: 500;
     font-size: 0.95rem;
+    transition: color var(--transition-fast), transform var(--transition-fast);
 
     &:hover {
       color: var(--color-primary);
