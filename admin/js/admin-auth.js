@@ -21,6 +21,20 @@
     return window.supabase;
   }
 
+  // --- Button loading helpers ---
+  function setButtonLoading(btn, isLoading) {
+    if (!btn) return;
+    btn.disabled = isLoading;
+    btn.classList.toggle('btn--loading', isLoading);
+    btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+  }
+
+  const MIN_BUSY_MS = 400;
+  function finishButtonLoading(btn, startedAt) {
+    const wait = Math.max(0, MIN_BUSY_MS - (Date.now() - startedAt));
+    setTimeout(function () { setButtonLoading(btn, false); }, wait);
+  }
+
   loginForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     showError('');
@@ -42,16 +56,27 @@
       return;
     }
 
-    if (submitBtn) submitBtn.disabled = true;
+    if (submitBtn && submitBtn.disabled) return;
 
-    const { error } = await sb().auth.signInWithPassword({ email, password });
+    setButtonLoading(submitBtn, true);
+    const startedAt = Date.now();
 
-    if (error) {
-      showError('Invalid credentials. Please try again.');
-      console.error(error);
-      if (submitBtn) submitBtn.disabled = false;
-    } else {
-      window.location.href = 'dashboard.html';
+    try {
+      const { error } = await sb().auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showError('Invalid credentials. Please try again.');
+        console.error(error);
+      } else {
+        window.location.href = 'dashboard.html';
+        // spinner stays visible through the redirect
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+      showError('Authentication failed. Please try again.');
+    } finally {
+      finishButtonLoading(submitBtn, startedAt);
     }
   });
 

@@ -415,3 +415,88 @@
     display: inline-flex !important;
   }
 }
+
+// ============================================
+// Button Loading State
+// ============================================
+
+// Busy state for submission buttons (login + all CMS forms + row deletes +
+// logout). JS toggles .btn--loading together with the disabled attribute.
+// The disabled attribute already blocks interaction, so no pointer-events
+// override — that keeps cursor: progress reachable.
+.btn.btn--loading {
+  position: relative;
+  // Hides the label AND Lucide icons (stroke="currentColor") while keeping
+  // them in flow, so the button keeps its exact width — no layout shift.
+  color: transparent;
+  cursor: progress;
+
+  &:hover,
+  &:active {
+    transform: none; // stay perfectly still while busy
+  }
+
+  // Spinner reuses the global `spin` keyframes (_animations.scss).
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.15em;
+    height: 1.15em;
+    margin: -0.575em 0 0 -0.575em; // half the size — avoids transform (spin owns it)
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #FFFFFF; // visible head of the arc
+    animation: spin 0.7s linear infinite;
+  }
+
+  // Light variants keep dark text, so the spinner must be dark there too.
+  &.btn--outline::after,
+  &.btn--secondary-outline::after {
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+    border-top-color: var(--color-primary);
+  }
+}
+
+// Non-loading disabled buttons (e.g. mid-flight guards) stay calm.
+.btn[disabled]:not(.btn--loading) {
+  cursor: not-allowed;
+  transform: none;
+}
+
+// Sidebar logout gets the same treatment even though it is not a .btn.
+.sidebar__logout.btn--loading {
+  position: relative;
+  color: transparent;
+  cursor: progress;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.15em;
+    height: 1.15em;
+    margin: -0.575em 0 0 -0.575em;
+    border-radius: 50%;
+    border: 2px solid rgba(239, 68, 68, 0.35);
+    border-top-color: #EF4444;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+// Reduced motion: the global override freezes keyframes, so present a static
+// ring instead of a frozen arc — still reads as "busy" next to aria-busy.
+@media (prefers-reduced-motion: reduce) {
+  .btn.btn--loading::after,
+  .sidebar__logout.btn--loading::after {
+    animation: none;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+
+  .sidebar__logout.btn--loading::after {
+    border-color: rgba(239, 68, 68, 0.55);
+  }
+}
