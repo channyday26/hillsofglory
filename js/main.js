@@ -173,13 +173,17 @@
   // ============================================
   if (navbar) {
     let ticking = false;
+    let isScrolled = false;
 
     function syncNavbarState() {
-      navbar.classList.toggle('is-scrolled', window.scrollY > 48);
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      const shouldBeScrolled = scrollY > 48;
+      if (shouldBeScrolled !== isScrolled) {
+        isScrolled = shouldBeScrolled;
+        navbar.classList.toggle('is-scrolled', isScrolled);
+      }
     }
 
-    // Sync immediately so a reload at mid-scroll doesn't leave the bar stuck in
-    // its transparent top-of-page state.
     syncNavbarState();
 
     window.addEventListener('scroll', function () {
