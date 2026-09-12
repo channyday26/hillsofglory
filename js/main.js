@@ -1382,8 +1382,8 @@
     const media = videoId
       ? '<div class="live-showcase__video">' +
         '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(videoId) +
-        '?autoplay=1&amp;rel=0" title="' + escAttr(s.live_title || 'Live stream') +
-        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' +
+        '?autoplay=1&amp;mute=1&amp;playsinline=1&amp;rel=0" title="' + escAttr(s.live_title || 'Live stream') +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen playsinline></iframe>' +
         '</div>'
       : '<div class="live-showcase__cover"><i data-lucide="youtube" aria-hidden="true"></i><span>Watch on YouTube</span></div>';
 
