@@ -92,16 +92,25 @@
     padding: 0;
   }
 
-  @media (min-width: 961px) {
+  @media (min-width: 961px) and (max-width: 1200px) {
+    gap: var(--space-sm);
+    padding: 0.9rem 1.25rem 0;
+
+    .navbar.is-scrolled & {
+      padding: 0 1.25rem;
+    }
+  }
+
+  @media (min-width: 1201px) {
     gap: var(--space-lg);
   }
 
   @media (max-width: 960px) {
     // Default state: symmetric padding (vertical matches the 1rem horizontal).
-    padding: 1rem;
+    padding: 0.75rem 1rem;
 
     .navbar.is-scrolled & {
-      padding: 0.1rem 1rem;
+      padding: 0.5rem 1rem;
     }
   }
 }
@@ -111,35 +120,71 @@
 // shrinks the logo, wordmark, and control sizes. All rules are scoped to the
 // mobile media query so the desktop layout is untouched.
 @media (max-width: 960px) {
+  .navbar__nav {
+    display: none !important;
+  }
+
+  .navbar__brand {
+    min-width: 0;
+    flex-shrink: 1;
+    gap: 0.5rem;
+  }
+
   .navbar.is-scrolled .navbar__brand {
     gap: 0.4rem;
   }
 
   .navbar.is-scrolled .navbar__logo {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
   }
 
   .navbar.is-scrolled .navbar__title {
-    font-size: 1rem;
+    font-size: 0.95rem;
 
     span {
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       letter-spacing: 0.02em;
     }
   }
 
-  .navbar.is-scrolled .theme-switch {
+  .theme-switch {
     padding: 4px;
+    flex-shrink: 0;
   }
 
-  .navbar.is-scrolled .mobile-menu-toggle {
-    width: 36px;
-    height: 36px;
+  .navbar.is-scrolled .theme-switch {
+    padding: 3px;
+  }
+
+  .navbar__actions {
+    gap: 0.5rem;
+    flex-shrink: 0;
   }
 
   .navbar.is-scrolled .navbar__actions {
     gap: 0.35rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__logo {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar__logo {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar__logo {
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -154,6 +199,10 @@
   .navbar.is-scrolled & {
     text-shadow: none;
   }
+
+  @media (min-width: 961px) and (max-width: 1120px) {
+    gap: 0.4rem;
+  }
 }
 
 .navbar__logo {
@@ -162,6 +211,11 @@
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
   transition: width var(--transition-nav), height var(--transition-nav);
+
+  @media (min-width: 961px) and (max-width: 1120px) {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .navbar__title {
@@ -189,20 +243,44 @@
     transition: font-size var(--transition-nav);
   }
 
-  @media (max-width: 640px) {
-    font-size: 1.35rem;
+  @media (min-width: 961px) and (max-width: 1120px) {
+    font-size: 1.05rem;
+
+    span {
+      font-size: 0.6rem;
+    }
+  }
+
+  @media (max-width: 960px) {
+    font-size: 1.15rem;
 
     span {
       font-size: 0.65rem;
     }
   }
 
-  @media (max-width: 480px) {
-    font-size: 1.4rem;
+  @media (max-width: 640px) {
+    font-size: 1.05rem;
 
     span {
       font-size: 0.6rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+
+    span {
+      font-size: 0.55rem;
       letter-spacing: 0.02em;
+    }
+  }
+
+  @media (max-width: 380px) {
+    font-size: 0.88rem;
+
+    span {
+      font-size: 0.5rem;
     }
   }
 
@@ -238,6 +316,10 @@
 
   .navbar.is-scrolled & {
     gap: 0.4rem;
+  }
+
+  @media (min-width: 961px) and (max-width: 1120px) {
+    gap: 0;
   }
 
   @media (min-width: 961px) {
@@ -319,13 +401,32 @@
   -webkit-backdrop-filter: none;
   border: none;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
   transition: color var(--transition-nav),
               padding var(--transition-nav),
               text-shadow var(--transition-nav);
 
+  @media (min-width: 961px) and (max-width: 1120px) {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.45rem;
+  }
+
+  @media (min-width: 1121px) and (max-width: 1240px) {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.6rem;
+  }
+
   .navbar.is-scrolled & {
     padding: 0.45rem 1rem;
     text-shadow: none;
+
+    @media (min-width: 961px) and (max-width: 1120px) {
+      padding: 0.35rem 0.45rem;
+    }
+
+    @media (min-width: 1121px) and (max-width: 1240px) {
+      padding: 0.4rem 0.6rem;
+    }
   }
 
   // Context-aware underline affordance: hidden by default, revealed on hover,
@@ -527,8 +628,37 @@
 // Mobile only: in dark mode the checked track drops the green gradient
 // for a solid muted green so the switch reads cleanly against the dark UI.
 @media (max-width: 960px) {
-  [data-theme='dark'] .theme-switch__input:checked ~ .theme-switch__track {
+  .theme-switch__track {
+    width: 48px;
+    height: 24px;
+    padding: 2px;
+
+    &::after {
+      width: 18px;
+      height: 18px;
+      left: 2px;
+    }
+  }
+
+  .theme-switch__input:checked ~ .theme-switch__track {
     background: #{$dark-primary-pastel};
+
+    &::after {
+      transform: translate(24px, -50%);
+    }
+  }
+
+  .theme-switch__icon {
+    width: 1em;
+    height: 1em;
+
+    &--light {
+      left: 3px;
+    }
+
+    &--dark {
+      right: 3px;
+    }
   }
 }
 
@@ -772,6 +902,10 @@
   gap: var(--space-sm);
   flex-shrink: 0;
   z-index: 1001;
+
+  @media (min-width: 961px) and (max-width: 1120px) {
+    gap: 0.35rem;
+  }
 }
 
 // --- Navbar ---
@@ -805,14 +939,13 @@
 }
 
 // --- Navbar "Live" Button ---
-// Desktop-only signal that a stream is happening right now. It stays hidden
-// entirely until js/main.js finds an active live_status row; on mobile the
-// CSS hides it no matter what, so the CTA never appears in the mobile drawer.
+// Stream signal that appears when an active live_status row exists.
+// On desktop and mobile, stays properly scaled and compact.
 .nav-live {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.95rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
   border-radius: var(--radius-full);
   border: 1px solid rgba(var(--color-live-rgb), 0.4);
   background: rgba(var(--color-live-rgb), 0.12);
@@ -823,6 +956,8 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: transform var(--transition-fast),
               background-color var(--transition-fast),
               box-shadow var(--transition-fast);
@@ -840,9 +975,21 @@
   }
 
   @media (max-width: 960px) {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    gap: 0.35rem;
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.68rem;
+    gap: 0.3rem;
   }
 }
 

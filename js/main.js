@@ -1403,7 +1403,6 @@
     const section = document.getElementById('liveSection');
     const slot = document.getElementById('liveShowcase');
     const navBtn = document.getElementById('navLiveButton');
-    if (!section || !slot) return;
 
     const rows = await fetchTable('live_status', function (q) {
       return q.limit(1);
@@ -1413,26 +1412,31 @@
 
     // Toggling `hidden` on the section hides it and everything inside it
     // (the [hidden] { display:none } base rule beats all component displays).
-    section.hidden = !isLive;
+    if (section) section.hidden = !isLive;
     if (navBtn) navBtn.hidden = !isLive;
     if (!isLive) return;
 
-    slot.innerHTML = renderLiveShowcase(live);
-    initIcons();
+    if (slot) {
+      slot.innerHTML = renderLiveShowcase(live);
+      initIcons();
+    }
   }
 
   // The navbar "Live" entry smooth-scrolls to the visible live section while
-  // a stream is up; reduced-motion users get an instant jump instead.
+  // a stream is up; on subpages, it links to index.html#liveSection.
   function wireNavLive() {
     const btn = document.getElementById('navLiveButton');
     if (!btn) return;
     btn.addEventListener('click', function () {
       const section = document.getElementById('liveSection');
-      if (!section) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        section.scrollIntoView();
+      if (section) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          section.scrollIntoView();
+        } else {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       } else {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.location.href = 'index.html#liveSection';
       }
     });
   }
