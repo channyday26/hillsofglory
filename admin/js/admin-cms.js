@@ -181,6 +181,7 @@
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
         (l.image_url ? '<img src="' + l.image_url + '" alt="' + (l.name || '') + '" style="width:60px;height:60px;border-radius:var(--radius-full);object-fit:cover;" />' : '') +
         '<div style="flex:1;"><h3 class="card__title" style="margin:0;">' + (l.name || '') + '</h3><p class="card__text" style="margin:0;">' + (l.role || '') + '</p></div>' +
+        '<button class="btn btn--secondary" data-action="edit-leader" data-id="' + (l.id || '') + '">Edit</button>' +
         '<button class="btn btn--secondary" data-action="delete-leader" data-id="' + (l.id || '') + '">Delete</button></div>';
     }).join('');
   }
@@ -196,6 +197,7 @@
         '<h3 class="card__title" style="margin:0;">' + (m.name || '') + '</h3>' +
         '<p class="card__text" style="margin:0;">' + (m.category || '') + '</p>' +
         '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-ministry" data-id="' + (m.id || '') + '">Edit</button>' +
         '<button class="btn btn--secondary" data-action="delete-ministry" data-id="' + (m.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
@@ -212,6 +214,7 @@
         '<h3 class="card__title" style="margin:0;">' + (l.name || '') + '</h3>' +
         '<p class="card__text" style="margin:0;">' + (l.location_type || '') + ' — ' + (l.address || '') + '</p>' +
         '</div>' +
+        '<button class="btn btn--secondary" data-action="edit-location" data-id="' + (l.id || '') + '">Edit</button>' +
         '<button class="btn btn--secondary" data-action="delete-location" data-id="' + (l.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
@@ -651,303 +654,564 @@
     return error.message || 'Error saving settings.';
   }
 
-  const settingsForm = document.getElementById('settingsForm');
-  if (settingsForm) {
-    settingsForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
+const settingsForm = document.getElementById('settingsForm');
+   if (settingsForm) {
+     settingsForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
 
-      const submitBtn = settingsForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+       const submitBtn = settingsForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        // Spotlight image is uploaded to Storage; the resulting public URL goes
-        // into home_spotlight_image. No new file selected -> keep the value held
-        // in the hidden field (i.e. the image that is currently live).
-        let spotlightImage = valueOf('setSpotlightImageValue');
-        const spotFileInput = document.getElementById('setSpotlightImage');
-        if (spotFileInput && spotFileInput.files && spotFileInput.files[0]) {
-          spotlightImage = await uploadImage(spotFileInput.files[0]);
+       // Validate form inputs (excluding file inputs)
+       const mainAddress = valueOf('setAddress').trim();
+       const contactPhone = valueOf('setPhone').trim();
+       const contactEmail = valueOf('setEmail').trim();
+       const bankDetails = valueOf('setBank').trim();
+       const facebookUrl = valueOf('setFacebook').trim();
+       const instagramUrl = valueOf('setInstagram').trim();
+       const youtubeUrl = valueOf('setYouTube').trim();
+       const xUrl = valueOf('setX').trim();
+       const heroVideoUrl = valueOf('setHeroVideo').trim();
+
+       // Basic validation - at least one contact method should be provided
+       if (!mainAddress && !contactPhone && !contactEmail && !bankDetails && 
+           !facebookUrl && !instagramUrl && !youtubeUrl && !xUrl && !heroVideoUrl) {
+         showToast('Please fill in at least one field.', 'error');
+         return;
+       }
+
+       // Validate email if provided
+       if (contactEmail && !isValidEmail(contactEmail)) {
+         showToast('Please enter a valid email address.', 'error');
+         return;
+       }
+
+       // Validate URLs if provided
+       if (facebookUrl && !isValidUrl(facebookUrl)) {
+         showToast('Please enter a valid Facebook URL.', 'error');
+         return;
+       }
+       if (instagramUrl && !isValidUrl(instagramUrl)) {
+         showToast('Please enter a valid Instagram URL.', 'error');
+         return;
+       }
+       if (youtubeUrl && !isValidUrl(youtubeUrl)) {
+         showToast('Please enter a valid YouTube URL.', 'error');
+         return;
+       }
+       if (xUrl && !isValidUrl(xUrl)) {
+         showToast('Please enter a valid X/Twitter URL.', 'error');
+         return;
+       }
+       if (heroVideoUrl && !isValidUrl(heroVideoUrl)) {
+         showToast('Please enter a valid Hero Video URL.', 'error');
+         return;
+       }
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         // Spotlight image is uploaded to Storage; the resulting public URL goes
+         // into home_spotlight_image. No new file selected -> keep the value held
+         // in the hidden field (i.e. the image that is currently live).
+         let spotlightImage = valueOf('setSpotlightImageValue');
+         const spotFileInput = document.getElementById('setSpotlightImage');
+         if (spotFileInput && spotFileInput.files && spotFileInput.files[0]) {
+           spotlightImage = await uploadImage(spotFileInput.files[0]);
+         }
+
+         const payload = {
+           main_address: mainAddress,
+           contact_phone: contactPhone,
+           contact_email: contactEmail,
+           bank_details: bankDetails,
+           facebook_url: facebookUrl,
+           instagram_url: instagramUrl,
+           youtube_url: youtubeUrl,
+           x_url: xUrl,
+           hero_video_url: heroVideoUrl,
+           home_spotlight_image: spotlightImage,
+         };
+
+         const result = await saveChurchSettings(payload);
+
+         if (result.error) {
+           showToast(settingsErrorMessage(result.error), 'error');
+           console.error(result.error);
+         } else {
+           showToast('Settings saved!', 'success');
+           loadSettings();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
+   }
+
+   function valueOf(id) {
+     const el = document.getElementById(id);
+     return el ? el.value.trim() : '';
+   }
+
+   // --- Validation Helpers ---
+   function isValidEmail(email) {
+     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+   }
+
+   function isValidUrl(url) {
+     try {
+       new URL(url);
+       return true;
+     } catch {
+       return false;
+     }
+   }
+
+   function validateRequiredFields(fields) {
+     const missing = [];
+     for (const [id, label] of fields) {
+       const el = document.getElementById(id);
+       if (el && !el.value.trim()) {
+         missing.push(label);
+       }
+     }
+     return missing;
+   }
+
+   // --- Leadership CRUD ---
+   const leadershipForm = document.getElementById('leadershipForm');
+   if (leadershipForm) {
+     // Edit state: when null the form adds a new leader; otherwise it holds the
+     // id of the row being updated. One form serves both modes.
+     let leadershipEditingId = null;
+     const leadershipSubmit = leadershipForm.querySelector('button[type="submit"]');
+     const leadershipCancelEdit = document.getElementById('leadershipCancelEdit');
+
+     function resetLeadershipForm() {
+       leadershipEditingId = null;
+       leadershipForm.reset();
+       if (leadershipCancelEdit) leadershipCancelEdit.hidden = true;
+       if (leadershipSubmit) {
+         leadershipSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Leader';
+         if (window.initIcons) window.initIcons();
+       }
+     }
+
+     leadershipForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = leadershipForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
+
+       // Validate form inputs (excluding file inputs)
+       const name = document.getElementById('leaderName').value.trim();
+       const role = document.getElementById('leaderRole').value.trim();
+       const bio = document.getElementById('leaderBio').value.trim();
+
+       const missing = validateRequiredFields([['leaderName', 'Name'], ['leaderRole', 'Role']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
+
+       const imageInput = document.getElementById('leaderImage');
+       const imageFile = imageInput ? imageInput.files[0] : null;
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let imageUrl = '';
+         if (imageFile) imageUrl = await uploadImage(imageFile);
+         let error;
+         if (leadershipEditingId) {
+           ({ error } = await supabase.from('leadership_team').update({ name, role, bio, image_url: imageUrl }).eq('id', leadershipEditingId));
+          } else {
+            ({ error } = await supabase.from('leadership_team').insert([{ name, role, bio, image_url: imageUrl }]));
+          }
+
+         if (error) {
+           showToast('Error saving leader.', 'error');
+           console.error(error);
+         } else {
+           showToast(leadershipEditingId ? 'Leader updated!' : 'Leader added!', 'success');
+           resetLeadershipForm();
+           loadLeadership();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
+
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="delete-leader"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       setButtonLoading(btn, true);
+       const startedAt = Date.now();
+       try {
+         const { error } = await supabase.from('leadership_team').delete().eq('id', id);
+         if (error) {
+           showToast('Error deleting.', 'error');
+           console.error(error);
+         } else {
+           showToast('Leader removed.', 'success');
+           loadLeadership();
+         }
+       } catch (err) {
+         showToast('Something went wrong.', 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(btn, startedAt);
+       }
+     });
+
+     // Edit handler for leaders
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="edit-leader"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       const { data, error } = await supabase.from('leadership_team').select('*').eq('id', id).single();
+       if (error || !data) {
+         showToast('Could not load that leader.', 'error');
+         console.error(error);
+         return;
+       }
+       leadershipEditingId = id;
+       document.getElementById('leaderName').value = data.name || '';
+       document.getElementById('leaderRole').value = data.role || '';
+       document.getElementById('leaderBio').value = data.bio || '';
+       if (leadershipCancelEdit) leadershipCancelEdit.hidden = false;
+       if (leadershipSubmit) {
+         leadershipSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Leader';
+         if (window.initIcons) window.initIcons();
+       }
+       document.getElementById('leaderName').focus();
+     });
+
+     if (leadershipCancelEdit) {
+       leadershipCancelEdit.addEventListener('click', resetLeadershipForm);
+     }
+   }
+
+// --- Ministries CRUD ---
+   const ministriesForm = document.getElementById('ministriesForm');
+   if (ministriesForm) {
+     // Edit state: when null the form adds a new ministry; otherwise it holds the
+     // id of the row being updated. One form serves both modes.
+     let ministriesEditingId = null;
+     const ministriesSubmit = ministriesForm.querySelector('button[type="submit"]');
+     const ministriesCancelEdit = document.getElementById('ministriesCancelEdit');
+
+     function resetMinistriesForm() {
+       ministriesEditingId = null;
+       ministriesForm.reset();
+       if (ministriesCancelEdit) ministriesCancelEdit.hidden = true;
+       if (ministriesSubmit) {
+         ministriesSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Ministry';
+         if (window.initIcons) window.initIcons();
+       }
+     }
+
+     ministriesForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = ministriesForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
+
+       // Validate form inputs (excluding file inputs)
+       const name = document.getElementById('minName').value.trim();
+       const category = document.getElementById('minCategory').value;
+       const desc = document.getElementById('minDesc').value.trim();
+       const contact = document.getElementById('minContact').value.trim();
+       const school = document.getElementById('minSchool').value.trim();
+
+       const missing = validateRequiredFields([['minName', 'Name'], ['minCategory', 'Category']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
+
+       const imageInput = document.getElementById('minImage');
+       const imageFile = imageInput ? imageInput.files[0] : null;
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let imageUrl = '';
+         if (imageFile) imageUrl = await uploadImage(imageFile);
+         let error;
+         if (ministriesEditingId) {
+           ({ error } = await supabase.from('ministries').update({ name, category, description: desc, contact_person: contact, target_school: school, image_url: imageUrl }).eq('id', ministriesEditingId));
+          } else {
+            ({ error } = await supabase.from('ministries').insert([{ name, category, description: desc, contact_person: contact, target_school: school, image_url: imageUrl }]));
+          }
+
+         if (error) {
+           showToast('Error saving ministry.', 'error');
+           console.error(error);
+         } else {
+           showToast(ministriesEditingId ? 'Ministry updated!' : 'Ministry added!', 'success');
+           resetMinistriesForm();
+           loadMinistries();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
+
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="delete-ministry"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       setButtonLoading(btn, true);
+       const startedAt = Date.now();
+       try {
+         const { error } = await supabase.from('ministries').delete().eq('id', id);
+         if (error) { showToast('Error deleting.', 'error'); console.error(error); }
+         else { showToast('Ministry removed.', 'success'); loadMinistries(); }
+       } catch (err) {
+         showToast('Something went wrong.', 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(btn, startedAt);
+       }
+     });
+
+     // Edit handler for ministries
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="edit-ministry"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       const { data, error } = await supabase.from('ministries').select('*').eq('id', id).single();
+       if (error || !data) {
+         showToast('Could not load that ministry.', 'error');
+         console.error(error);
+         return;
+       }
+       ministriesEditingId = id;
+       document.getElementById('minName').value = data.name || '';
+       document.getElementById('minCategory').value = data.category || 'General';
+       document.getElementById('minDesc').value = data.description || '';
+       document.getElementById('minContact').value = data.contact_person || '';
+       document.getElementById('minSchool').value = data.target_school || '';
+       if (ministriesCancelEdit) ministriesCancelEdit.hidden = false;
+       if (ministriesSubmit) {
+         ministriesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Ministry';
+         if (window.initIcons) window.initIcons();
+       }
+       document.getElementById('minName').focus();
+     });
+
+     if (ministriesCancelEdit) {
+       ministriesCancelEdit.addEventListener('click', resetMinistriesForm);
+     }
+   }
+
+// --- Locations CRUD ---
+   const locationsForm = document.getElementById('locationsForm');
+   if (locationsForm) {
+     // Edit state: null = adding; otherwise the row id being updated.
+     let locationsEditingId = null;
+     let locationsEditingImage = '';
+     const locationsSubmit = locationsForm.querySelector('button[type="submit"]');
+     const locationsCancelEdit = document.getElementById('locationsCancelEdit');
+
+     function resetLocationsForm() {
+       locationsEditingId = null;
+       locationsEditingImage = '';
+       locationsForm.reset();
+       if (locationsCancelEdit) locationsCancelEdit.hidden = true;
+       if (locationsSubmit) {
+         locationsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Location';
+         if (window.initIcons) window.initIcons();
+       }
+     }
+
+locationsForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const submitBtn = locationsForm.querySelector('[type="submit"]');
+        if (isButtonBusy(submitBtn)) return;
+
+        // Validate form inputs (excluding file inputs)
+        const name = document.getElementById('locName').value.trim();
+        const type = document.getElementById('locType').value;
+        const address = document.getElementById('locAddress').value.trim();
+        const maps = document.getElementById('locMaps').value.trim();
+        const status = document.getElementById('locStatus').value;
+
+        const missing = validateRequiredFields([['locName', 'Campus Name'], ['locType', 'Type']]);
+        if (missing.length > 0) {
+          showToast(missing.join(' and ') + ' are required.', 'error');
+          return;
         }
 
-        const payload = {
-          main_address: valueOf('setAddress'),
-          contact_phone: valueOf('setPhone'),
-          contact_email: valueOf('setEmail'),
-          bank_details: valueOf('setBank'),
-          facebook_url: valueOf('setFacebook'),
-          instagram_url: valueOf('setInstagram'),
-          youtube_url: valueOf('setYouTube'),
-          x_url: valueOf('setX'),
-          hero_video_url: valueOf('setHeroVideo'),
-          home_spotlight_image: spotlightImage,
-        };
-
-        const result = await saveChurchSettings(payload);
-
-        if (result.error) {
-          showToast(settingsErrorMessage(result.error), 'error');
-          console.error(result.error);
-        } else {
-          showToast('Settings saved!', 'success');
-          loadSettings();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
-  }
-
-  function valueOf(id) {
-    const el = document.getElementById(id);
-    return el ? el.value.trim() : '';
-  }
-
-  // --- Leadership CRUD ---
-  const leadershipForm = document.getElementById('leadershipForm');
-  if (leadershipForm) {
-    // Data loading deferred to initCMSData() after auth.
-    leadershipForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = leadershipForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
-
-      const name = document.getElementById('leaderName').value.trim();
-      const role = document.getElementById('leaderRole').value.trim();
-      const bio = document.getElementById('leaderBio').value.trim();
-      const imageInput = document.getElementById('leaderImage');
-      const imageFile = imageInput ? imageInput.files[0] : null;
-
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let imageUrl = '';
-        if (imageFile) imageUrl = await uploadImage(imageFile);
-        const { data, error } = await supabase.from('leadership_team').insert([{ name, role, bio, image_url: imageUrl }]);
-        if (error) {
-          showToast('Error adding leader.', 'error');
-          console.error(error);
-        } else {
-          showToast('Leader added!', 'success');
-          leadershipForm.reset();
-          loadLeadership();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
-
-    document.addEventListener('click', async function (e) {
-      const btn = e.target.closest('[data-action="delete-leader"]');
-      if (!btn) return;
-      const id = btn.dataset.id;
-      setButtonLoading(btn, true);
-      const startedAt = Date.now();
-      try {
-        const { error } = await supabase.from('leadership_team').delete().eq('id', id);
-        if (error) {
-          showToast('Error deleting.', 'error');
-          console.error(error);
-        } else {
-          showToast('Leader removed.', 'success');
-          loadLeadership();
-        }
-      } catch (err) {
-        showToast('Something went wrong.', 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(btn, startedAt);
-      }
-    });
-  }
-
-  // --- Ministries CRUD ---
-  const ministriesForm = document.getElementById('ministriesForm');
-  if (ministriesForm) {
-    // Data loading deferred to initCMSData() after auth.
-
-    ministriesForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = ministriesForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
-
-      const name = document.getElementById('minName').value.trim();
-      const category = document.getElementById('minCategory').value;
-      const desc = document.getElementById('minDesc').value.trim();
-      const contact = document.getElementById('minContact').value.trim();
-      const school = document.getElementById('minSchool').value.trim();
-      const imageInput = document.getElementById('minImage');
-      const imageFile = imageInput ? imageInput.files[0] : null;
-
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let imageUrl = '';
-        if (imageFile) imageUrl = await uploadImage(imageFile);
-        const { data, error } = await supabase.from('ministries').insert([{ name, category, description: desc, contact_person: contact, target_school: school, image_url: imageUrl }]);
-        if (error) {
-          showToast('Error adding ministry.', 'error');
-          console.error(error);
-        } else {
-          showToast('Ministry added!', 'success');
-          ministriesForm.reset();
-          loadMinistries();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
-
-    document.addEventListener('click', async function (e) {
-      const btn = e.target.closest('[data-action="delete-ministry"]');
-      if (!btn) return;
-      const id = btn.dataset.id;
-      setButtonLoading(btn, true);
-      const startedAt = Date.now();
-      try {
-        const { error } = await supabase.from('ministries').delete().eq('id', id);
-        if (error) { showToast('Error deleting.', 'error'); console.error(error); }
-        else { showToast('Ministry removed.', 'success'); loadMinistries(); }
-      } catch (err) {
-        showToast('Something went wrong.', 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(btn, startedAt);
-      }
-    });
-  }
-
-  // --- Locations CRUD ---
-  const locationsForm = document.getElementById('locationsForm');
-  if (locationsForm) {
-    // Data loading deferred to initCMSData() after auth.
-
-    locationsForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = locationsForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
-
-      const name = document.getElementById('locName').value.trim();
-      const type = document.getElementById('locType').value;
-      const address = document.getElementById('locAddress').value.trim();
-      const maps = document.getElementById('locMaps').value.trim();
-      const status = document.getElementById('locStatus').value;
-
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        const { data, error } = await supabase.from('locations').insert([{ name, location_type: type, address, google_maps_embed_link: maps, status }]);
-        if (error) {
-          showToast('Error adding location.', 'error');
-          console.error(error);
-        } else {
-          showToast('Location added!', 'success');
-          locationsForm.reset();
-          loadLocations();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
-
-    document.addEventListener('click', async function (e) {
-      const btn = e.target.closest('[data-action="delete-location"]');
-      if (!btn) return;
-      const id = btn.dataset.id;
-      setButtonLoading(btn, true);
-      const startedAt = Date.now();
-      try {
-        const { error } = await supabase.from('locations').delete().eq('id', id);
-        if (error) { showToast('Error deleting.', 'error'); console.error(error); }
-        else { showToast('Location removed.', 'success'); loadLocations(); }
-      } catch (err) {
-        showToast('Something went wrong.', 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(btn, startedAt);
-      }
-    });
-  }
-
-  // --- Lifegroups CRUD ---
-  const lifegroupsForm = document.getElementById('lifegroupsForm');
-  if (lifegroupsForm) {
-    // Data loading deferred to initCMSData() after auth.
-
-    // Edit state: when null the form adds a new group; otherwise it holds the
-    // id of the row being updated. One form serves both modes.
-    let lifegroupsEditingId = null;
-    const lifegroupsSubmit = lifegroupsForm.querySelector('button[type="submit"]');
-
-    function resetLifegroupForm() {
-      lifegroupsEditingId = null;
-      lifegroupsForm.reset();
-      const cancelEdit = document.getElementById('lifegroupCancelEdit');
-      if (cancelEdit) cancelEdit.hidden = true;
-      if (lifegroupsSubmit) {
-        lifegroupsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Lifegroup';
-        if (window.initIcons) window.initIcons();
-      }
-    }
-
-    lifegroupsForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = lifegroupsForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
-
-      const name = document.getElementById('lgName').value.trim();
-      const type = document.getElementById('lgType').value;
-      const leader = document.getElementById('lgLeader').value.trim();
-      const location = document.getElementById('lgLocation').value.trim();
-      const time = document.getElementById('lgTime').value.trim();
-      const contact = document.getElementById('lgContact').value.trim();
-      const payload = {
-        group_name: name,
-        group_type: type,
-        leader_name: leader,
-        location,
-        meeting_time: time,
-        contact_info: contact
-      };
-
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let error;
-        if (lifegroupsEditingId) {
-          ({ error } = await supabase.from('lifegroups').update(payload).eq('id', lifegroupsEditingId));
-        } else {
-          ({ error } = await supabase.from('lifegroups').insert([payload]));
+        // Validate URL if provided
+        if (maps && !isValidUrl(maps)) {
+          showToast('Please enter a valid Google Maps URL.', 'error');
+          return;
         }
 
-        if (error) {
-          showToast('Error saving lifegroup.', 'error');
-          console.error(error);
-        } else {
-          showToast(lifegroupsEditingId ? 'Lifegroup updated!' : 'Lifegroup added!', 'success');
-          resetLifegroupForm();
-          loadLifegroups();
+        setButtonLoading(submitBtn, true);
+        const startedAt = Date.now();
+        try {
+          let image_url = locationsEditingImage;
+          const imageInput = document.getElementById('locImage');
+          const imageFile = imageInput ? imageInput.files[0] : null;
+          if (imageFile) image_url = await uploadImage(imageFile);
+
+          let error;
+          if (locationsEditingId) {
+            ({ error } = await supabase.from('locations').update({ name, location_type: type, address, google_maps_embed_link: maps, status, image_url }).eq('id', locationsEditingId));
+          } else {
+            ({ error } = await supabase.from('locations').insert([{ name, location_type: type, address, google_maps_embed_link: maps, status, image_url }]));
+          }
+
+          if (error) {
+            showToast('Error saving location.', 'error');
+            console.error(error);
+          } else {
+            showToast(locationsEditingId ? 'Location updated!' : 'Location added!', 'success');
+            resetLocationsForm();
+            loadLocations();
+          }
+        } catch (err) {
+          showToast(err.message, 'error');
+          console.error(err);
+        } finally {
+          finishButtonLoading(submitBtn, startedAt);
         }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+      });
+
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="delete-location"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       setButtonLoading(btn, true);
+       const startedAt = Date.now();
+       try {
+         const { error } = await supabase.from('locations').delete().eq('id', id);
+         if (error) { showToast('Error deleting.', 'error'); console.error(error); }
+         else { showToast('Location removed.', 'success'); loadLocations(); }
+       } catch (err) {
+         showToast('Something went wrong.', 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(btn, startedAt);
+       }
+     });
+
+     // Edit handler for locations
+     document.addEventListener('click', async function (e) {
+       const btn = e.target.closest('[data-action="edit-location"]');
+       if (!btn) return;
+       const id = btn.dataset.id;
+       const { data, error } = await supabase.from('locations').select('*').eq('id', id).single();
+       if (error || !data) {
+         showToast('Could not load that location.', 'error');
+         console.error(error);
+         return;
+       }
+       locationsEditingId = id;
+       locationsEditingImage = data.image_url || '';
+       document.getElementById('locName').value = data.name || '';
+       document.getElementById('locType').value = data.location_type || 'Main';
+       document.getElementById('locAddress').value = data.address || '';
+       document.getElementById('locMaps').value = data.google_maps_embed_link || '';
+       document.getElementById('locStatus').value = data.status || 'Active';
+       if (locationsCancelEdit) locationsCancelEdit.hidden = false;
+       if (locationsSubmit) {
+         locationsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Location';
+         if (window.initIcons) window.initIcons();
+       }
+       document.getElementById('locName').focus();
+     });
+
+     if (locationsCancelEdit) {
+       locationsCancelEdit.addEventListener('click', resetLocationsForm);
+     }
+   }
+
+// --- Lifegroups CRUD ---
+   const lifegroupsForm = document.getElementById('lifegroupsForm');
+   if (lifegroupsForm) {
+     // Data loading deferred to initCMSData() after auth.
+
+     // Edit state: when null the form adds a new group; otherwise it holds the
+     // id of the row being updated. One form serves both modes.
+     let lifegroupsEditingId = null;
+     const lifegroupsSubmit = lifegroupsForm.querySelector('button[type="submit"]');
+
+     function resetLifegroupForm() {
+       lifegroupsEditingId = null;
+       lifegroupsForm.reset();
+       const cancelEdit = document.getElementById('lifegroupCancelEdit');
+       if (cancelEdit) cancelEdit.hidden = true;
+       if (lifegroupsSubmit) {
+         lifegroupsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Lifegroup';
+         if (window.initIcons) window.initIcons();
+       }
+     }
+
+     lifegroupsForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = lifegroupsForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
+
+       // Validate form inputs (excluding file inputs)
+       const name = document.getElementById('lgName').value.trim();
+       const type = document.getElementById('lgType').value;
+       const leader = document.getElementById('lgLeader').value.trim();
+       const location = document.getElementById('lgLocation').value.trim();
+       const time = document.getElementById('lgTime').value.trim();
+       const contact = document.getElementById('lgContact').value.trim();
+
+       const missing = validateRequiredFields([['lgName', 'Group Name'], ['lgType', 'Group Type']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
+
+       const payload = {
+         group_name: name,
+         group_type: type,
+         leader_name: leader,
+         location,
+         meeting_time: time,
+         contact_info: contact
+       };
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let error;
+         if (lifegroupsEditingId) {
+           ({ error } = await supabase.from('lifegroups').update(payload).eq('id', lifegroupsEditingId));
+         } else {
+           ({ error } = await supabase.from('lifegroups').insert([payload]));
+         }
+
+         if (error) {
+           showToast('Error saving lifegroup.', 'error');
+           console.error(error);
+         } else {
+           showToast(lifegroupsEditingId ? 'Lifegroup updated!' : 'Lifegroup added!', 'success');
+           resetLifegroupForm();
+           loadLifegroups();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-lifegroup') {
@@ -998,60 +1262,74 @@
     }
   }
 
-  // --- Sermons CRUD ---
-  const sermonsForm = document.getElementById('sermonsForm');
-  if (sermonsForm) {
-    let sermonsEditingId = null;
-    const sermonsSubmit = sermonsForm.querySelector('button[type="submit"]');
+// --- Sermons CRUD ---
+   const sermonsForm = document.getElementById('sermonsForm');
+   if (sermonsForm) {
+     let sermonsEditingId = null;
+     const sermonsSubmit = sermonsForm.querySelector('button[type="submit"]');
 
-    function resetSermonForm() {
-      sermonsEditingId = null;
-      sermonsForm.reset();
-      const cancelEdit = document.getElementById('sermonCancelEdit');
-      if (cancelEdit) cancelEdit.hidden = true;
-      if (sermonsSubmit) {
-        sermonsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Sermon';
-        if (window.initIcons) window.initIcons();
-      }
-    }
+     function resetSermonForm() {
+       sermonsEditingId = null;
+       sermonsForm.reset();
+       const cancelEdit = document.getElementById('sermonCancelEdit');
+       if (cancelEdit) cancelEdit.hidden = true;
+       if (sermonsSubmit) {
+         sermonsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Sermon';
+         if (window.initIcons) window.initIcons();
+       }
+     }
 
-    sermonsForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = sermonsForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+     sermonsForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = sermonsForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      const title = document.getElementById('sermonTitle').value.trim();
-      const speaker = document.getElementById('sermonSpeaker').value.trim();
-      const date = document.getElementById('sermonDate').value;
-      const youtube = document.getElementById('sermonYoutube').value.trim();
-      const desc = document.getElementById('sermonDesc').value.trim();
-      const payload = { title, speaker, date, youtube_url: youtube, description: desc };
+       // Validate form inputs (excluding file inputs)
+       const title = document.getElementById('sermonTitle').value.trim();
+       const speaker = document.getElementById('sermonSpeaker').value.trim();
+       const date = document.getElementById('sermonDate').value;
+       const youtube = document.getElementById('sermonYoutube').value.trim();
+       const desc = document.getElementById('sermonDesc').value.trim();
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let error;
-        if (sermonsEditingId) {
-          ({ error } = await supabase.from('sermons').update(payload).eq('id', sermonsEditingId));
-        } else {
-          ({ error } = await supabase.from('sermons').insert([payload]));
-        }
+       const missing = validateRequiredFields([['sermonTitle', 'Title']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
 
-        if (error) {
-          showToast('Error saving sermon.', 'error');
-          console.error(error);
-        } else {
-          showToast(sermonsEditingId ? 'Sermon updated!' : 'Sermon added!', 'success');
-          resetSermonForm();
-          loadSermons();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+       // Validate YouTube URL if provided
+       if (youtube && !isValidUrl(youtube)) {
+         showToast('Please enter a valid YouTube URL.', 'error');
+         return;
+       }
+
+       const payload = { title, speaker, date, youtube_url: youtube, description: desc };
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let error;
+         if (sermonsEditingId) {
+           ({ error } = await supabase.from('sermons').update(payload).eq('id', sermonsEditingId));
+         } else {
+           ({ error } = await supabase.from('sermons').insert([payload]));
+         }
+
+         if (error) {
+           showToast('Error saving sermon.', 'error');
+           console.error(error);
+         } else {
+           showToast(sermonsEditingId ? 'Sermon updated!' : 'Sermon added!', 'success');
+           resetSermonForm();
+           loadSermons();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-sermon') {
@@ -1101,88 +1379,96 @@
     }
   }
 
-  // --- Special Events CRUD (max two) ---
-  const specialEventsForm = document.getElementById('specialEventsForm');
-  if (specialEventsForm) {
-    // Data loading deferred to initCMSData() after auth.
+// --- Special Events CRUD (max two) ---
+   const specialEventsForm = document.getElementById('specialEventsForm');
+   if (specialEventsForm) {
+     // Data loading deferred to initCMSData() after auth.
 
-    // Edit state: null = adding a new event; otherwise the row id being
-    // updated. One form serves both modes, mirroring the lifegroups editor.
-    let specialEventsEditingId = null;
-    let specialEventsEditingImage = '';
-    const specialEventsSubmit = specialEventsForm.querySelector('button[type="submit"]');
+     // Edit state: null = adding a new event; otherwise the row id being
+     // updated. One form serves both modes, mirroring the lifegroups editor.
+     let specialEventsEditingId = null;
+     let specialEventsEditingImage = '';
+     const specialEventsSubmit = specialEventsForm.querySelector('button[type="submit"]');
 
-    function resetSpecialEventsForm() {
-      specialEventsEditingId = null;
-      specialEventsEditingImage = '';
-      specialEventsForm.reset();
-      const cancelEdit = document.getElementById('specialEventCancelEdit');
-      if (cancelEdit) cancelEdit.hidden = true;
-      if (specialEventsSubmit) {
-        specialEventsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Event';
-        if (window.initIcons) window.initIcons();
-      }
-    }
+     function resetSpecialEventsForm() {
+       specialEventsEditingId = null;
+       specialEventsEditingImage = '';
+       specialEventsForm.reset();
+       const cancelEdit = document.getElementById('specialEventCancelEdit');
+       if (cancelEdit) cancelEdit.hidden = true;
+       if (specialEventsSubmit) {
+         specialEventsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Event';
+         if (window.initIcons) window.initIcons();
+       }
+     }
 
-    specialEventsForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = specialEventsForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+     specialEventsForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = specialEventsForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      const title = document.getElementById('evTitle').value.trim();
-      const date = document.getElementById('evDate').value;
-      const time = document.getElementById('evTime').value.trim();
-      const desc = document.getElementById('evDesc').value.trim();
-      const imageInput = document.getElementById('evImage');
-      const imageFile = imageInput ? imageInput.files[0] : null;
+       // Validate form inputs (excluding file inputs)
+       const title = document.getElementById('evTitle').value.trim();
+       const date = document.getElementById('evDate').value;
+       const time = document.getElementById('evTime').value.trim();
+       const desc = document.getElementById('evDesc').value.trim();
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let imageUrl = specialEventsEditingImage;
-        if (imageFile) imageUrl = await uploadImage(imageFile);
+       const missing = validateRequiredFields([['evTitle', 'Title'], ['evDate', 'Event Date']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
 
-        // Only additions must respect the two-event cap; editing never adds a row.
-        if (!specialEventsEditingId) {
-          const { count, error: countError } = await supabase
-            .from('special_events')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_active', true);
-          if (countError) console.error(countError);
-          if (!countError && count >= 2) {
-            showToast('Only two events can be featured at a time. Delete one first.', 'error');
-            return;
-          }
-        }
+       const imageInput = document.getElementById('evImage');
+       const imageFile = imageInput ? imageInput.files[0] : null;
 
-        const payload = { title, event_date: date, event_time: time, description: desc, image_url: imageUrl };
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let imageUrl = specialEventsEditingImage;
+         if (imageFile) imageUrl = await uploadImage(imageFile);
 
-        let error;
-        if (specialEventsEditingId) {
-          ({ error } = await supabase.from('special_events').update(payload).eq('id', specialEventsEditingId));
-        } else {
-          ({ error } = await supabase.from('special_events').insert([payload]));
-        }
+         // Only additions must respect the two-event cap; editing never adds a row.
+         if (!specialEventsEditingId) {
+           const { count, error: countError } = await supabase
+             .from('special_events')
+             .select('id', { count: 'exact', head: true })
+             .eq('is_active', true);
+           if (countError) console.error(countError);
+           if (!countError && count >= 2) {
+             showToast('Only two events can be featured at a time. Delete one first.', 'error');
+             return;
+           }
+         }
 
-        if (error) {
-          // The database trigger re-bounds the same limit as defence in depth.
-          const capped = /special events/i.test(error.message || '');
-          showToast(capped
-            ? 'Only two events can be featured at a time. Delete one first.'
-            : 'Error saving event.', 'error');
-          console.error(error);
-        } else {
-          showToast(specialEventsEditingId ? 'Event updated!' : 'Event added!', 'success');
-          resetSpecialEventsForm();
-          loadSpecialEvents();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+         const payload = { title, event_date: date, event_time: time, description: desc, image_url: imageUrl };
+
+         let error;
+         if (specialEventsEditingId) {
+           ({ error } = await supabase.from('special_events').update(payload).eq('id', specialEventsEditingId));
+         } else {
+           ({ error } = await supabase.from('special_events').insert([payload]));
+         }
+
+         if (error) {
+           // The database trigger re-bounds the same limit as defence in depth.
+           const capped = /special events/i.test(error.message || '');
+           showToast(capped
+             ? 'Only two events can be featured at a time. Delete one first.'
+             : 'Error saving event.', 'error');
+           console.error(error);
+         } else {
+           showToast(specialEventsEditingId ? 'Event updated!' : 'Event added!', 'success');
+           resetSpecialEventsForm();
+           loadSpecialEvents();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-special-event') {
@@ -1232,75 +1518,77 @@
     }
   }
 
-  // --- Service Schedules CRUD ---
-  const schedulesForm = document.getElementById('schedulesForm');
-  if (schedulesForm) {
-    // Data loading deferred to initCMSData() after auth.
+// --- Service Schedules CRUD ---
+   const schedulesForm = document.getElementById('schedulesForm');
+   if (schedulesForm) {
+     // Data loading deferred to initCMSData() after auth.
 
-    // Edit state: null = adding; otherwise the row id being updated.
-    let schedulesEditingId = null;
-    let schedulesEditingImage = '';
-    const schedulesSubmit = schedulesForm.querySelector('button[type="submit"]');
+     // Edit state: null = adding; otherwise the row id being updated.
+     let schedulesEditingId = null;
+     let schedulesEditingImage = '';
+     const schedulesSubmit = schedulesForm.querySelector('button[type="submit"]');
 
-    function resetScheduleForm() {
-      schedulesEditingId = null;
-      schedulesEditingImage = '';
-      schedulesForm.reset();
-      const cancelEdit = document.getElementById('scheduleCancelEdit');
-      if (cancelEdit) cancelEdit.hidden = true;
-      if (schedulesSubmit) {
-        schedulesSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Schedule';
-        if (window.initIcons) window.initIcons();
-      }
-    }
+     function resetScheduleForm() {
+       schedulesEditingId = null;
+       schedulesEditingImage = '';
+       schedulesForm.reset();
+       const cancelEdit = document.getElementById('scheduleCancelEdit');
+       if (cancelEdit) cancelEdit.hidden = true;
+       if (schedulesSubmit) {
+         schedulesSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Schedule';
+         if (window.initIcons) window.initIcons();
+       }
+     }
 
-    schedulesForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = schedulesForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+     schedulesForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = schedulesForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      const service_name = document.getElementById('scName').value.trim();
-      const day = document.getElementById('scDay').value.trim();
-      const time = document.getElementById('scTime').value.trim();
-      const location_id = document.getElementById('scLocation').value;
-      const imageInput = document.getElementById('scImage');
-      const imageFile = imageInput ? imageInput.files[0] : null;
+       // Validate form inputs (excluding file inputs)
+       const service_name = document.getElementById('scName').value.trim();
+       const day = document.getElementById('scDay').value.trim();
+       const time = document.getElementById('scTime').value.trim();
+       const location_id = document.getElementById('scLocation').value;
+       const imageInput = document.getElementById('scImage');
+       const imageFile = imageInput ? imageInput.files[0] : null;
 
-      if (!service_name || !day || !time || !location_id) {
-        showToast('Service name, day, time, and location are required.', 'error');
-        return;
-      }
+       const missing = validateRequiredFields([['scName', 'Service name'], ['scDay', 'Day'], ['scTime', 'Time'], ['scLocation', 'Location']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let image_url = schedulesEditingImage;
-        if (imageFile) image_url = await uploadImage(imageFile);
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let image_url = schedulesEditingImage;
+         if (imageFile) image_url = await uploadImage(imageFile);
 
-        const payload = { service_name, day, time, location_id, image_url };
+         const payload = { service_name, day, time, location_id, image_url };
 
-        let error;
-        if (schedulesEditingId) {
-          ({ error } = await supabase.from('service_schedules').update(payload).eq('id', schedulesEditingId));
-        } else {
-          ({ error } = await supabase.from('service_schedules').insert([payload]));
-        }
+         let error;
+         if (schedulesEditingId) {
+           ({ error } = await supabase.from('service_schedules').update(payload).eq('id', schedulesEditingId));
+         } else {
+           ({ error } = await supabase.from('service_schedules').insert([payload]));
+         }
 
-        if (error) {
-          showToast('Error saving schedule.', 'error');
-          console.error(error);
-        } else {
-          showToast(schedulesEditingId ? 'Schedule updated!' : 'Schedule added!', 'success');
-          resetScheduleForm();
-          loadServiceSchedules();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+         if (error) {
+           showToast('Error saving schedule.', 'error');
+           console.error(error);
+         } else {
+           showToast(schedulesEditingId ? 'Schedule updated!' : 'Schedule added!', 'success');
+           resetScheduleForm();
+           loadServiceSchedules();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-schedule') {
@@ -1350,54 +1638,61 @@
     }
   }
 
-  // --- Monthly Theme CRUD (singleton upsert) ---
-  // One row, constant id (migration 009): saving upserts idempotently, exactly
-  // like church_settings. Delete removes the row so the homepage hides.
-  const MONTHLY_THEME_ID = '00000000-0000-0000-0000-000000000002';
-  const monthlyThemeForm = document.getElementById('monthlyThemeForm');
-  if (monthlyThemeForm) {
-    let monthlyThemeEditingImage = '';
+// --- Monthly Theme CRUD (singleton upsert) ---
+   // One row, constant id (migration 009): saving upserts idempotently, exactly
+   // like church_settings. Delete removes the row so the homepage hides.
+   const MONTHLY_THEME_ID = '00000000-0000-0000-0000-000000000002';
+   const monthlyThemeForm = document.getElementById('monthlyThemeForm');
+   if (monthlyThemeForm) {
+     let monthlyThemeEditingImage = '';
 
-    monthlyThemeForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = monthlyThemeForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+     monthlyThemeForm.addEventListener('submit', async function (e) {
+       e.preventDefault();
+       const submitBtn = monthlyThemeForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      const month_label = document.getElementById('mtMonth').value.trim();
-      const title = document.getElementById('mtTitle').value.trim();
-      const description = document.getElementById('mtText').value.trim();
-      const scripture = document.getElementById('mtScripture').value.trim();
-      const is_active = document.getElementById('mtActive').value === 'true';
-      const imageInput = document.getElementById('mtImage');
-      const imageFile = imageInput ? imageInput.files[0] : null;
+       // Validate form inputs (excluding file inputs)
+       const month_label = document.getElementById('mtMonth').value.trim();
+       const title = document.getElementById('mtTitle').value.trim();
+       const description = document.getElementById('mtText').value.trim();
+       const scripture = document.getElementById('mtScripture').value.trim();
+       const is_active = document.getElementById('mtActive').value === 'true';
+       const imageInput = document.getElementById('mtImage');
+       const imageFile = imageInput ? imageInput.files[0] : null;
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        let image_url = monthlyThemeEditingImage;
-        if (imageFile) image_url = await uploadImage(imageFile);
+       const missing = validateRequiredFields([['mtMonth', 'Month label'], ['mtTitle', 'Theme title'], ['mtText', 'Message'], ['mtScripture', 'Scripture verse']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
 
-        const payload = { month_label, title, description, scripture, image_url, is_active };
-        const { error } = await supabase
-          .from('monthly_theme')
-          .upsert(Object.assign({ id: MONTHLY_THEME_ID }, payload));
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         let image_url = monthlyThemeEditingImage;
+         if (imageFile) image_url = await uploadImage(imageFile);
 
-        if (error) {
-          showToast('Error saving monthly theme.', 'error');
-          console.error(error);
-        } else {
-          showToast('Monthly theme saved!', 'success');
-          monthlyThemeEditingImage = '';
-          monthlyThemeForm.reset();
-          loadMonthlyTheme();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+         const payload = { month_label, title, description, scripture, image_url, is_active };
+         const { error } = await supabase
+           .from('monthly_theme')
+           .upsert(Object.assign({ id: MONTHLY_THEME_ID }, payload));
+
+         if (error) {
+           showToast('Error saving monthly theme.', 'error');
+           console.error(error);
+         } else {
+           showToast('Monthly theme saved!', 'success');
+           monthlyThemeEditingImage = '';
+           monthlyThemeForm.reset();
+           loadMonthlyTheme();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-monthly-theme') {
@@ -1443,49 +1738,62 @@
     });
   }
 
-  // --- Live Status CRUD (singleton upsert) ---
-  const LIVE_STATUS_ID = '00000000-0000-0000-0000-000000000003';
-  const liveStatusForm = document.getElementById('liveStatusForm');
-  if (liveStatusForm) {
+// --- Live Status CRUD (singleton upsert) ---
+   const LIVE_STATUS_ID = '00000000-0000-0000-0000-000000000003';
+   const liveStatusForm = document.getElementById('liveStatusForm');
+   if (liveStatusForm) {
 liveStatusForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const submitBtn = liveStatusForm.querySelector('[type="submit"]');
-      if (isButtonBusy(submitBtn)) return;
+       e.preventDefault();
+       const submitBtn = liveStatusForm.querySelector('[type="submit"]');
+       if (isButtonBusy(submitBtn)) return;
 
-      const is_live = document.getElementById('lsLive').value === 'true';
-      const live_title = document.getElementById('lsTitle').value.trim();
-      const live_description = document.getElementById('lsDesc').value.trim();
-      let youtube_url = document.getElementById('lsYoutube').value.trim();
+       const is_live = document.getElementById('lsLive').value === 'true';
+       const live_title = document.getElementById('lsTitle').value.trim();
+       const live_description = document.getElementById('lsDesc').value.trim();
+       let youtube_url = document.getElementById('lsYoutube').value.trim();
 
-      // If user pasted an iframe, extract the src URL
-      if (youtube_url.includes('<iframe')) {
-        const match = youtube_url.match(/src="([^"]+)"/);
-        if (match && match[1]) {
-          youtube_url = match[1];
-        }
-      }
+       // Validate required fields (excluding file uploads)
+       const missing = validateRequiredFields([['lsTitle', 'Live title'], ['lsYoutube', 'YouTube URL']]);
+       if (missing.length > 0) {
+         showToast(missing.join(' and ') + ' are required.', 'error');
+         return;
+       }
 
-      setButtonLoading(submitBtn, true);
-      const startedAt = Date.now();
-      try {
-        const { error } = await supabase
-          .from('live_status')
-          .upsert(Object.assign({ id: LIVE_STATUS_ID }, { is_live, live_title, live_description, youtube_url }));
+       // Validate YouTube URL if provided
+       if (youtube_url && !isValidUrl(youtube_url)) {
+         showToast('Please enter a valid YouTube URL.', 'error');
+         return;
+       }
 
-        if (error) {
-          showToast('Error saving live status.', 'error');
-          console.error(error);
-        } else {
-          showToast('Live status saved!', 'success');
-          loadLiveStatus();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        console.error(err);
-      } finally {
-        finishButtonLoading(submitBtn, startedAt);
-      }
-    });
+       // If user pasted an iframe, extract the src URL
+       if (youtube_url.includes('<iframe')) {
+         const match = youtube_url.match(/src="([^"]+)"/);
+         if (match && match[1]) {
+           youtube_url = match[1];
+         }
+       }
+
+       setButtonLoading(submitBtn, true);
+       const startedAt = Date.now();
+       try {
+         const { error } = await supabase
+           .from('live_status')
+           .upsert(Object.assign({ id: LIVE_STATUS_ID }, { is_live, live_title, live_description, youtube_url }));
+
+         if (error) {
+           showToast('Error saving live status.', 'error');
+           console.error(error);
+         } else {
+           showToast('Live status saved!', 'success');
+           loadLiveStatus();
+         }
+       } catch (err) {
+         showToast(err.message, 'error');
+         console.error(err);
+       } finally {
+         finishButtonLoading(submitBtn, startedAt);
+       }
+     });
 
     document.addEventListener('click', async function (e) {
       if (e.target.dataset.action === 'edit-live-status') {

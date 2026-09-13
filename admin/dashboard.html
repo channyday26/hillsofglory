@@ -165,7 +165,10 @@
                 <label for="leaderImage" class="form__label">Profile Image (Max 2MB)</label>
                 <input type="file" id="leaderImage" name="image" class="form__input" accept="image/*" />
               </div>
-              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Leader</button>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Leader</button>
+                <button type="button" class="btn btn--outline" id="leadershipCancelEdit" hidden>Cancel Editing</button>
+              </div>
             </form>
           </div>
           <div class="admin-list" id="leadershipList"></div>
@@ -206,7 +209,10 @@
                 <label for="minImage" class="form__label">Image (Max 2MB)</label>
                 <input type="file" id="minImage" name="image" class="form__input" accept="image/*" />
               </div>
-              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Ministry</button>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Ministry</button>
+                <button type="button" class="btn btn--outline" id="ministriesCancelEdit" hidden>Cancel Editing</button>
+              </div>
             </form>
           </div>
           <div class="admin-list" id="ministriesList"></div>
@@ -245,7 +251,10 @@
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Location</button>
+              <div class="admin-form__actions">
+                <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Location</button>
+                <button type="button" class="btn btn--outline" id="locationsCancelEdit" hidden>Cancel Editing</button>
+              </div>
             </form>
           </div>
           <div class="admin-list" id="locationsList"></div>
