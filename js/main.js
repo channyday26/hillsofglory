@@ -42,6 +42,18 @@
     }
     // Re-render icons so the sun/moon icons reflect the new theme.
     initIcons();
+    updateXIcon();
+  }
+
+  // Update the X (Twitter) icon to use the correct light/dark variant.
+  function updateXIcon() {
+    const currentTheme = html.getAttribute('data-theme') || 'light';
+    const xIcon = document.getElementById('footerXIcon');
+    if (xIcon) {
+      xIcon.src = currentTheme === 'dark'
+        ? 'images/X (formerly Twitter)_dark.svg'
+        : 'images/X (formerly Twitter)_light.svg';
+    }
   }
 
   applyTheme(getPreferredTheme());
@@ -60,6 +72,7 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
     if (!localStorage.getItem('theme')) {
       applyTheme(e.matches ? 'dark' : 'light');
+      updateXIcon();
     }
   });
 
@@ -301,22 +314,21 @@
     const footerSocial = document.getElementById('footerSocial');
     if (footerSocial) {
       const socials = [
-         { url: s.facebook_url, label: 'Facebook', icon: 'facebook' },
-        { url: s.instagram_url, label: 'Instagram', icon: 'instagram' },
-        { url: s.youtube_url, label: 'YouTube', icon: 'youtube' },
-        { url: s.x_url, label: 'X', icon: 'twitter' },
+         { url: s.facebook_url, label: 'Facebook', image: 'images/facebook-icon.svg' },
+        { url: s.instagram_url, label: 'Instagram', image: 'images/instagram-icon.svg' },
+        { url: s.youtube_url, label: 'YouTube', image: 'images/youtube.svg' },
+        { url: s.x_url, label: 'X', image: 'images/X (formerly Twitter)_light.svg', darkImage: 'images/X (formerly Twitter)_dark.svg', id: 'footerXIcon' },
       ].filter(function (item) { return item.url; });
 
       if (socials.length) {
         footerSocial.innerHTML = socials.map(function (item) {
-          return '<a href="' + escAttr(item.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escAttr(item.label) + '">' +
-            '<i data-lucide="' + item.icon + '"></i></a>';
+          var imgAttrs = 'src="' + escAttr(item.image) + '" alt="' + escAttr(item.label) + '" loading="lazy"';
+          if (item.id) imgAttrs += ' id="' + item.id + '"';
+          return '<a href="' + escAttr(item.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escAttr(item.label) + '"><img ' + imgAttrs + '></a>';
         }).join('');
       }
 
-      // The social pills were re-injected as <i data-lucide> placeholders;
-      // convert them to inline SVGs or they render as empty, invisible boxes.
-      initIcons();
+      updateXIcon();
     }
   }
 
