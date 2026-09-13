@@ -21,6 +21,7 @@
   <!-- jQuery & Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preload" as="video" href="videos/hero_video_bg.mp4" />
 </head>
 <body>
   <!-- Global Header -->
@@ -94,13 +95,10 @@
     <!-- Hero Section -->
     <section class="hero" aria-label="Welcome Hero">
       <div class="hero__media">
-        <video class="hero__video" autoplay muted loop playsinline poster="images/bg1.png">
-          <!-- Compressed derivatives, produced by `npm run optimize:video`.
-               A <source> that 404s falls through to the next candidate, so the
-               original 43 MB file still plays until those files exist. -->
-          <source src="videos/hero.webm" type="video/webm" />
-          <source src="videos/hero.mp4" type="video/mp4" />
+        <video class="hero__video" autoplay muted loop playsinline preload="auto">
           <source src="videos/hero_video_bg.mp4" type="video/mp4" />
+          <source src="videos/hero.mp4" type="video/mp4" />
+          <source src="videos/hero.webm" type="video/webm" />
         </video>
         <div class="hero__overlay"></div>
       </div>
