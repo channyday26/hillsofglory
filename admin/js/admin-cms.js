@@ -161,87 +161,464 @@
     if (enabledEl) enabledEl.checked = data.prayer_notify_enabled !== false;
   }
 
-  async function loadLeadership() {
-    const list = document.getElementById('leadershipList');
-    if (!list) return;
-    const { data, error } = await supabase.from('leadership_team').select('*').order('sort_order', { ascending: true });
-    if (error) { console.error(error); return; }
-    list.innerHTML = (data || []).map(function (l) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        (l.image_url ? '<img src="' + escAttr(l.image_url) + '" alt="' + escAttr(l.name || '') + '" style="width:60px;height:60px;border-radius:var(--radius-full);object-fit:cover;" />' : '') +
-        '<div style="flex:1;"><h3 class="card__title" style="margin:0;">' + esc(l.name || '') + '</h3><p class="card__text" style="margin:0;">' + esc(l.role || '') + '</p></div>' +
-        '<button class="btn btn--secondary" data-action="edit-leader" data-id="' + escAttr(l.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-leader" data-id="' + escAttr(l.id || '') + '">Delete</button></div>';
+  // --- Compact record tables ------------------------------------------------
+  // Leadership, Ministries, Locations, Service Schedules, Lifegroups, Sermons
+  // and Requests render in the same table component: a server-side search bar
+  // above a compact table, six rows per page, and a "Load more" button in the
+  // footer. Each section declares its query and column cells only — the shell
+  // markup, debounced search, pagination and empty states are shared. Events,
+  // Monthly theme and Live status keep focused card lists (tiny datasets) but
+  // share the icon-style action buttons and the edit-populated toast.
+
+  const RECORD_PAGE_SIZE = 6;
+
+  // Location names for the schedules table. Fetched once and cached.
+  let locationNameById = {};
+  let locationNamesLoaded = false;
+
+  async function ensureLocationNames() {
+    if (locationNamesLoaded) return;
+    const { data } = await supabase.from('locations').select('id, name');
+    locationNameById = {};
+    (data || []).forEach(function (l) { locationNameById[l.id] = l.name; });
+    locationNamesLoaded = true;
+  }
+
+  function locationNameOf(id) {
+    return locationNameById[id] || 'Unknown location';
+  }
+
+  // --- Cell render helpers ---------------------------------------------------
+
+  // Escape LIKE wildcards so a user's "%" or "_" — a valid search string —
+  // searches for the literal character instead of matching every record.
+  // Commas/parens/quotes are PostgREST .or() grammar and would break the
+  // generated filter, so they are neutralised to spaces in the pattern.
+  function dbEscapePattern(value) {
+    return String(value || '')
+      .replace(/[\\%*_]/g, function (m) { return '\\' + m; })
+      .replace(/[,'"()]/g, ' ');
+  }
+
+  // Avatar (people) or square thumbnail (services) + a primary text label.
+  function identityCell(imageUrl, name, icon, square) {
+    const shape = square ? ' data-table__avatar--square' : '';
+    const media = imageUrl
+      ? '<img class="data-table__avatar' + shape + '" src="' + escAttr(imageUrl) + '" alt="" loading="lazy" />'
+      : '<span class="data-table__avatar' + shape + ' data-table__avatar--icon">' +
+        '<i data-lucide="' + escAttr(icon || 'user') + '" aria-hidden="true"></i></span>';
+    return '<div class="data-table__identity">' + media + '<span>' + esc(name || '') + '</span></div>';
+  }
+
+  function badgeCell(value, tone) {
+    const toneClass = tone === 'on' ? ' data-table__badge--on' : (tone === 'off' ? ' data-table__badge--off' : '');
+    return '<span class="data-table__badge' + toneClass + '">' + esc(value || '') + '</span>';
+  }
+
+  function primaryCell(value) {
+    return '<span class="data-table__primary">' + esc(value || '') + '</span>';
+  }
+
+  function summaryCell(value) {
+    return '<span class="data-table__summary">' + esc(value || '') + '</span>';
+  }
+
+  function linkCell(url) {
+    if (!url) return '';
+    return '<a class="data-table__link" href="' + escAttr(url) + '" target="_blank" rel="noopener noreferrer">' + esc(url) + '</a>';
+  }
+
+  function formatIsoDate(value) {
+    if (!value) return '';
+    const parts = String(value).split('T')[0].split('-');
+    if (parts.length !== 3) return esc(String(value));
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function formatTableDateTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  // Edit/Delete button pair used on every record row.
+  function actionButtons(action, id, label) {
+    return '<div class="data-table__actions">' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--edit" ' +
+        'data-action="edit-' + action + '" data-id="' + escAttr(id) + '" aria-label="Edit ' + escAttr(label) + '">' +
+        '<i data-lucide="pencil" aria-hidden="true"></i> Edit</button>' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--delete" ' +
+        'data-action="delete-' + action + '" data-id="' + escAttr(id) + '" aria-label="Delete ' + escAttr(label) + '">' +
+        '<i data-lucide="trash-2" aria-hidden="true"></i> Delete</button>' +
+      '</div>';
+  }
+
+  // --- Table section configuration ------------------------------------------
+
+  const DATA_TABLES = {
+    leadership: {
+      containerId: 'leadershipList',
+      searchId: 'leadershipSearch',
+      tbodyId: 'leadershipTableBody',
+      countId: 'leadershipTableCount',
+      moreId: 'leadershipLoadMore',
+      searchPlaceholder: 'Search leaders…',
+      searchLabel: 'Search leaders',
+      table: 'leadership_team',
+      orderColumn: 'sort_order',
+      ascending: true,
+      searchColumns: ['name', 'role', 'bio'],
+      emptyText: 'No leaders yet. Add a leader below.',
+      countLabel: 'leaders',
+      columns: [
+        { label: 'Leader', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (l) { return identityCell(l.image_url, l.name, 'user'); } },
+        { label: 'Role', render: function (l) { return summaryCell(l.role); } },
+        { label: 'Bio', tdClass: 'data-table__td--grow', render: function (l) { return summaryCell(l.bio); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (l) { return actionButtons('leader', l.id, l.name); } }
+      ]
+    },
+    ministries: {
+      containerId: 'ministriesList',
+      searchId: 'ministriesSearch',
+      tbodyId: 'ministriesTableBody',
+      countId: 'ministriesTableCount',
+      moreId: 'ministriesLoadMore',
+      searchPlaceholder: 'Search ministries…',
+      searchLabel: 'Search ministries',
+      table: 'ministries',
+      orderColumn: 'name',
+      ascending: true,
+      searchColumns: ['name', 'category', 'description', 'contact_person'],
+      emptyText: 'No ministries yet. Add a ministry below.',
+      countLabel: 'ministries',
+      columns: [
+        { label: 'Ministry', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (m) { return identityCell(m.image_url, m.name, 'heart-handshake', true); } },
+        { label: 'Category', render: function (m) { return badgeCell(m.category); } },
+        { label: 'Description', tdClass: 'data-table__td--grow', render: function (m) { return summaryCell(m.description); } },
+        { label: 'Contact Person', render: function (m) { return summaryCell(m.contact_person); } },
+        { label: 'Target School', render: function (m) { return summaryCell(m.target_school); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (m) { return actionButtons('ministry', m.id, m.name); } }
+      ]
+    },
+    locations: {
+      containerId: 'locationsList',
+      searchId: 'locationsSearch',
+      tbodyId: 'locationsTableBody',
+      countId: 'locationsTableCount',
+      moreId: 'locationsLoadMore',
+      searchPlaceholder: 'Search locations…',
+      searchLabel: 'Search locations',
+      table: 'locations',
+      orderColumn: 'sort_order',
+      ascending: true,
+      searchColumns: ['name', 'address', 'location_type'],
+      emptyText: 'No locations yet. Add a location below.',
+      countLabel: 'locations',
+      columns: [
+        { label: 'Campus', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (l) { return identityCell(l.image_url, l.name, 'map-pin', true); } },
+        { label: 'Type', render: function (l) { return badgeCell(l.location_type); } },
+        { label: 'Address', tdClass: 'data-table__td--grow', render: function (l) { return summaryCell(l.address); } },
+        { label: 'Google Maps', tdClass: 'data-table__td--link', render: function (l) { return linkCell(l.google_maps_embed_link); } },
+        { label: 'Status', render: function (l) { return badgeCell(l.status || 'Inactive', String(l.status) === 'Active' ? 'on' : 'off'); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (l) { return actionButtons('location', l.id, l.name); } }
+      ]
+    },
+    schedules: {
+      containerId: 'schedulesList',
+      searchId: 'schedulesSearch',
+      tbodyId: 'schedulesTableBody',
+      countId: 'schedulesTableCount',
+      moreId: 'schedulesLoadMore',
+      searchPlaceholder: 'Search schedules…',
+      searchLabel: 'Search service schedules',
+      table: 'service_schedules',
+      orderColumn: 'sort_order',
+      ascending: true,
+      searchColumns: ['service_name', 'day', 'time'],
+      emptyText: 'No service schedules yet. Add one below.',
+      countLabel: 'schedules',
+      columns: [
+        { label: 'Service', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (s) { return identityCell(s.image_url, s.service_name, 'clock', true); } },
+        { label: 'Day', render: function (s) { return badgeCell(s.day); } },
+        { label: 'Time', render: function (s) { return summaryCell(s.time); } },
+        { label: 'Location', render: function (s) { return summaryCell(locationNameOf(s.location_id)); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (s) { return actionButtons('schedule', s.id, s.service_name); } }
+      ]
+    },
+    lifegroups: {
+      containerId: 'lifegroupsList',
+      searchId: 'lifegroupsSearch',
+      tbodyId: 'lifegroupsTableBody',
+      countId: 'lifegroupsTableCount',
+      moreId: 'lifegroupsLoadMore',
+      searchPlaceholder: 'Search lifegroups…',
+      searchLabel: 'Search lifegroups',
+      table: 'lifegroups',
+      orderColumn: 'group_name',
+      ascending: true,
+      searchColumns: ['group_name', 'leader_name', 'location', 'meeting_time'],
+      emptyText: 'No lifegroups yet. Add a lifegroup below.',
+      countLabel: 'lifegroups',
+      columns: [
+        { label: 'Group', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (lg) { return primaryCell(lg.group_name); } },
+        { label: 'Type', render: function (lg) { return badgeCell(lg.group_type); } },
+        { label: 'Leader', render: function (lg) { return summaryCell(lg.leader_name); } },
+        { label: 'Location', tdClass: 'data-table__td--grow', render: function (lg) { return summaryCell(lg.location); } },
+        { label: 'Meeting Time', render: function (lg) { return summaryCell(lg.meeting_time); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (lg) { return actionButtons('lifegroup', lg.id, lg.group_name); } }
+      ]
+    },
+    sermons: {
+      containerId: 'sermonsList',
+      searchId: 'sermonsSearch',
+      tbodyId: 'sermonsTableBody',
+      countId: 'sermonsTableCount',
+      moreId: 'sermonsLoadMore',
+      searchPlaceholder: 'Search sermons…',
+      searchLabel: 'Search sermons',
+      table: 'sermons',
+      orderColumn: 'date',
+      ascending: false,
+      searchColumns: ['title', 'speaker'],
+      emptyText: 'No sermons yet. Add a sermon below.',
+      countLabel: 'sermons',
+      columns: [
+        { label: 'Title', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (s) { return primaryCell(s.title); } },
+        { label: 'Speaker', render: function (s) { return summaryCell(s.speaker); } },
+        { label: 'Date', tdClass: 'data-table__td--date', render: function (s) { return formatIsoDate(s.date); } },
+        { label: 'YouTube', tdClass: 'data-table__td--link', render: function (s) { return linkCell(s.youtube_url); } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (s) { return actionButtons('sermon', s.id, s.title); } }
+      ]
+    }
+  };
+
+  // --- Shared table engine ---------------------------------------------------
+
+  const tableShellsBuilt = {};
+
+  function buildTableShell(cfg) {
+    const container = document.getElementById(cfg.containerId);
+    if (!container) return false;
+    const key = cfg.containerId + (cfg.shellKey ? '::' + cfg.shellKey : '');
+    if (!cfg.alwaysRebuild && tableShellsBuilt[key]) return false;
+    tableShellsBuilt[key] = true;
+
+    const headings = cfg.columns.map(function (col) {
+      return '<th' + (col.thClass ? ' class="' + col.thClass + '"' : '') + ' scope="col">' + esc(col.label) + '</th>';
+    }).join('');
+
+    container.innerHTML =
+      '<div class="data-table">' +
+        '<div class="data-table__toolbar">' +
+          '<div class="data-table__toolbar-group">' +
+            (cfg.dateFromId && cfg.dateToId
+              ? '<div class="data-table__datefilter">' +
+                  '<label class="data-table__datefilter-label" for="' + escAttr(cfg.dateFromId) + '">From</label>' +
+                  '<input type="date" id="' + escAttr(cfg.dateFromId) + '" class="data-table__datefilter-input" aria-label="Filter from date" />' +
+                  '<label class="data-table__datefilter-label" for="' + escAttr(cfg.dateToId) + '">To</label>' +
+                  '<input type="date" id="' + escAttr(cfg.dateToId) + '" class="data-table__datefilter-input" aria-label="Filter to date" />' +
+                '</div>'
+              : '') +
+            '<div class="data-table__search">' +
+              '<i data-lucide="search" class="data-table__search-icon" aria-hidden="true"></i>' +
+              '<input type="search" id="' + escAttr(cfg.searchId) + '" class="data-table__search-input" ' +
+                'placeholder="' + escAttr(cfg.searchPlaceholder) + '" aria-label="' + escAttr(cfg.searchLabel) + '" autocomplete="off" />' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="data-table__scroll">' +
+          '<table class="data-table__table">' +
+            '<thead><tr>' + headings + '</tr></thead>' +
+            '<tbody id="' + escAttr(cfg.tbodyId) + '"></tbody>' +
+          '</table>' +
+        '</div>' +
+        '<div class="data-table__footer">' +
+          '<span class="data-table__count" id="' + escAttr(cfg.countId) + '"></span>' +
+          '<button type="button" class="btn btn--sm btn--outline data-table__more" id="' + escAttr(cfg.moreId) + '" hidden>' +
+            '<i data-lucide="chevron-down" aria-hidden="true"></i> Load more</button>' +
+        '</div>' +
+      '</div>';
+    return true;
+  }
+
+  function bindTableControls(cfg) {
+    const search = document.getElementById(cfg.searchId);
+    const more = document.getElementById(cfg.moreId);
+
+    if (search && !search._bound) {
+      search._bound = true;
+      let timer = null;
+      search.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          // Debounced server-side query: fires once the admin finishes typing.
+          loadTablePage(cfg, { reset: true, term: search.value.trim() });
+        }, 350);
+      });
+    }
+
+    if (more && !more._bound) {
+      more._bound = true;
+      more.addEventListener('click', function () {
+        if (isButtonBusy(more)) return;
+        loadMoreRecords(cfg, more);
+      });
+    }
+
+    // Optional date-range filters (Requests). Changing either bound re-queries
+    // from page 0, combining with any active text search term.
+    if (cfg.dateFromId && cfg.dateToId) {
+      const fromEl = document.getElementById(cfg.dateFromId);
+      const toEl = document.getElementById(cfg.dateToId);
+
+      if (fromEl && !fromEl._bound) {
+        fromEl._bound = true;
+        fromEl.addEventListener('change', function () {
+          cfg.dateFrom = fromEl.value || '';
+          loadTablePage(cfg, { reset: true, term: search ? search.value.trim() : '' });
+        });
+      }
+      if (toEl && !toEl._bound) {
+        toEl._bound = true;
+        toEl.addEventListener('change', function () {
+          cfg.dateTo = toEl.value || '';
+          loadTablePage(cfg, { reset: true, term: search ? search.value.trim() : '' });
+        });
+      }
+    }
+  }
+
+  async function fetchTablePage(cfg, term, offset) {
+    const searchCols = typeof cfg.searchColumns === 'function' ? cfg.searchColumns() : cfg.searchColumns;
+    let query = supabase.from(cfg.table).select('*', { count: 'exact' });
+    if (term) {
+      const pattern = '%' + dbEscapePattern(term) + '%';
+      query = query.or(searchCols.map(function (col) {
+        return col + '.ilike.' + pattern;
+      }).join(','));
+    }
+    if (cfg.dateColumn) {
+      if (cfg.dateFrom) query = query.gte(cfg.dateColumn, cfg.dateFrom + 'T00:00:00');
+      if (cfg.dateTo) query = query.lte(cfg.dateColumn, cfg.dateTo + 'T23:59:59.999');
+    }
+    if (cfg.orderColumn) {
+      query = query.order(cfg.orderColumn, { ascending: cfg.ascending });
+    }
+    return await query.range(offset, offset + RECORD_PAGE_SIZE - 1);
+  }
+
+  function renderTableRows(cfg, records) {
+    return records.map(function (record) {
+      const cells = cfg.columns.map(function (col) {
+        return '<td' + (col.tdClass ? ' class="' + col.tdClass + '"' : '') + '>' + col.render(record) + '</td>';
+      }).join('');
+      return '<tr>' + cells + '</tr>';
     }).join('');
   }
 
-  async function loadMinistries() {
-    const list = document.getElementById('ministriesList');
-    if (!list) return;
-    const { data, error } = await supabase.from('ministries').select('*').order('name', { ascending: true });
-    if (error) { console.error(error); return; }
-    list.innerHTML = (data || []).map(function (m) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(m.name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(m.category || '') + '</p>' +
-        '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-ministry" data-id="' + escAttr(m.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-ministry" data-id="' + escAttr(m.id || '') + '">Delete</button>' +
-        '</div>';
-    }).join('');
+  function renderEmptyRow(cfg) {
+    const hasFilters = !!(cfg.term || cfg.dateFrom || cfg.dateTo);
+    const icon = hasFilters ? 'search-x' : 'inbox';
+    const message = hasFilters ? 'No records match your filters.' : cfg.emptyText;
+    return '<tr class="data-table__empty"><td colspan="' + cfg.columns.length + '">' +
+      '<i data-lucide="' + icon + '" aria-hidden="true"></i> ' + esc(message) + '</td></tr>';
   }
 
-  async function loadLocations() {
-    const list = document.getElementById('locationsList');
-    if (!list) return;
-    const { data, error } = await supabase.from('locations').select('*');
-    if (error) { console.error(error); return; }
-    list.innerHTML = (data || []).map(function (l) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(l.name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(l.location_type || '') + ' — ' + esc(l.address || '') + '</p>' +
-        '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-location" data-id="' + escAttr(l.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-location" data-id="' + escAttr(l.id || '') + '">Delete</button>' +
-        '</div>';
-    }).join('');
+  async function loadTablePage(cfg, opts) {
+    opts = opts || {};
+    const tbody = document.getElementById(cfg.tbodyId);
+    if (!tbody) return;
+    if (opts.reset) cfg.offset = 0;
+    const term = typeof opts.term === 'string' ? opts.term : (cfg.term || '');
+    cfg.term = term;
+
+    const result = await fetchTablePage(cfg, term, cfg.offset);
+    if (result.error) {
+      console.error(result.error);
+      const failedCfg = Object.assign({}, cfg, { term: '', emptyText: 'Could not load records.' });
+      tbody.innerHTML = renderEmptyRow(failedCfg);
+      updateTableFooter(cfg, 0, 0);
+      return;
+    }
+
+    const records = result.data || [];
+    const total = typeof result.count === 'number' ? result.count : 0;
+
+    if (opts.reset) {
+      tbody.innerHTML = records.length ? renderTableRows(cfg, records) : renderEmptyRow(cfg);
+    } else {
+      tbody.insertAdjacentHTML('beforeend', renderTableRows(cfg, records));
+    }
+    updateTableFooter(cfg, total, records.length);
+    if (window.initIcons) window.initIcons();
   }
 
-  async function loadLifegroups() {
-    const list = document.getElementById('lifegroupsList');
-    if (!list) return;
-    const { data, error } = await supabase.from('lifegroups').select('*');
-    if (error) { console.error(error); return; }
-    list.innerHTML = (data || []).map(function (lg) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(lg.group_name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(lg.group_type || 'uncategorised') + ' — Leader: ' +
-          esc(lg.leader_name || '') + ' — ' + esc(lg.location || '') + '</p>' +
-        '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-lifegroup" data-id="' + (lg.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-lifegroup" data-id="' + (lg.id || '') + '">Delete</button>' +
-        '</div>';
-    }).join('');
+  async function loadMoreRecords(cfg, btn) {
+    const startedAt = Date.now();
+    setButtonLoading(btn, true);
+    cfg.offset += RECORD_PAGE_SIZE;
+    await loadTablePage(cfg, { reset: false });
+    finishButtonLoading(btn, startedAt);
   }
 
-  async function loadSermons() {
-    const list = document.getElementById('sermonsList');
-    if (!list) return;
-    const { data, error } = await supabase.from('sermons').select('*').order('date', { ascending: false });
-    if (error) { console.error(error); return; }
-    list.innerHTML = (data || []).map(function (s) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(s.title || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(s.speaker || '') + ' — ' + esc(s.date || '') + '</p>' +
-        '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-sermon" data-id="' + escAttr(s.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-sermon" data-id="' + escAttr(s.id || '') + '">Delete</button>' +
-        '</div>';
-    }).join('');
+  function updateTableFooter(cfg, total, pageCount) {
+    const counter = document.getElementById(cfg.countId);
+    if (counter) {
+      const to = Math.min(cfg.offset + pageCount, total);
+      counter.textContent = total > 0
+        ? 'Showing ' + (cfg.offset + 1) + '–' + to + ' of ' + total + ' ' + cfg.countLabel
+        : '';
+    }
+    const moreBtn = document.getElementById(cfg.moreId);
+    if (moreBtn) moreBtn.hidden = (cfg.offset + pageCount) >= total;
+  }
+
+  // --- Section loaders (entry points for initCMSData + post-write reloads) --
+
+  function loadLeadership() {
+    const cfg = DATA_TABLES.leadership;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
+  }
+
+  function loadMinistries() {
+    const cfg = DATA_TABLES.ministries;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
+  }
+
+  function loadLocations() {
+    const cfg = DATA_TABLES.locations;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
+  }
+
+  function loadLifegroups() {
+    const cfg = DATA_TABLES.lifegroups;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
+  }
+
+  function loadSermons() {
+    const cfg = DATA_TABLES.sermons;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
   }
 
   // --- Special events (max two) ---
@@ -262,19 +639,21 @@
     }
     list.innerHTML = data.map(function (ev) {
       const dateLabel = formatAdminDate(ev.event_date) + (ev.event_time ? ' — ' + ev.event_time : '');
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+      return '<div class="card admin-record">' +
         (ev.image_url
-          ? '<img src="' + escAttr(ev.image_url) + '" alt="' + escAttr(ev.title || '') +
-            '" style="width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;" />'
+          ? '<img class="admin-record__media" src="' + escAttr(ev.image_url) + '" alt="' + escAttr(ev.title || '') + '" />'
           : '') +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(ev.title || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(dateLabel) + '</p>' +
+        '<div class="admin-record__body">' +
+        '<h3 class="card__title admin-record__title">' + esc(ev.title || '') + '</h3>' +
+        '<p class="card__text admin-record__text">' + esc(dateLabel) + '</p>' +
         '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-special-event" data-id="' + (ev.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-special-event" data-id="' + (ev.id || '') + '">Delete</button>' +
+        '<div class="admin-record__actions">' +
+        '<button type="button" class="btn btn--sm data-table__btn data-table__btn--edit" data-action="edit-special-event" data-id="' + escAttr(ev.id) + '" aria-label="Edit event ' + escAttr(ev.title || '') + '"><i data-lucide="pencil" aria-hidden="true"></i> Edit</button>' +
+        '<button type="button" class="btn btn--sm data-table__btn data-table__btn--delete" data-action="delete-special-event" data-id="' + escAttr(ev.id) + '" aria-label="Delete event ' + escAttr(ev.title || '') + '"><i data-lucide="trash-2" aria-hidden="true"></i> Delete</button>' +
+        '</div>' +
         '</div>';
     }).join('');
+    if (window.initIcons) window.initIcons();
   }
 
   // --- Monthly theme (singleton) ------------------------------------------
@@ -292,19 +671,21 @@
       list.innerHTML = '<p class="card__text">No monthly theme yet. Add one (Active) to reveal the homepage theme section; delete it to hide the section.</p>';
       return;
     }
-    list.innerHTML = '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
+    list.innerHTML = '<div class="card admin-record">' +
       (data.image_url
-        ? '<img src="' + escAttr(data.image_url) + '" alt="' + escAttr(data.title || 'Monthly Theme') +
-          '" style="width:64px;height:64px;border-radius:var(--radius-md);object-fit:cover;" />'
+        ? '<img class="admin-record__media" src="' + escAttr(data.image_url) + '" alt="' + escAttr(data.title || 'Monthly Theme') + '" />'
         : '') +
-      '<div style="flex:1;">' +
-      '<h3 class="card__title" style="margin:0;">' + esc(data.title || 'Monthly Theme') + '</h3>' +
-      '<p class="card__text" style="margin:0;">' + esc(data.month_label || 'No month label') + ' — ' +
-        (data.is_active ? 'Active (visible)' : 'Inactive (hidden)') + '</p>' +
+      '<div class="admin-record__body">' +
+      '<h3 class="card__title admin-record__title">' + esc(data.title || 'Monthly Theme') + '</h3>' +
+      '<p class="card__text admin-record__text">' + esc(data.month_label || 'No month label') + ' — ' +
+        (data.is_active ? badgeCell('Active', 'on') : badgeCell('Inactive', 'off')) + '</p>' +
       '</div>' +
-      '<button class="btn btn--secondary" data-action="edit-monthly-theme">Edit</button>' +
-      '<button class="btn btn--secondary" data-action="delete-monthly-theme">Delete</button>' +
+      '<div class="admin-record__actions">' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--edit" data-action="edit-monthly-theme" aria-label="Edit monthly theme"><i data-lucide="pencil" aria-hidden="true"></i> Edit</button>' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--delete" data-action="delete-monthly-theme" aria-label="Delete monthly theme"><i data-lucide="trash-2" aria-hidden="true"></i> Delete</button>' +
+      '</div>' +
       '</div>';
+    if (window.initIcons) window.initIcons();
   }
 
   // --- Live status (singleton) --------------------------------------------
@@ -320,18 +701,21 @@
       list.innerHTML = '<p class="card__text">No live status yet. Save one with status Live to reveal the homepage section and navbar Live button.</p>';
       return;
     }
-    list.innerHTML = '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-      '<div style="flex:1;">' +
-      '<h3 class="card__title" style="margin:0;">' + esc(data.live_title || 'Live Stream') + '</h3>' +
-      '<p class="card__text" style="margin:0;">' +
-        (data.is_live ? '<span style="color:var(--color-live);font-weight:700;">Live Now</span>'
-                      : 'Not live (hidden)') +
+    list.innerHTML = '<div class="card admin-record">' +
+      '<div class="admin-record__body">' +
+      '<h3 class="card__title admin-record__title">' + esc(data.live_title || 'Live Stream') + '</h3>' +
+      '<p class="card__text admin-record__text">' +
+        (data.is_live ? '<span class="data-table__badge data-table__badge--live">Live Now</span>'
+                      : badgeCell('Not live', 'off')) +
         (data.youtube_url ? ' — ' + esc(data.youtube_url) : '') +
       '</p>' +
       '</div>' +
-      '<button class="btn btn--secondary" data-action="edit-live-status">Edit</button>' +
-      '<button class="btn btn--secondary" data-action="delete-live-status">Delete</button>' +
+      '<div class="admin-record__actions">' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--edit" data-action="edit-live-status" aria-label="Edit live status"><i data-lucide="pencil" aria-hidden="true"></i> Edit</button>' +
+      '<button type="button" class="btn btn--sm data-table__btn data-table__btn--delete" data-action="delete-live-status" aria-label="Delete live status"><i data-lucide="trash-2" aria-hidden="true"></i> Delete</button>' +
+      '</div>' +
       '</div>';
+    if (window.initIcons) window.initIcons();
   }
 
   // --- Service schedules (full CRUD with location + optional image) -------
@@ -351,37 +735,10 @@
   }
 
   async function loadServiceSchedules() {
-    const list = document.getElementById('schedulesList');
-    if (!list) return;
-
-    const [schedulesRes, locationsRes] = await Promise.all([
-      supabase.from('service_schedules').select('*').order('sort_order', { ascending: true }),
-      supabase.from('locations').select('id, name').order('sort_order', { ascending: true })
-    ]);
-    if (schedulesRes.error) { console.error(schedulesRes.error); return; }
-
-    const nameById = {};
-    (locationsRes.data || []).forEach(function (l) { nameById[l.id] = l.name; });
-
-    if (!schedulesRes.data || !schedulesRes.data.length) {
-      list.innerHTML = '<p class="card__text">No service schedules yet. Add one below.</p>';
-      return;
-    }
-
-    list.innerHTML = schedulesRes.data.map(function (s) {
-      return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        (s.image_url
-          ? '<img src="' + escAttr(s.image_url) + '" alt="" style="width:60px;height:60px;border-radius:var(--radius-md);object-fit:cover;" />'
-          : '') +
-        '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + esc(s.service_name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + esc(s.day || '') + ' — ' + esc(s.time || '') +
-          ' — ' + esc(nameById[s.location_id] || 'Unknown location') + '</p>' +
-        '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-schedule" data-id="' + escAttr(s.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-schedule" data-id="' + escAttr(s.id || '') + '">Delete</button>' +
-        '</div>';
-    }).join('');
+    await ensureLocationNames();
+    const cfg = DATA_TABLES.schedules;
+    if (buildTableShell(cfg)) bindTableControls(cfg);
+    loadTablePage(cfg, { reset: true });
   }
 
   // --- HTML escaping ---------------------------------------------------
@@ -412,62 +769,78 @@
   };
   let activeRequestTab = 'prayer';
 
-  async function loadRequests() {
-    const list = document.getElementById('requestsList');
-    if (!list) return;
-
+  function requestTableConfig() {
     const tab = REQUEST_TABS[activeRequestTab] || REQUEST_TABS.prayer;
-    const { data, error } = await supabase
-      .from(tab.table)
-      .select('*')
-      .order('date_submitted', { ascending: false });
-
-    if (error) {
-      console.error(error);
-      list.innerHTML = '<p class="card__text">Could not load requests. ' +
-        (error.code === '42501' ? 'Your account needs role = admin.' : 'See the console.') + '</p>';
-      return;
-    }
-
-    renderRequestsList(list, tab, data || []);
-
-    // Icons in the freshly-injected rows are <i data-lucide> placeholders;
-    // convert them now that they are in the DOM.
-    if (window.initIcons) window.initIcons();
+    const isPrayer = tab.table === 'prayer_requests';
+    const kind = isPrayer ? 'prayer request' : 'ministry join request';
+    return {
+      containerId: 'requestsList',
+      shellKey: activeRequestTab,
+      // The shell mirrors the active tab (column labels, delete target table),
+      // so always rebuild it on every load when the tab changes.
+      alwaysRebuild: true,
+      searchId: 'requestsSearch',
+      tbodyId: 'requestsTableBody',
+      countId: 'requestsTableCount',
+      moreId: 'requestsLoadMore',
+      searchPlaceholder: 'Search ' + tab.title.toLowerCase() + '…',
+      searchLabel: 'Search ' + tab.title.toLowerCase(),
+      table: tab.table,
+      orderColumn: 'date_submitted',
+      ascending: false,
+      searchColumns: isPrayer
+        ? ['visitor_name', 'request_text']
+        : ['visitor_name', 'ministry_of_interest', 'contact_info'],
+      dateColumn: 'date_submitted',
+      dateFromId: 'requestsDateFrom',
+      dateToId: 'requestsDateTo',
+      emptyText: 'No ' + tab.title.toLowerCase() + ' yet.',
+      countLabel: 'requests',
+      columns: [
+        { label: 'Name', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+          render: function (r) { return primaryCell(r.visitor_name || 'Anonymous'); } },
+        { label: 'Message', tdClass: 'data-table__td--grow',
+          render: function (r) {
+            return summaryCell(isPrayer
+              ? r.request_text
+              : [r.ministry_of_interest, r.contact_info].filter(Boolean).join(' — '));
+          } },
+        { label: 'Submitted', tdClass: 'data-table__td--date',
+          render: function (r) { return formatTableDateTime(r.date_submitted); } },
+        { label: 'Status', tdClass: 'data-table__td--status',
+          render: function (r) {
+            return r.notified_at
+              ? '<span class="data-table__badge data-table__badge--on"><i data-lucide="mail-check" aria-hidden="true"></i> Emailed</span>'
+              : badgeCell('New');
+          } },
+        { label: 'Actions', thClass: 'data-table__th--actions', tdClass: 'data-table__td--actions',
+          render: function (r) {
+            return '<div class="data-table__actions">' +
+              '<button type="button" class="btn btn--sm data-table__btn data-table__btn--delete" ' +
+                'data-action="delete-request" data-id="' + escAttr(r.id) + '" data-table="' + escAttr(tab.table) + '" ' +
+                'aria-label="Delete ' + kind + ' from ' + escAttr(r.visitor_name || 'Anonymous') + '">' +
+                '<i data-lucide="trash-2" aria-hidden="true"></i> Delete</button>' +
+              '</div>';
+          } }
+      ]
+    };
   }
 
-  function renderRequestsList(container, tab, items) {
-    if (!items.length) {
-      container.innerHTML = '<p class="card__text">No ' + esc(tab.title.toLowerCase()) + ' yet.</p>';
-      return;
+  async function loadRequests() {
+    const cfg = requestTableConfig();
+    const container = document.getElementById(cfg.containerId);
+    if (!container) return;
+    // The table shell is keyed by the active tab, so switching tabs rebuilds
+    // the search bar + table for the other request type (and re-binds controls).
+    buildTableShell(cfg);
+    bindTableControls(cfg);
+    const input = document.getElementById(cfg.searchId);
+    if (input) {
+      input.placeholder = cfg.searchPlaceholder;
+      input.setAttribute('aria-label', cfg.searchLabel);
+      input.value = '';
     }
-
-    container.innerHTML = '<h3 class="admin-list__heading">' + esc(tab.title) + '</h3>' +
-      items.map(function (r) {
-        const name = r.visitor_name || 'Anonymous';
-        // prayer_requests carries request_text; ministry_join_requests carries
-        // the interest plus a contact detail.
-        const body = r.request_text ||
-          [r.ministry_of_interest, r.contact_info].filter(Boolean).join(' — ') || '';
-        const date = r.date_submitted ? new Date(r.date_submitted).toLocaleString() : '';
-        const notified = r.notified_at
-          ? '<span class="request-row__badge"><i data-lucide="mail-check"></i> Emailed</span>'
-          : '';
-
-        return '<div class="card request-row">' +
-          '<div class="request-row__body">' +
-            '<p class="card__subtitle">' + esc(name) + '</p>' +
-            '<p class="card__text request-row__text">' + esc(body) + '</p>' +
-            '<p class="request-row__meta">' + esc(date) + notified + '</p>' +
-          '</div>' +
-          '<button type="button" class="btn btn--secondary btn--sm" ' +
-            'data-action="delete-request" ' +
-            'data-id="' + escAttr(r.id || '') + '" ' +
-            'data-table="' + escAttr(tab.table) + '" ' +
-            'aria-label="Delete request from ' + escAttr(name) + '">' +
-            '<i data-lucide="trash-2"></i> Delete</button>' +
-          '</div>';
-      }).join('');
+    await loadTablePage(cfg, { reset: true, term: '' });
   }
 
   function wireRequestControls() {
@@ -565,12 +938,11 @@
     }
     const toast = document.createElement('div');
     toast.className = 'toast toast--' + (type === 'error' ? 'error' : 'success');
-    const iconClass = type === 'error' ? 'circle-alert' : 'circle-check';
-    const span = document.createElement('span');
-    span.textContent = message;
-    toast.innerHTML = '<i class="ti ' + iconClass + ' toast__icon"></i>';
-    toast.appendChild(span);
+    const iconName = type === 'error' ? 'circle-alert' : 'circle-check';
+    toast.innerHTML = '<i data-lucide="' + iconName + '" class="toast__icon" aria-hidden="true"></i><span></span>';
+    toast.querySelector('span').textContent = message;
     container.appendChild(toast);
+    if (window.initIcons) window.initIcons();
     setTimeout(function () {
       toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
       toast.style.opacity = '0';
@@ -963,35 +1335,47 @@ const name = document.getElementById('leaderName').value.trim();
       document.addEventListener('click', async function (e) {
         const btn = e.target.closest('[data-action="edit-leader"]');
         if (!btn) return;
-        const id = btn.dataset.id;
-        const { data, error } = await supabase.from('leadership_team').select('*').eq('id', id).single();
-        if (error || !data) {
+        if (isButtonBusy(btn)) return;
+        setButtonLoading(btn, true);
+        const startedAt = Date.now();
+        try {
+          const id = btn.dataset.id;
+          const { data, error } = await supabase.from('leadership_team').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that leader.', 'error');
+            console.error(error);
+            return;
+          }
+          leadershipEditingId = id;
+          document.getElementById('leaderName').value = data.name || '';
+          document.getElementById('leaderRole').value = data.role || '';
+          document.getElementById('leaderBio').value = data.bio || '';
+          if (leadershipCancelEdit) leadershipCancelEdit.hidden = false;
+          if (leadershipSubmit) {
+            leadershipSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Leader';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('leaderName').focus();
+
+          // Ensure the Leadership section remains visible
+          const sidebarLinks = document.querySelectorAll('.sidebar__link');
+          sidebarLinks.forEach(function (link) {
+            link.classList.remove('sidebar__link--active');
+          });
+          document.querySelector('.sidebar__link[data-section="leadership"]').classList.add('sidebar__link--active');
+
+          const sections = document.querySelectorAll('.admin-section');
+          sections.forEach(function (sec) {
+            sec.hidden = sec.id !== 'section-leadership';
+          });
+
+          showToast('Leader loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load that leader.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(btn, startedAt);
         }
-        leadershipEditingId = id;
-        document.getElementById('leaderName').value = data.name || '';
-        document.getElementById('leaderRole').value = data.role || '';
-        document.getElementById('leaderBio').value = data.bio || '';
-        if (leadershipCancelEdit) leadershipCancelEdit.hidden = false;
-        if (leadershipSubmit) {
-          leadershipSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Leader';
-          if (window.initIcons) window.initIcons();
-        }
-        document.getElementById('leaderName').focus();
-        
-        // Ensure the Leadership section remains visible
-        const sidebarLinks = document.querySelectorAll('.sidebar__link');
-        sidebarLinks.forEach(function (link) {
-          link.classList.remove('sidebar__link--active');
-        });
-        document.querySelector('.sidebar__link[data-section="leadership"]').classList.add('sidebar__link--active');
-        
-        const sections = document.querySelectorAll('.admin-section');
-        sections.forEach(function (sec) {
-          sec.hidden = sec.id !== 'section-leadership';
-        });
       });
 
      if (leadershipCancelEdit) {
@@ -1090,30 +1474,41 @@ const name = document.getElementById('leaderName').value.trim();
        }
      });
 
-     // Edit handler for ministries
-     document.addEventListener('click', async function (e) {
-       const btn = e.target.closest('[data-action="edit-ministry"]');
-       if (!btn) return;
-       const id = btn.dataset.id;
-       const { data, error } = await supabase.from('ministries').select('*').eq('id', id).single();
-       if (error || !data) {
-         showToast('Could not load that ministry.', 'error');
-         console.error(error);
-         return;
-       }
-       ministriesEditingId = id;
-       document.getElementById('minName').value = data.name || '';
-       document.getElementById('minCategory').value = data.category || 'General';
-       document.getElementById('minDesc').value = data.description || '';
-       document.getElementById('minContact').value = data.contact_person || '';
-       document.getElementById('minSchool').value = data.target_school || '';
-       if (ministriesCancelEdit) ministriesCancelEdit.hidden = false;
-       if (ministriesSubmit) {
-         ministriesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Ministry';
-         if (window.initIcons) window.initIcons();
-       }
-       document.getElementById('minName').focus();
-     });
+// Edit handler for ministries
+      document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('[data-action="edit-ministry"]');
+        if (!btn) return;
+        if (isButtonBusy(btn)) return;
+        setButtonLoading(btn, true);
+        const startedAt = Date.now();
+        try {
+          const id = btn.dataset.id;
+          const { data, error } = await supabase.from('ministries').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that ministry.', 'error');
+            console.error(error);
+            return;
+          }
+          ministriesEditingId = id;
+          document.getElementById('minName').value = data.name || '';
+          document.getElementById('minCategory').value = data.category || 'General';
+          document.getElementById('minDesc').value = data.description || '';
+          document.getElementById('minContact').value = data.contact_person || '';
+          document.getElementById('minSchool').value = data.target_school || '';
+          if (ministriesCancelEdit) ministriesCancelEdit.hidden = false;
+          if (ministriesSubmit) {
+            ministriesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Ministry';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('minName').focus();
+          showToast('Ministry loaded into the form.', 'success');
+        } catch (err) {
+          showToast('Could not load that ministry.', 'error');
+          console.error(err);
+        } finally {
+          finishButtonLoading(btn, startedAt);
+        }
+      });
 
      if (ministriesCancelEdit) {
        ministriesCancelEdit.addEventListener('click', resetMinistriesForm);
@@ -1212,31 +1607,42 @@ locationsForm.addEventListener('submit', async function (e) {
        }
      });
 
-     // Edit handler for locations
-     document.addEventListener('click', async function (e) {
-       const btn = e.target.closest('[data-action="edit-location"]');
-       if (!btn) return;
-       const id = btn.dataset.id;
-       const { data, error } = await supabase.from('locations').select('*').eq('id', id).single();
-       if (error || !data) {
-         showToast('Could not load that location.', 'error');
-         console.error(error);
-         return;
-       }
-       locationsEditingId = id;
-       locationsEditingImage = data.image_url || '';
-       document.getElementById('locName').value = data.name || '';
-       document.getElementById('locType').value = data.location_type || 'Main';
-       document.getElementById('locAddress').value = data.address || '';
-       document.getElementById('locMaps').value = data.google_maps_embed_link || '';
-       document.getElementById('locStatus').value = data.status || 'Active';
-       if (locationsCancelEdit) locationsCancelEdit.hidden = false;
-       if (locationsSubmit) {
-         locationsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Location';
-         if (window.initIcons) window.initIcons();
-       }
-       document.getElementById('locName').focus();
-     });
+// Edit handler for locations
+      document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('[data-action="edit-location"]');
+        if (!btn) return;
+        if (isButtonBusy(btn)) return;
+        setButtonLoading(btn, true);
+        const startedAt = Date.now();
+        try {
+          const id = btn.dataset.id;
+          const { data, error } = await supabase.from('locations').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that location.', 'error');
+            console.error(error);
+            return;
+          }
+          locationsEditingId = id;
+          locationsEditingImage = data.image_url || '';
+          document.getElementById('locName').value = data.name || '';
+          document.getElementById('locType').value = data.location_type || 'Main';
+          document.getElementById('locAddress').value = data.address || '';
+          document.getElementById('locMaps').value = data.google_maps_embed_link || '';
+          document.getElementById('locStatus').value = data.status || 'Active';
+          if (locationsCancelEdit) locationsCancelEdit.hidden = false;
+          if (locationsSubmit) {
+            locationsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Location';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('locName').focus();
+          showToast('Location loaded into the form.', 'success');
+        } catch (err) {
+          showToast('Could not load that location.', 'error');
+          console.error(err);
+        } finally {
+          finishButtonLoading(btn, startedAt);
+        }
+      });
 
      if (locationsCancelEdit) {
        locationsCancelEdit.addEventListener('click', resetLocationsForm);
@@ -1324,27 +1730,38 @@ locationsForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-lifegroup"]');
       if (editBtn) {
-        const id = editBtn.dataset.id;
-        const { data, error } = await supabase.from('lifegroups').select('*').eq('id', id).single();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const id = editBtn.dataset.id;
+          const { data, error } = await supabase.from('lifegroups').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that lifegroup.', 'error');
+            console.error(error);
+            return;
+          }
+          lifegroupsEditingId = id;
+          document.getElementById('lgName').value = data.group_name || '';
+          document.getElementById('lgType').value = data.group_type || 'men';
+          document.getElementById('lgLeader').value = data.leader_name || '';
+          document.getElementById('lgLocation').value = data.location || '';
+          document.getElementById('lgTime').value = data.meeting_time || '';
+          document.getElementById('lgContact').value = data.contact_info || '';
+          const cancelEdit = document.getElementById('lifegroupCancelEdit');
+          if (cancelEdit) cancelEdit.hidden = false;
+          if (lifegroupsSubmit) {
+            lifegroupsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Lifegroup';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('lgName').focus();
+          showToast('Lifegroup loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load that lifegroup.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        lifegroupsEditingId = id;
-        document.getElementById('lgName').value = data.group_name || '';
-        document.getElementById('lgType').value = data.group_type || 'men';
-        document.getElementById('lgLeader').value = data.leader_name || '';
-        document.getElementById('lgLocation').value = data.location || '';
-        document.getElementById('lgTime').value = data.meeting_time || '';
-        document.getElementById('lgContact').value = data.contact_info || '';
-        const cancelEdit = document.getElementById('lifegroupCancelEdit');
-        if (cancelEdit) cancelEdit.hidden = false;
-        if (lifegroupsSubmit) {
-          lifegroupsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Lifegroup';
-          if (window.initIcons) window.initIcons();
-        }
-        document.getElementById('lgName').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-lifegroup"]');
@@ -1443,26 +1860,37 @@ locationsForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-sermon"]');
       if (editBtn) {
-        const id = editBtn.dataset.id;
-        const { data, error } = await supabase.from('sermons').select('*').eq('id', id).single();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const id = editBtn.dataset.id;
+          const { data, error } = await supabase.from('sermons').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that sermon.', 'error');
+            console.error(error);
+            return;
+          }
+          sermonsEditingId = id;
+          document.getElementById('sermonTitle').value = data.title || '';
+          document.getElementById('sermonSpeaker').value = data.speaker || '';
+          document.getElementById('sermonDate').value = data.date || '';
+          document.getElementById('sermonYoutube').value = data.youtube_url || '';
+          document.getElementById('sermonDesc').value = data.description || '';
+          const cancelEdit = document.getElementById('sermonCancelEdit');
+          if (cancelEdit) cancelEdit.hidden = false;
+          if (sermonsSubmit) {
+            sermonsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Sermon';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('sermonTitle').focus();
+          showToast('Sermon loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load that sermon.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        sermonsEditingId = id;
-        document.getElementById('sermonTitle').value = data.title || '';
-        document.getElementById('sermonSpeaker').value = data.speaker || '';
-        document.getElementById('sermonDate').value = data.date || '';
-        document.getElementById('sermonYoutube').value = data.youtube_url || '';
-        document.getElementById('sermonDesc').value = data.description || '';
-        const cancelEdit = document.getElementById('sermonCancelEdit');
-        if (cancelEdit) cancelEdit.hidden = false;
-        if (sermonsSubmit) {
-          sermonsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Sermon';
-          if (window.initIcons) window.initIcons();
-        }
-        document.getElementById('sermonTitle').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-sermon"]');
@@ -1586,26 +2014,37 @@ locationsForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-special-event"]');
       if (editBtn) {
-        const id = editBtn.dataset.id;
-        const { data, error } = await supabase.from('special_events').select('*').eq('id', id).single();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const id = editBtn.dataset.id;
+          const { data, error } = await supabase.from('special_events').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that event.', 'error');
+            console.error(error);
+            return;
+          }
+          specialEventsEditingId = id;
+          specialEventsEditingImage = data.image_url || '';
+          document.getElementById('evTitle').value = data.title || '';
+          document.getElementById('evDate').value = data.event_date ? String(data.event_date).slice(0, 10) : '';
+          document.getElementById('evTime').value = data.event_time || '';
+          document.getElementById('evDesc').value = data.description || '';
+          const cancelEdit = document.getElementById('specialEventCancelEdit');
+          if (cancelEdit) cancelEdit.hidden = false;
+          if (specialEventsSubmit) {
+            specialEventsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Event';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('evTitle').focus();
+          showToast('Event loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load that event.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        specialEventsEditingId = id;
-        specialEventsEditingImage = data.image_url || '';
-        document.getElementById('evTitle').value = data.title || '';
-        document.getElementById('evDate').value = data.event_date ? String(data.event_date).slice(0, 10) : '';
-        document.getElementById('evTime').value = data.event_time || '';
-        document.getElementById('evDesc').value = data.description || '';
-        const cancelEdit = document.getElementById('specialEventCancelEdit');
-        if (cancelEdit) cancelEdit.hidden = false;
-        if (specialEventsSubmit) {
-          specialEventsSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Event';
-          if (window.initIcons) window.initIcons();
-        }
-        document.getElementById('evTitle').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-special-event"]');
@@ -1710,26 +2149,37 @@ locationsForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-schedule"]');
       if (editBtn) {
-        const id = editBtn.dataset.id;
-        const { data, error } = await supabase.from('service_schedules').select('*').eq('id', id).single();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const id = editBtn.dataset.id;
+          const { data, error } = await supabase.from('service_schedules').select('*').eq('id', id).single();
+          if (error || !data) {
+            showToast('Could not load that schedule.', 'error');
+            console.error(error);
+            return;
+          }
+          schedulesEditingId = id;
+          schedulesEditingImage = data.image_url || '';
+          document.getElementById('scName').value = data.service_name || '';
+          document.getElementById('scDay').value = data.day || '';
+          document.getElementById('scTime').value = data.time || '';
+          await populateLocationSelect(data.location_id);
+          const cancelEdit = document.getElementById('scheduleCancelEdit');
+          if (cancelEdit) cancelEdit.hidden = false;
+          if (schedulesSubmit) {
+            schedulesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Schedule';
+            if (window.initIcons) window.initIcons();
+          }
+          document.getElementById('scName').focus();
+          showToast('Schedule loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load that schedule.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        schedulesEditingId = id;
-        schedulesEditingImage = data.image_url || '';
-        document.getElementById('scName').value = data.service_name || '';
-        document.getElementById('scDay').value = data.day || '';
-        document.getElementById('scTime').value = data.time || '';
-        await populateLocationSelect(data.location_id);
-        const cancelEdit = document.getElementById('scheduleCancelEdit');
-        if (cancelEdit) cancelEdit.hidden = false;
-        if (schedulesSubmit) {
-          schedulesSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Schedule';
-          if (window.initIcons) window.initIcons();
-        }
-        document.getElementById('scName').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-schedule"]');
@@ -1818,19 +2268,30 @@ locationsForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-monthly-theme"]');
       if (editBtn) {
-        const { data, error } = await supabase.from('monthly_theme').select('*').limit(1).maybeSingle();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const { data, error } = await supabase.from('monthly_theme').select('*').limit(1).maybeSingle();
+          if (error || !data) {
+            showToast('Could not load the current theme.', 'error');
+            console.error(error);
+            return;
+          }
+          monthlyThemeEditingImage = data.image_url || '';
+          document.getElementById('mtMonth').value = data.month_label || '';
+          document.getElementById('mtTitle').value = data.title || '';
+          document.getElementById('mtText').value = data.description || '';
+          document.getElementById('mtScripture').value = data.scripture || '';
+          document.getElementById('mtActive').value = data.is_active ? 'true' : 'false';
+          document.getElementById('mtTitle').focus();
+          showToast('Monthly theme loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load the current theme.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        monthlyThemeEditingImage = data.image_url || '';
-        document.getElementById('mtMonth').value = data.month_label || '';
-        document.getElementById('mtTitle').value = data.title || '';
-        document.getElementById('mtText').value = data.description || '';
-        document.getElementById('mtScripture').value = data.scripture || '';
-        document.getElementById('mtActive').value = data.is_active ? 'true' : 'false';
-        document.getElementById('mtTitle').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-monthly-theme"]');
@@ -1914,17 +2375,28 @@ liveStatusForm.addEventListener('submit', async function (e) {
     document.addEventListener('click', async function (e) {
       const editBtn = e.target.closest('[data-action="edit-live-status"]');
       if (editBtn) {
-        const { data, error } = await supabase.from('live_status').select('*').limit(1).maybeSingle();
-        if (error || !data) {
+        if (isButtonBusy(editBtn)) return;
+        setButtonLoading(editBtn, true);
+        const startedAt = Date.now();
+        try {
+          const { data, error } = await supabase.from('live_status').select('*').limit(1).maybeSingle();
+          if (error || !data) {
+            showToast('Could not load the live status.', 'error');
+            console.error(error);
+            return;
+          }
+          document.getElementById('lsLive').value = data.is_live ? 'true' : 'false';
+          document.getElementById('lsTitle').value = data.live_title || '';
+          document.getElementById('lsDesc').value = data.live_description || '';
+          document.getElementById('lsYoutube').value = data.youtube_url || '';
+          document.getElementById('lsTitle').focus();
+          showToast('Live status loaded into the form.', 'success');
+        } catch (err) {
           showToast('Could not load the live status.', 'error');
-          console.error(error);
-          return;
+          console.error(err);
+        } finally {
+          finishButtonLoading(editBtn, startedAt);
         }
-        document.getElementById('lsLive').value = data.is_live ? 'true' : 'false';
-        document.getElementById('lsTitle').value = data.live_title || '';
-        document.getElementById('lsDesc').value = data.live_description || '';
-        document.getElementById('lsYoutube').value = data.youtube_url || '';
-        document.getElementById('lsTitle').focus();
       }
 
       const btn = e.target.closest('[data-action="delete-live-status"]');

@@ -500,3 +500,388 @@
     border-color: rgba(239, 68, 68, 0.55);
   }
 }
+
+// ============================================
+// Compact Record Tables (admin CMS)
+// ============================================
+
+.data-table {
+  .data-table__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-md);
+  }
+
+  .data-table__toolbar-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .data-table__datefilter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .data-table__datefilter-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .data-table__datefilter-input {
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-solid);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-accent-glow);
+    }
+  }
+
+  .data-table__search {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+
+    .data-table__search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1em;
+      height: 1em;
+      color: var(--color-text-muted);
+      pointer-events: none;
+    }
+
+    .data-table__search-input {
+      width: 100%;
+      padding: 0.6rem 1rem 0.6rem 2.4rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      background: var(--color-surface-solid);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      transition: border-color var(--transition-fast),
+                  box-shadow var(--transition-fast),
+                  background-color var(--transition-fast);
+
+      &::placeholder {
+        color: var(--color-text-muted);
+      }
+
+      &:focus,
+      &:not(:placeholder-shown) {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-accent-glow);
+      }
+    }
+  }
+
+  .data-table__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-solid);
+  }
+
+  .data-table__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+
+    th {
+      padding: 0.7rem 1rem;
+      background: var(--color-accent-glow);
+      color: var(--color-primary);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    td {
+      padding: 0.7rem 1rem;
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text);
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+    }
+
+    tbody tr {
+      transition: background-color var(--transition-fast);
+
+      &:hover {
+        background-color: var(--color-surface-hover);
+      }
+    }
+  }
+
+  .data-table__th--actions {
+    text-align: right;
+  }
+
+  .data-table__td--actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .data-table__td--name {
+    min-width: 190px;
+  }
+
+  .data-table__td--grow {
+    min-width: 220px;
+    max-width: 420px;
+  }
+
+  .data-table__td--link {
+    min-width: 220px;
+    max-width: 320px;
+  }
+
+  .data-table__td--date,
+  .data-table__td--status {
+    white-space: nowrap;
+  }
+
+  .data-table__identity {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-weight: 700;
+    color: var(--color-text);
+    min-width: 0;
+  }
+
+  .data-table__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--color-accent-glow);
+
+    &--square {
+      border-radius: var(--radius-sm);
+    }
+
+    &--icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+
+      .lucide {
+        width: 1.05em;
+        height: 1.05em;
+      }
+    }
+  }
+
+  .data-table__primary {
+    font-weight: 700;
+    display: block;
+  }
+
+  .data-table__summary {
+    display: block;
+    line-height: 1.5;
+  }
+
+  .data-table__link {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .data-table__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: var(--color-accent-glow);
+    color: var(--color-primary);
+
+    .lucide {
+      width: 0.9em;
+      height: 0.9em;
+    }
+
+    &--on {
+      background: rgba(var(--color-primary-rgb), 0.14);
+      color: var(--color-primary);
+    }
+
+    &--off {
+      background: rgba(128, 128, 128, 0.14);
+      color: var(--color-text-muted);
+    }
+
+    &--live {
+      background: rgba(var(--color-live-rgb), 0.14);
+      color: var(--color-live);
+    }
+  }
+
+  .data-table__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+  }
+
+  .data-table__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .data-table__count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .data-table__empty td {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-xl);
+    color: var(--color-text-muted);
+
+    .lucide {
+      width: 1.5em;
+      height: 1.5em;
+      margin-bottom: 0.4rem;
+      vertical-align: middle;
+    }
+  }
+}
+
+// Compact icon + label row-action buttons (Edit / Delete). They also carry
+// .btn and .btn--sm classes so the shared busy-spinner applies; the overrides
+// below keep the tinted pills compact and give the spinner a visible arc on
+// their light backgrounds.
+.data-table__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.42rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background-color var(--transition-fast),
+              color var(--transition-fast);
+
+  .lucide {
+    width: 0.95em;
+    height: 0.95em;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  &--edit {
+    background-color: rgba(var(--color-primary-rgb), 0.12);
+    color: var(--color-primary);
+
+    &:hover {
+      background-color: rgba(var(--color-primary-rgb), 0.2);
+      box-shadow: 0 3px 10px rgba(var(--color-primary-rgb), 0.16);
+    }
+  }
+
+  &--delete {
+    background-color: rgba(var(--color-error-rgb), 0.1);
+    color: var(--color-error);
+
+    &:hover {
+      background-color: rgba(var(--color-error-rgb), 0.16);
+      box-shadow: 0 3px 10px rgba(var(--color-error-rgb), 0.14);
+    }
+  }
+}
+
+// Spinner arc for the tinted action pills (dark arc reads on both themes).
+.data-table__btn.btn--loading::after {
+  border-color: rgba(0, 0, 0, 0.14);
+  border-top-color: var(--color-text);
+}
+
+// Compact card record (Special Events, Monthly Theme, Live status).
+.admin-record {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  padding: var(--space-md) var(--space-lg);
+}
+
+.admin-record__media {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--color-accent-glow);
+}
+
+.admin-record__body {
+  flex: 1;
+  min-width: 200px;
+}
+
+.admin-record__title,
+.admin-record__text {
+  margin: 0;
+}
+
+.admin-record__actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+// Lucide SVG icons inside toasts are sized like the old font icons.
+.toast .toast__icon {
+  width: 1.35em;
+  height: 1.35em;
+}
