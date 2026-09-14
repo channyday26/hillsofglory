@@ -805,30 +805,74 @@ const settingsForm = document.getElementById('settingsForm');
        const submitBtn = leadershipForm.querySelector('[type="submit"]');
        if (isButtonBusy(submitBtn)) return;
 
-       // Validate form inputs (excluding file inputs)
-       const name = document.getElementById('leaderName').value.trim();
-       const role = document.getElementById('leaderRole').value.trim();
-       const bio = document.getElementById('leaderBio').value.trim();
+        // Validate form inputs (excluding file inputs)
+        const name = document.getElementById('leaderName').value.trim();
+        const role = document.getElementById('leaderRole').value.trim();
+        const bio = document.getElementById('leaderBio').value.trim();
 
-       const missing = validateRequiredFields([['leaderName', 'Name'], ['leaderRole', 'Role']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Clear previous error messages
+        document.getElementById('bioError').textContent = '';
 
-       const imageInput = document.getElementById('leaderImage');
-       const imageFile = imageInput ? imageInput.files[0] : null;
+        // Validate required fields
+        const fieldsToValidate = [
+          { id: 'leaderName', label: 'Name', errorId: 'nameError', element: document.getElementById('leaderName') },
+          { id: 'leaderRole', label: 'Role', errorId: 'roleError', element: document.getElementById('leaderRole') },
+          { id: 'leaderBio', label: 'Bio', errorId: 'bioError', element: document.getElementById('leaderBio') }
+        ];
+        
+        // Initialize error elements
+        fieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasErrors = false;
+        const missingFields = [];
+        
+        fieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(`${id}Error`);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingFields.push(label);
+            hasErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(`${id}Error`);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasErrors) {
+          showToast(missingFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidField = fieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidField) firstInvalidField.element.focus();
+          return;
+        }
 
-       setButtonLoading(submitBtn, true);
+        const imageInput = document.getElementById('leaderImage');
+        const imageFile = imageInput ? imageInput.files[0] : null;
+
+        // Validate bio field again before submission
+        const bioValue = document.getElementById('leaderBio').value.trim();
+        if (!bioValue) {
+          document.getElementById('bioError').textContent = 'Bio is required.';
+          showToast('Bio is required.', 'error');
+          return;
+        }
+
+        setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
        try {
          let imageUrl = '';
          if (imageFile) imageUrl = await uploadImage(imageFile);
-         let error;
-         if (leadershipEditingId) {
-           ({ error } = await supabase.from('leadership_team').update({ name, role, bio, image_url: imageUrl }).eq('id', leadershipEditingId));
-          } else {
-            ({ error } = await supabase.from('leadership_team').insert([{ name, role, bio, image_url: imageUrl }]));
+          let error;
+          if (leadershipEditingId) {
+            ({ error } = await supabase.from('leadership_team').update({ name, role, bio: bioValue, image_url: imageUrl }).eq('id', leadershipEditingId));
+           } else {
+            ({ error } = await supabase.from('leadership_team').insert([{ name, role, bio: bioValue, image_url: imageUrl }]));
           }
 
          if (error) {
@@ -870,28 +914,40 @@ const settingsForm = document.getElementById('settingsForm');
        }
      });
 
-     // Edit handler for leaders
-     document.addEventListener('click', async function (e) {
-       const btn = e.target.closest('[data-action="edit-leader"]');
-       if (!btn) return;
-       const id = btn.dataset.id;
-       const { data, error } = await supabase.from('leadership_team').select('*').eq('id', id).single();
-       if (error || !data) {
-         showToast('Could not load that leader.', 'error');
-         console.error(error);
-         return;
-       }
-       leadershipEditingId = id;
-       document.getElementById('leaderName').value = data.name || '';
-       document.getElementById('leaderRole').value = data.role || '';
-       document.getElementById('leaderBio').value = data.bio || '';
-       if (leadershipCancelEdit) leadershipCancelEdit.hidden = false;
-       if (leadershipSubmit) {
-         leadershipSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Leader';
-         if (window.initIcons) window.initIcons();
-       }
-       document.getElementById('leaderName').focus();
-     });
+      // Edit handler for leaders
+      document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('[data-action="edit-leader"]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const { data, error } = await supabase.from('leadership_team').select('*').eq('id', id).single();
+        if (error || !data) {
+          showToast('Could not load that leader.', 'error');
+          console.error(error);
+          return;
+        }
+        leadershipEditingId = id;
+        document.getElementById('leaderName').value = data.name || '';
+        document.getElementById('leaderRole').value = data.role || '';
+        document.getElementById('leaderBio').value = data.bio || '';
+        if (leadershipCancelEdit) leadershipCancelEdit.hidden = false;
+        if (leadershipSubmit) {
+          leadershipSubmit.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i> Update Leader';
+          if (window.initIcons) window.initIcons();
+        }
+        document.getElementById('leaderName').focus();
+        
+        // Ensure the Leadership section remains visible
+        const sidebarLinks = document.querySelectorAll('.sidebar__link');
+        sidebarLinks.forEach(function (link) {
+          link.classList.remove('sidebar__link--active');
+        });
+        document.querySelector('.sidebar__link[data-section="leadership"]').classList.add('sidebar__link--active');
+        
+        const sections = document.querySelectorAll('.admin-section');
+        sections.forEach(function (sec) {
+          sec.hidden = sec.id !== 'section-leadership';
+        });
+      });
 
      if (leadershipCancelEdit) {
        leadershipCancelEdit.addEventListener('click', resetLeadershipForm);
@@ -929,11 +985,43 @@ const settingsForm = document.getElementById('settingsForm');
        const contact = document.getElementById('minContact').value.trim();
        const school = document.getElementById('minSchool').value.trim();
 
-       const missing = validateRequiredFields([['minName', 'Name'], ['minCategory', 'Category']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const minFieldsToValidate = [
+          { id: 'minName', label: 'Name', errorId: 'minNameError', element: document.getElementById('minName') },
+          { id: 'minCategory', label: 'Category', errorId: 'minCategoryError', element: document.getElementById('minCategory') }
+        ];
+        
+        // Initialize error elements
+        minFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasMinErrors = false;
+        const missingMinFields = [];
+        
+        minFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingMinFields.push(label);
+            hasMinErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasMinErrors) {
+          showToast(missingMinFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidMinField = minFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidMinField) firstInvalidMinField.element.focus();
+          return;
+        }
 
        const imageInput = document.getElementById('minImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
@@ -1291,11 +1379,42 @@ locationsForm.addEventListener('submit', async function (e) {
        const youtube = document.getElementById('sermonYoutube').value.trim();
        const desc = document.getElementById('sermonDesc').value.trim();
 
-       const missing = validateRequiredFields([['sermonTitle', 'Title']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const sermonFieldsToValidate = [
+          { id: 'sermonTitle', label: 'Title', errorId: 'sermonTitleError', element: document.getElementById('sermonTitle') }
+        ];
+        
+        // Initialize error elements
+        sermonFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasSermonErrors = false;
+        const missingSermonFields = [];
+        
+        sermonFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingSermonFields.push(label);
+            hasSermonErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasSermonErrors) {
+          showToast(missingSermonFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidSermonField = sermonFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidSermonField) firstInvalidSermonField.element.focus();
+          return;
+        }
 
        // Validate YouTube URL if provided
        if (youtube && !isValidUrl(youtube)) {
@@ -1413,11 +1532,43 @@ locationsForm.addEventListener('submit', async function (e) {
        const time = document.getElementById('evTime').value.trim();
        const desc = document.getElementById('evDesc').value.trim();
 
-       const missing = validateRequiredFields([['evTitle', 'Title'], ['evDate', 'Event Date']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const eventFieldsToValidate = [
+          { id: 'evTitle', label: 'Title', errorId: 'evTitleError', element: document.getElementById('evTitle') },
+          { id: 'evDate', label: 'Event Date', errorId: 'evDateError', element: document.getElementById('evDate') }
+        ];
+        
+        // Initialize error elements
+        eventFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasEventErrors = false;
+        const missingEventFields = [];
+        
+        eventFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingEventFields.push(label);
+            hasEventErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasEventErrors) {
+          showToast(missingEventFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidEventField = eventFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidEventField) firstInvalidEventField.element.focus();
+          return;
+        }
 
        const imageInput = document.getElementById('evImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
@@ -1553,11 +1704,45 @@ locationsForm.addEventListener('submit', async function (e) {
        const imageInput = document.getElementById('scImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
 
-       const missing = validateRequiredFields([['scName', 'Service name'], ['scDay', 'Day'], ['scTime', 'Time'], ['scLocation', 'Location']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const scheduleFieldsToValidate = [
+          { id: 'scName', label: 'Service name', errorId: 'scNameError', element: document.getElementById('scName') },
+          { id: 'scDay', label: 'Day', errorId: 'scDayError', element: document.getElementById('scDay') },
+          { id: 'scTime', label: 'Time', errorId: 'scTimeError', element: document.getElementById('scTime') },
+          { id: 'scLocation', label: 'Location', errorId: 'scLocationError', element: document.getElementById('scLocation') }
+        ];
+        
+        // Initialize error elements
+        scheduleFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasScheduleErrors = false;
+        const missingScheduleFields = [];
+        
+        scheduleFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingScheduleFields.push(label);
+            hasScheduleErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasScheduleErrors) {
+          showToast(missingScheduleFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidScheduleField = scheduleFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidScheduleField) firstInvalidScheduleField.element.focus();
+          return;
+        }
 
        setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
@@ -1660,11 +1845,45 @@ locationsForm.addEventListener('submit', async function (e) {
        const imageInput = document.getElementById('mtImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
 
-       const missing = validateRequiredFields([['mtMonth', 'Month label'], ['mtTitle', 'Theme title'], ['mtText', 'Message'], ['mtScripture', 'Scripture verse']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const themeFieldsToValidate = [
+          { id: 'mtMonth', label: 'Month label', errorId: 'mtMonthError', element: document.getElementById('mtMonth') },
+          { id: 'mtTitle', label: 'Theme title', errorId: 'mtTitleError', element: document.getElementById('mtTitle') },
+          { id: 'mtText', label: 'Message', errorId: 'mtTextError', element: document.getElementById('mtText') },
+          { id: 'mtScripture', label: 'Scripture verse', errorId: 'mtScriptureError', element: document.getElementById('mtScripture') }
+        ];
+        
+        // Initialize error elements
+        themeFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasThemeErrors = false;
+        const missingThemeFields = [];
+        
+        themeFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingThemeFields.push(label);
+            hasThemeErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasThemeErrors) {
+          showToast(missingThemeFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidThemeField = themeFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidThemeField) firstInvalidThemeField.element.focus();
+          return;
+        }
 
        setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
@@ -1752,12 +1971,43 @@ liveStatusForm.addEventListener('submit', async function (e) {
        const live_description = document.getElementById('lsDesc').value.trim();
        let youtube_url = document.getElementById('lsYoutube').value.trim();
 
-       // Validate required fields (excluding file uploads)
-       const missing = validateRequiredFields([['lsTitle', 'Live title'], ['lsYoutube', 'YouTube URL']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+        // Validate required fields
+        const liveFieldsToValidate = [
+          { id: 'lsTitle', label: 'Live title', errorId: 'lsTitleError', element: document.getElementById('lsTitle') },
+          { id: 'lsYoutube', label: 'YouTube URL', errorId: 'lsYoutubeError', element: document.getElementById('lsYoutube') }
+        ];
+        
+        // Initialize error elements
+        liveFieldsToValidate.forEach(({ errorId }) => {
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) errorElement.textContent = '';
+        });
+        
+        let hasLiveErrors = false;
+        const missingLiveFields = [];
+        
+        liveFieldsToValidate.forEach(({ id, label, element }) => {
+          if (!element.value.trim() && element.required) {
+            element.setAttribute('aria-invalid', 'true');
+            element.style.borderColor = '#ff4444';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = `${label} is required.`;
+            missingLiveFields.push(label);
+            hasLiveErrors = true;
+          } else {
+            element.setAttribute('aria-invalid', 'false');
+            element.style.borderColor = '';
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) errorElement.textContent = '';
+          }
+        });
+        
+        if (hasLiveErrors) {
+          showToast(missingLiveFields.join(' and ') + ' are required.', 'error');
+          const firstInvalidLiveField = liveFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
+          if (firstInvalidLiveField) firstInvalidLiveField.element.focus();
+          return;
+        }
 
        // Validate YouTube URL if provided
        if (youtube_url && !isValidUrl(youtube_url)) {

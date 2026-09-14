@@ -157,10 +157,13 @@
                   <input type="text" id="leaderRole" name="role" class="form__input" required />
                 </div>
               </div>
-              <div class="form__group">
-                <label for="leaderBio" class="form__label">Bio</label>
-                <textarea id="leaderBio" name="bio" class="form__input form__input--textarea" rows="3"></textarea>
-              </div>
+<div class="form__group">
+    <label for="leaderBio" class="form__label">Bio <span class="form__required">*</span></label>
+    <textarea id="leaderBio" name="bio" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="bioError"></textarea>
+    <div id="bioError" class="error-message" aria-live="polite"></div>
+  </div>
+  <div class="form__group" id="nameError" style="display: none;"></div>
+  <div class="form__group" id="roleError" style="display: none;"></div>
               <div class="form__group">
                 <label for="leaderImage" class="form__label">Profile Image (Max 2MB)</label>
                 <input type="file" id="leaderImage" name="image" class="form__input" accept="image/*" />
@@ -180,16 +183,18 @@
             <h2 class="section-title">Manage Ministries</h2>
             <form class="admin-form" id="ministriesForm" novalidate>
               <div class="form__row">
-                <div class="form__group">
-                  <label for="minName" class="form__label">Name</label>
-                  <input type="text" id="minName" name="name" class="form__input" required />
-                </div>
-                <div class="form__group">
-                  <label for="minCategory" class="form__label">Category</label>
-                  <select id="minCategory" name="category" class="form__input" required>
-                    <option value="General" selected>General</option>
-                  </select>
-                </div>
+<div class="form__group">
+  <label for="minName" class="form__label">Name <span class="form__required">*</span></label>
+  <input type="text" id="minName" name="name" class="form__input" required aria-invalid="false" aria-describedby="minNameError" />
+  <div id="minNameError" class="error-message" aria-live="polite"></div>
+</div>
+<div class="form__group">
+  <label for="minCategory" class="form__label">Category <span class="form__required">*</span></label>
+  <select id="minCategory" name="category" class="form__input" required aria-invalid="false" aria-describedby="minCategoryError">
+    <option value="General" selected>General</option>
+  </select>
+  <div id="minCategoryError" class="error-message" aria-live="polite"></div>
+</div>
               </div>
               <div class="form__group">
                 <label for="minDesc" class="form__label">Description</label>
@@ -284,10 +289,11 @@
                   <label for="lgLeader" class="form__label">Leader Name</label>
                   <input type="text" id="lgLeader" name="leader_name" class="form__input" />
                 </div>
-                <div class="form__group">
-                  <label for="lgLocation" class="form__label">Location</label>
-                  <input type="text" id="lgLocation" name="location" class="form__input" />
-                </div>
+<div class="form__group">
+  <label for="scLocation" class="form__label">Location <span class="form__required">*</span></label>
+  <select id="scLocation" name="location_id" class="form__input" required aria-invalid="false" aria-describedby="scLocationError"></select>
+  <div id="scLocationError" class="error-message" aria-live="polite"></div>
+</div>
               </div>
               <div class="form__group">
                 <label for="lgTime" class="form__label">Meeting Time</label>
@@ -311,10 +317,11 @@
           <div class="admin-card">
             <h2 class="section-title">Manage Sermons</h2>
             <form class="admin-form" id="sermonsForm" novalidate>
-              <div class="form__group">
-                <label for="sermonTitle" class="form__label">Title</label>
-                <input type="text" id="sermonTitle" name="title" class="form__input" required />
-              </div>
+<div class="form__group">
+  <label for="sermonTitle" class="form__label">Title <span class="form__required">*</span></label>
+  <input type="text" id="sermonTitle" name="title" class="form__input" required aria-invalid="false" aria-describedby="sermonTitleError" />
+  <div id="sermonTitleError" class="error-message" aria-live="polite"></div>
+</div>
               <div class="form__row">
                 <div class="form__group">
                   <label for="sermonSpeaker" class="form__label">Speaker</label>
@@ -389,22 +396,22 @@
             <form class="admin-form" id="schedulesForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="scName" class="form__label">Service Name</label>
-                  <input type="text" id="scName" name="service_name" class="form__input" required />
+                  <label for="scName" class="form__label">Service Name <span class="form__required">*</span></label>
+                  <input type="text" id="scName" name="service_name" class="form__input" required aria-invalid="false" aria-describedby="scNameError" />
                 </div>
                 <div class="form__group">
-                  <label for="scDay" class="form__label">Day</label>
-                  <input type="text" id="scDay" name="day" class="form__input" placeholder="e.g. Sunday" required />
+                  <label for="scDay" class="form__label">Day <span class="form__required">*</span></label>
+                  <input type="text" id="scDay" name="day" class="form__input" placeholder="e.g. Sunday" required aria-invalid="false" aria-describedby="scDayError" />
                 </div>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="scTime" class="form__label">Time</label>
-                  <input type="text" id="scTime" name="time" class="form__input" placeholder="e.g. 10:00 AM" required />
+                  <label for="scTime" class="form__label">Time <span class="form__required">*</span></label>
+                  <input type="text" id="scTime" name="time" class="form__input" placeholder="e.g. 10:00 AM" required aria-invalid="false" aria-describedby="scTimeError" />
                 </div>
                 <div class="form__group">
-                  <label for="scLocation" class="form__label">Location</label>
-                  <select id="scLocation" name="location_id" class="form__input" required></select>
+                  <label for="scLocation" class="form__label">Location <span class="form__required">*</span></label>
+                  <select id="scLocation" name="location_id" class="form__input" required aria-invalid="false" aria-describedby="scLocationError"></select>
                 </div>
               </div>
               <div class="form__group">
@@ -427,10 +434,11 @@
             <p class="card__text" style="margin-bottom:var(--space-lg);">Feature a striking monthly theme on the homepage. Saving an active theme reveals the section; deleting it (or setting it inactive) hides it.</p>
             <form class="admin-form" id="monthlyThemeForm" novalidate>
               <div class="form__row">
-                <div class="form__group">
-                  <label for="mtMonth" class="form__label">Month Label</label>
-                  <input type="text" id="mtMonth" name="month_label" class="form__input" placeholder="e.g. September 2026" />
-                </div>
+<div class="form__group">
+  <label for="mtMonth" class="form__label">Month Label <span class="form__required">*</span></label>
+  <input type="text" id="mtMonth" name="month_label" class="form__input" placeholder="e.g. September 2026" required aria-invalid="false" aria-describedby="mtMonthError" />
+  <div id="mtMonthError" class="error-message" aria-live="polite"></div>
+</div>
                 <div class="form__group">
                   <label for="mtActive" class="form__label">Show Theme</label>
                   <select id="mtActive" name="is_active" class="form__input">
@@ -439,18 +447,21 @@
                   </select>
                 </div>
               </div>
-              <div class="form__group">
-                <label for="mtTitle" class="form__label">Theme Title</label>
-                <input type="text" id="mtTitle" name="title" class="form__input" placeholder="e.g. The Month of Breakthrough" />
-              </div>
-              <div class="form__group">
-                <label for="mtText" class="form__label">Message</label>
-                <textarea id="mtText" name="description" class="form__input form__input--textarea" rows="3"></textarea>
-              </div>
-              <div class="form__group">
-                <label for="mtScripture" class="form__label">Scripture Verse</label>
-                <input type="text" id="mtScripture" name="scripture" class="form__input" placeholder="e.g. Isaiah 43:19" />
-              </div>
+<div class="form__group">
+  <label for="mtTitle" class="form__label">Theme Title <span class="form__required">*</span></label>
+  <input type="text" id="mtTitle" name="title" class="form__input" placeholder="e.g. The Month of Breakthrough" required aria-invalid="false" aria-describedby="mtTitleError" />
+  <div id="mtTitleError" class="error-message" aria-live="polite"></div>
+</div>
+<div class="form__group">
+  <label for="mtText" class="form__label">Message <span class="form__required">*</span></label>
+  <textarea id="mtText" name="description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="mtTextError"></textarea>
+  <div id="mtTextError" class="error-message" aria-live="polite"></div>
+</div>
+<div class="form__group">
+  <label for="mtScripture" class="form__label">Scripture Verse <span class="form__required">*</span></label>
+  <input type="text" id="mtScripture" name="scripture" class="form__input" placeholder="e.g. Isaiah 43:19" required aria-invalid="false" aria-describedby="mtScriptureError" />
+  <div id="mtScriptureError" class="error-message" aria-live="polite"></div>
+</div>
               <div class="form__group">
                 <label for="mtImage" class="form__label">Theme Image (Max 2MB)</label>
                 <input type="file" id="mtImage" name="image" class="form__input" accept="image/*" />
@@ -470,22 +481,24 @@
             <p class="card__text" style="margin-bottom:var(--space-lg);">When a stream is running, set the status to Live and paste the YouTube link. The homepage section and desktop navbar Live button appear while active; set it to Not Live to hide them.</p>
             <form class="admin-form" id="liveStatusForm" novalidate>
               <div class="form__row">
-                <div class="form__group">
-                  <label for="lsLive" class="form__label">Status</label>
-                  <select id="lsLive" name="is_live" class="form__input">
-                    <option value="false">Not Live (hidden)</option>
-                    <option value="true">Live Now (visible)</option>
-                  </select>
-                </div>
-                <div class="form__group">
-                  <label for="lsYoutube" class="form__label">YouTube Link</label>
-                  <input type="url" id="lsYoutube" name="youtube_url" class="form__input" placeholder="https://youtube.com/watch?v=..." />
-                </div>
+<div class="form__group">
+  <label for="lsLive" class="form__label">Status</label>
+  <select id="lsLive" name="is_live" class="form__input">
+    <option value="false">Not Live (hidden)</option>
+    <option value="true">Live Now (visible)</option>
+  </select>
+</div>
+<div class="form__group">
+  <label for="lsYoutube" class="form__label">YouTube Link <span class="form__required">*</span></label>
+  <input type="url" id="lsYoutube" name="youtube_url" class="form__input" placeholder="https://youtube.com/watch?v=..." required aria-invalid="false" aria-describedby="lsYoutubeError" />
+  <div id="lsYoutubeError" class="error-message" aria-live="polite"></div>
+</div>
               </div>
-              <div class="form__group">
-                <label for="lsTitle" class="form__label">Live Title</label>
-                <input type="text" id="lsTitle" name="live_title" class="form__input" placeholder="e.g. Sunday Worship Service" />
-              </div>
+<div class="form__group">
+  <label for="lsTitle" class="form__label">Live Title <span class="form__required">*</span></label>
+  <input type="text" id="lsTitle" name="live_title" class="form__input" placeholder="e.g. Sunday Worship Service" required aria-invalid="false" aria-describedby="lsTitleError" />
+  <div id="lsTitleError" class="error-message" aria-live="polite"></div>
+</div>
               <div class="form__group">
                 <label for="lsDesc" class="form__label">Description</label>
                 <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3"></textarea>
