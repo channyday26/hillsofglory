@@ -53,12 +53,12 @@
   }
 
   @media (max-width: 960px) {
-    height: 76px;
-    margin-bottom: -76px;
+    height: 88px;
+    margin-bottom: -88px;
 
     &.is-scrolled {
       margin-bottom: 0;
-      height: 64px;
+      height: 76px;
     }
 
     // Mobile keeps the slim bar borderless/shadow-free.
@@ -66,6 +66,30 @@
 
     &::before {
       box-shadow: none !important;
+    }
+
+    // Scrolled: dissolve the sharp bottom edge instead of a hard cut.
+    // The mask fades both the glass tint and the backdrop blur together.
+    // Content floats well above the dissolve zone (2rem bottom padding),
+    // so the mask holds full opacity through that area, then falls off with
+    // diminishing deltas for a smoothstep-style, optically seamless tail.
+    &.is-scrolled::before {
+      -webkit-mask-image: linear-gradient(to bottom,
+        #000 0%,
+        #000 62%,
+        rgba(0, 0, 0, 0.94) 74%,
+        rgba(0, 0, 0, 0.72) 83%,
+        rgba(0, 0, 0, 0.42) 90%,
+        rgba(0, 0, 0, 0.16) 95%,
+        transparent 100%);
+      mask-image: linear-gradient(to bottom,
+        #000 0%,
+        #000 62%,
+        rgba(0, 0, 0, 0.94) 74%,
+        rgba(0, 0, 0, 0.72) 83%,
+        rgba(0, 0, 0, 0.42) 90%,
+        rgba(0, 0, 0, 0.16) 95%,
+        transparent 100%);
     }
   }
 }
@@ -76,6 +100,8 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background-color: var(--color-surface-solid);
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 }
 
@@ -114,7 +140,9 @@
     padding: 0.75rem 1rem;
 
     .navbar.is-scrolled & {
-      padding: 0.5rem 1rem;
+      // 2rem bottom padding lifts the controls clear of the dissolving
+      // glass tail while scrolled.
+      padding: 0.5rem 1rem 2rem;
     }
   }
 }

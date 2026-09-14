@@ -7814,10 +7814,16 @@ form#prayerRequestForm {
 // ============================================================================
 // Homepage — Monthly Theme Showcase (dynamic, admin-produced)
 // ============================================================================
-// High-impact feature stage: a full-bleed photo panel with layered gradient
-// washes and a glassy content well. The whole section (including its `hidden`
-// attribute) is toggled by js/main.js — nothing renders until the CMS
-// publishes a theme.
+// Poster-style feature stage: the uploaded photo becomes the focal artwork
+// (clipped frame + echo + arc + month chip), the headline copy sits in an
+// editorial panel, and layered geometric shapes fill the backstage. The whole
+// section (including its `hidden` attribute) is toggled by js/main.js —
+// nothing renders until the CMS publishes a theme.
+//
+// COLOR: js/main.js samples the dominant palette from the photo and writes it
+// to the stage as `--mt-accent*` custom properties (runtime theming, not inline
+// styles). The SCSS defaults below — brand green/gold — are the guaranteed
+// pre-palette / CORS-fallback look while the sampler resolves.
 
 // Editorial band: the stage breaks out of the page container (its markup lives
 // directly in the section, not inside `.container`) so it reads as the site's
@@ -7827,97 +7833,179 @@ form#prayerRequestForm {
 }
 
 .monthly-theme {
+  // Dynamic palette surface — overridden at runtime by the JS sampler.
+  --mt-accent: var(--color-secondary);
+  --mt-accent-rgb: var(--color-secondary-rgb);
+  --mt-accent-2: var(--color-primary-light);
+  --mt-accent-2-rgb: var(--color-primary-rgb);
+  --mt-accent-soft: var(--color-secondary-light);
+  --mt-accent-deep: #1f2b12;
+  --mt-accent-deep-2: #10140c;
+  --mt-on-accent: #2b1d06;
+  --mt-text: #ffffff;
+
   position: relative;
   z-index: 1;
   isolation: isolate;
-  min-height: clamp(440px, 84vh, 560px);
-  display: flex;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: minmax(0, 9fr) minmax(0, 7fr);
+  align-items: center;
+  min-height: clamp(500px, 80vh, 760px);
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card-hover), 0 30px 70px -34px rgba(9, 20, 4, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(var(--color-secondary-rgb), 0.22);
+  border: 1px solid rgba(var(--mt-accent-rgb), 0.28);
+  background-color: var(--mt-accent-deep-2);
+  // Neutral ink base beneath the accent bloom — uniform even before sampling.
+  background-image: linear-gradient(158deg, var(--mt-accent-deep) 0%, var(--mt-accent-deep-2) 55%, #0b0e09 100%);
+}
 
-  // Decorative lane: a golden halo ring (top-right) + an organic emerald-gold
-  // ridge (bottom-right) clipped from real geometry, then softened into a glow.
-  &::before {
-    content: "";
-    position: absolute;
-    top: -18%;
-    right: -7%;
-    z-index: 0;
-    width: clamp(260px, 34vw, 500px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 1.5px solid rgba(236, 200, 134, 0.38);
-    box-shadow: 0 0 0 30px rgba(236, 200, 134, 0.05), 0 0 0 60px rgba(236, 200, 134, 0.035);
-    pointer-events: none;
-    animation: monthlyFloat 16s ease-in-out infinite;
+// Backstage décor: every accent-tinted layer lives here so it can fade in as a
+// unit once the sampled palette lands (.is-themed flips its opacity).
+.monthly-theme__stage-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.1s var(--spring-gentle);
+  background:
+    radial-gradient(72rem 40rem at 84% -6%, rgba(var(--mt-accent-rgb), 0.34) 0%, rgba(var(--mt-accent-rgb), 0) 58%),
+    radial-gradient(52rem 34rem at 6% 112%, rgba(var(--color-secondary-rgb), 0.24) 0%, rgba(var(--color-secondary-rgb), 0) 60%);
 
-    @media (prefers-reduced-transparency: reduce) {
-      box-shadow: none;
-    }
+  @media (prefers-reduced-transparency: reduce) {
+    background:
+      radial-gradient(72rem 40rem at 84% -6%, rgba(var(--mt-accent-rgb), 0.2) 0%, rgba(var(--mt-accent-rgb), 0) 58%);
   }
+}
+
+.monthly-theme.is-themed .monthly-theme__stage-bg {
+  opacity: 1;
+}
+
+// Concentric "target" rings (top-right) + a slowly orbiting dashed orbit.
+.monthly-theme__shape--rings {
+  position: absolute;
+  top: -12%;
+  right: -6%;
+  width: clamp(320px, 40vw, 620px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--mt-accent-rgb), 0.32);
+  box-shadow:
+    0 0 0 36px rgba(var(--mt-accent-rgb), 0.055),
+    0 0 0 76px rgba(var(--mt-accent-rgb), 0.04),
+    0 0 0 120px rgba(var(--mt-accent-rgb), 0.03);
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
 
   &::after {
     content: "";
     position: absolute;
-    right: -5%;
-    bottom: -16%;
-    z-index: 0;
-    width: clamp(320px, 46vw, 660px);
-    aspect-ratio: 1.9 / 1;
-    pointer-events: none;
-    background:
-      radial-gradient(120% 130% at 26% 34%, rgba(var(--color-secondary-rgb), 0.4) 0%, rgba(var(--color-secondary-rgb), 0) 62%),
-      linear-gradient(140deg, rgba(128, 176, 62, 0.34) 0%, rgba(38, 74, 20, 0.18) 100%);
-    clip-path: polygon(0 46%, 14% 22%, 34% 12%, 58% 20%, 78% 8%, 100% 30%, 100% 100%, 0 100%);
-    filter: blur(26px);
+    inset: 18%;
+    border-radius: 50%;
+    border: 1px dashed rgba(var(--mt-accent-rgb), 0.5);
+    animation: monthOrbit 120s linear infinite;
+  }
 
-    @media (prefers-reduced-transparency: reduce) {
-      filter: none;
-      opacity: 0.85;
-    }
+  @media (prefers-reduced-transparency: reduce) {
+    box-shadow: none;
   }
 }
 
-.monthly-theme__media {
+// Overlapping rotated square outline on the left — crisp counterpoint to the
+// round rings.
+.monthly-theme__shape--diamond {
   position: absolute;
-  inset: 0;
-  z-index: -2;
-  // Decorative fallback (keeps the stage striking even without an uploaded
-  // photo): elevations of deep moss into gold, with soft primary/secondary
-  // glows, a warm bottom-right sun pool and a faint concentric ripple receding
-  // from the halo.
-  background:
-    radial-gradient(720px 420px at 78% 112%, rgba(245, 208, 139, 0.2) 0%, rgba(245, 208, 139, 0) 56%),
-    radial-gradient(1040px 600px at 90% -8%, rgba(var(--color-secondary-rgb), 0.4) 0%, rgba(var(--color-secondary-rgb), 0) 58%),
-    radial-gradient(880px 500px at 4% 116%, rgba(var(--color-primary-rgb), 0.5) 0%, rgba(var(--color-primary-rgb), 0) 62%),
-    repeating-radial-gradient(ellipse 64% 44% at 86% 12%, rgba(235, 198, 130, 0.06) 0 3px, transparent 3px 52px),
-    linear-gradient(152deg, #10240c 0%, #1c4112 34%, #4c6b1d 62%, #a67c2e 86%, #d9a23f 100%);
+  top: 16%;
+  left: -4%;
+  width: clamp(120px, 15vw, 210px);
+  aspect-ratio: 1;
+  transform: rotate(45deg);
+  border: 1px solid rgba(var(--mt-accent-2-rgb), 0.5);
+  box-shadow: inset 0 0 0 12px rgba(var(--mt-accent-2-rgb), 0.06);
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
 
-  // Warm diagonal light beam spilling from the top-right halo — reads as
-  // sunlight through tall windows, reinforcing the "dawn over the hills" mood.
-  &::before {
-    content: "";
-    position: absolute;
-    top: -34%;
-    right: -6%;
-    z-index: 0;
-    width: clamp(150px, 20vw, 290px);
-    height: 84%;
-    background: linear-gradient(108deg, rgba(255, 214, 140, 0.3) 0%, rgba(255, 214, 140, 0.12) 42%, rgba(255, 214, 140, 0) 76%);
-    transform: rotate(17deg);
-    transform-origin: center top;
-    filter: blur(3px);
-    pointer-events: none;
+// Halftone-dot field rising from the lower-left corner.
+.monthly-theme__shape--dots {
+  position: absolute;
+  left: 5%;
+  bottom: -12%;
+  width: clamp(190px, 26vw, 320px);
+  aspect-ratio: 1.4 / 1;
+  background-image: radial-gradient(rgba(var(--mt-accent-rgb), 0.42) 1.4px, transparent 1.4px);
+  background-size: 20px 20px;
+  opacity: 0.4;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #000 42%, #000 100%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #000 42%, #000 100%);
+}
 
-    @media (prefers-reduced-transparency: reduce) {
-      opacity: 0.5;
-    }
-  }
+// Fine diagonal stripe sheen sweeping across the backstage.
+.monthly-theme__shape--stripes {
+  position: absolute;
+  top: -24%;
+  left: -8%;
+  width: 44%;
+  height: 130%;
+  background: repeating-linear-gradient(115deg, rgba(var(--mt-accent-rgb), 0.07) 0 2px, rgba(var(--mt-accent-rgb), 0) 2px 22px);
+  transform: rotate(7deg);
+}
+
+// Giant ghosted month label pressed into the backstage texture.
+.monthly-theme__watermark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2.2%;
+  z-index: 0;
+  font-family: var(--font-brand);
+  font-weight: 900;
+  font-size: clamp(5.5rem, 15vw, 12rem);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(var(--mt-accent-rgb), 0.062);
+  user-select: none;
+  transition: color var(--transition-smooth);
+}
+
+// Focal-artwork column: an inset poster frame raised off a gradient echo.
+.monthly-theme__media {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  margin: 0;
+  padding: clamp(1.4rem, 3.2vw, 2.8rem);
+  min-width: 0;
+  animation: fadeInScale 0.7s var(--spring-snappy) both;
+  animation-delay: 0.04s;
+}
+
+// Crisp geometric echo pushed under the photo — same silhouette, offset by a
+// beat, filled with the sampled accent gradient so the cut corner reads as
+// stacked paper, not a hole.
+.monthly-theme__echo {
+  position: absolute;
+  inset: clamp(1.4rem, 3.2vw, 2.8rem);
+  background: linear-gradient(135deg, rgba(var(--mt-accent-rgb), 0.85) 0%, rgba(var(--mt-accent-2-rgb), 0.6) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 0 100%);
+  transform: translate(1.15rem, 1.15rem);
+  opacity: 0.92;
+}
+
+// The clipped poster frame itself.
+.monthly-theme__photo {
+  position: relative;
+  aspect-ratio: 4 / 3.4;
+  width: 100%;
+  max-height: min(66vh, 660px);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 0 100%);
+  box-shadow: 0 36px 64px -30px rgba(5, 9, 3, 0.6);
+  background: var(--mt-accent-deep);
 
   img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -7925,84 +8013,167 @@ form#prayerRequestForm {
   }
 }
 
-.monthly-theme:hover .monthly-theme__media img {
-  transform: scale(1.06);
+// Bottom scrim + accent kiss so the photo melts into the stage palette.
+.monthly-theme__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(9, 13, 7, 0) 48%, rgba(9, 13, 7, 0.52) 100%),
+    linear-gradient(118deg, rgba(var(--mt-accent-rgb), 0.32) 0%, rgba(var(--mt-accent-rgb), 0) 46%);
+}
+
+.monthly-theme:hover .monthly-theme__photo img {
+  transform: scale(1.05);
 
   @media (prefers-reduced-motion: reduce) {
     transform: none;
   }
 }
 
-// Bottom-up legibility scrim + warm prism haze layered OVER the photograph,
-// with a low-opacity film-grain texture burned in on top for tactile depth.
-.monthly-theme__wash {
+// Half-donut "pin" straddling the poster's cut corner — ties the frame to the
+// geometric vocabulary.
+.monthly-theme__arc {
   position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(180deg, rgba(8, 16, 4, 0.08) 0%, rgba(8, 16, 4, 0.3) 38%, rgba(8, 16, 4, 0.76) 72%, rgba(7, 14, 3, 0.94) 100%),
-    linear-gradient(115deg, rgba(var(--color-secondary-rgb), 0.3) 0%, rgba(var(--color-secondary-rgb), 0) 44%),
-    linear-gradient(295deg, rgba(var(--color-primary-rgb), 0.3) 0%, rgba(var(--color-primary-rgb), 0) 52%);
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 160px 160px;
-    mix-blend-mode: overlay;
-    opacity: 0.42;
-    pointer-events: none;
-  }
-
-  @media (prefers-reduced-transparency: reduce) {
-    background: linear-gradient(180deg, rgba(8, 16, 4, 0.3) 0%, rgba(8, 16, 4, 0.92) 100%);
-
-    &::after {
-      opacity: 0.2;
-    }
-  }
+  z-index: 3;
+  right: 0.2rem;
+  bottom: 0.2rem;
+  width: clamp(58px, 7vw, 92px);
+  aspect-ratio: 1;
+  border: 3px solid rgba(var(--mt-accent-rgb), 0.92);
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-radius: 50%;
+  transform: rotate(-24deg);
+  transition: border-color var(--transition-smooth);
+  pointer-events: none;
 }
 
-.monthly-theme__panel {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 900px;
-  padding: clamp(1.75rem, 4vw, 3.4rem) clamp(1.5rem, 6vw, 5.5rem);
-  color: #FFFFFF;
-}
-
-// Editorial eyebrow that names the stage ("This Month's Theme") so visitors
-// immediately read it as the current message series, not a generic banner.
-.monthly-theme__eyebrow {
+// Editorial tab pinned over the frame's top-left corner.
+.monthly-theme__chip {
+  position: absolute;
+  z-index: 3;
+  top: clamp(0.9rem, 2.2vw, 1.6rem);
+  left: -0.55rem;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.7rem;
-  color: #f5d792;
+  padding: 0.55rem 1.05rem 0.55rem 1.2rem;
+  border-radius: var(--radius-sm);
+  background: var(--mt-accent);
+  color: var(--mt-on-accent);
   font-family: var(--font-brand);
-  font-weight: 700;
-  font-size: 0.78rem;
+  font-weight: 800;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.12em;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  box-shadow: 0 16px 32px -14px rgba(4, 8, 2, 0.55);
+  transition: background-color var(--transition-base), color var(--transition-base);
 
   .ti,
   .lucide {
     width: 1em;
     height: 1em;
     flex-shrink: 0;
-    color: #f5d792;
   }
 }
 
-// One-shot staggered entrance for the injected content, reading top-down like a
-// sermon opening. The reduced-motion guard below collapses it to instant paint.
-.monthly-theme__panel > * {
-  animation: fadeInUp 0.65s var(--spring-snappy) both;
+// No-photo fallback: an abstract poster built from the sampled palette.
+.monthly-theme__fallbackMark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  color: rgba(var(--mt-accent-rgb), 0.95);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--mt-accent-rgb), 0.28) 0%, rgba(var(--mt-accent-rgb), 0) 56%),
+    repeating-radial-gradient(ellipse 62% 48% at 50% 62%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 20px),
+    linear-gradient(152deg, var(--mt-accent-deep) 0%, var(--mt-accent-deep-2) 42%, var(--mt-accent) 135%);
+
+  .ti,
+  .lucide {
+    width: 1.2em;
+    height: 1.2em;
+  }
 }
 
-.monthly-theme__month {
+// Film-grain finish layered over the whole stage (poster + panel) for tactile
+// depth — a fine fractal-noise SVG burned in with overlay blending.
+.monthly-theme::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+  opacity: 0.3;
+  pointer-events: none;
+
+  @media (prefers-reduced-transparency: reduce) {
+    opacity: 0.14;
+  }
+}
+
+.monthly-theme__panel {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(1.75rem, 3.6vw, 3.2rem) clamp(1.5rem, 3.6vw, 3.4rem);
+  color: var(--mt-text);
+}
+
+// Eyebrow pill naming the stage ("This Month's Theme") so visitors immediately
+// read it as the current message series, not a generic banner.
+.monthly-theme__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  align-self: flex-start;
+  margin-bottom: clamp(0.9rem, 1.8vw, 1.3rem);
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(var(--mt-accent-rgb), 0.55);
+  background: rgba(var(--mt-accent-rgb), 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--mt-accent-soft);
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+
+  .ti,
+  .lucide {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    color: var(--mt-accent-soft);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background: rgba(17, 22, 12, 0.85);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+// One-shot staggered entrance for the injected copy, reading top-down like a
+// sermon opening. The reduced-motion guard below collapses it to instant paint.
+.monthly-theme__panel > * {
+  animation: fadeInUp 0.7s var(--spring-snappy) both;
+}
+
+.monthly-theme__eyebrow {
   animation-delay: 0.08s;
 }
 
@@ -8018,105 +8189,119 @@ form#prayerRequestForm {
   animation-delay: 0.32s;
 }
 
-.monthly-theme__month {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 1.2rem;
-  padding: 0.5rem 1.2rem;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #f0b45f 0%, var(--color-secondary-light) 55%, var(--color-secondary) 100%);
-  color: #2b1d06;
-  box-shadow: 0 10px 26px -12px rgba(224, 153, 47, 0.9), 0 1px 2px rgba(0, 0, 0, 0.28);
-  font-family: var(--font-brand);
-  font-weight: 800;
-  font-size: 0.84rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-
-  @media (prefers-reduced-transparency: reduce) {
-    background: var(--color-secondary);
-    box-shadow: none;
-  }
-
-  .ti,
-  .lucide {
-    width: 1em;
-    height: 1em;
-    flex-shrink: 0;
-    color: #2b1d06;
-  }
-}
-
 .monthly-theme__title {
+  margin-bottom: 1rem;
   font-family: var(--font-brand);
   font-weight: 900;
-  font-size: clamp(2.5rem, 5.4vw, 4.4rem);
-  line-height: 1.02;
+  font-size: clamp(2.6rem, 5.2vw, 4.5rem);
+  line-height: 1.03;
   letter-spacing: -0.03em;
-  color: #FFFFFF;
-  margin-bottom: 1rem;
-  text-shadow: var(--hero-heading-text-shadow), 0 0 42px rgba(224, 153, 47, 0.25);
+  color: var(--mt-text);
+  text-shadow: var(--hero-heading-text-shadow), 0 16px 48px rgba(var(--mt-accent-rgb), 0.28);
+  transition: color var(--transition-base);
+}
+
+// Accent flourish stroked beneath the headline — the palette's gradient line.
+.monthly-theme__titleline {
+  display: block;
+  margin-top: 0.7rem;
+  width: clamp(62px, 8vw, 108px);
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--mt-accent) 0%, var(--mt-accent-2) 74%, rgba(var(--mt-accent-2-rgb), 0) 100%);
+  box-shadow: 0 2px 16px rgba(var(--mt-accent-rgb), 0.55);
 }
 
 .monthly-theme__text {
-  font-size: clamp(1.05rem, 1.9vw, 1.22rem);
+  margin-bottom: 1.6rem;
+  max-width: 54ch;
+  font-size: clamp(1.02rem, 1.6vw, 1.18rem);
   line-height: 1.72;
-  color: rgba(255, 255, 255, 0.95);
-  max-width: 58ch;
-  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
+// Scripture callout — glass card with an accent spine.
 .monthly-theme__scripture {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.85rem;
+  max-width: 100%;
+  padding: 1.1rem 1.35rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-left: 3px solid var(--color-secondary-light);
-  background: rgba(20, 32, 10, 0.38);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  color: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 3px solid var(--mt-accent);
+  background: rgba(var(--mt-accent-rgb), 0.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 36px -18px rgba(5, 10, 2, 0.65);
   font-style: italic;
-  font-size: clamp(1.05rem, 1.9vw, 1.3rem);
-  box-shadow: 0 14px 34px -16px rgba(5, 10, 2, 0.7);
-
-  @media (prefers-reduced-transparency: reduce) {
-    background: rgba(14, 24, 6, 0.72);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
+  font-size: clamp(1rem, 1.6vw, 1.16rem);
+  transition: background-color var(--transition-base), border-left-color var(--transition-base);
 
   .ti,
   .lucide {
-    width: 1em;
-    height: 1em;
+    width: 1.15em;
+    height: 1.15em;
     flex-shrink: 0;
-    color: var(--color-secondary-light);
+    margin-top: 0.18em;
+    color: var(--mt-accent-soft);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background: rgba(15, 20, 10, 0.9);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
-// Taller, more cinematic stage on larger screens; tighter, taller on phones.
-@media (min-width: 768px) {
+// Fluid stage: side-by-side poster on wide screens, a stacked single-column
+// poster + copy on smaller viewports.
+@media (min-width: 900px) {
   .monthly-theme {
-    min-height: clamp(540px, 74vh, 780px);
+    min-height: clamp(540px, 76vh, 780px);
   }
 }
 
-@media (max-width: 640px) {
-  .monthly-theme__panel {
-    padding: 1.5rem 1.25rem;
+@media (max-width: 899px) {
+  .monthly-theme {
+    grid-template-columns: 1fr;
+    min-height: 0;
   }
 
-  .monthly-theme__scripture {
-    align-items: flex-start;
+  .monthly-theme__media {
+    padding: clamp(1rem, 4vw, 1.6rem) clamp(1rem, 4vw, 1.6rem) 0;
+  }
+
+  .monthly-theme__echo {
+    inset: clamp(1rem, 4vw, 1.6rem) clamp(1rem, 4vw, 1.6rem) 0;
+    transform: translate(0.9rem, 0.9rem);
+  }
+
+  .monthly-theme__photo {
+    aspect-ratio: 16 / 10;
+  }
+
+  .monthly-theme__panel {
+    padding: clamp(1.5rem, 5vw, 2.2rem);
+  }
+
+  .monthly-theme__shape--diamond {
+    top: auto;
+    bottom: -7%;
+    left: -12%;
+    width: clamp(90px, 20vw, 150px);
+  }
+
+  .monthly-theme__shape--dots {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .monthly-theme__panel > * {
+  .monthly-theme__panel > *,
+  .monthly-theme__media {
     animation: none;
     opacity: 1;
     transform: none;

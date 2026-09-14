@@ -1352,24 +1352,219 @@
   // The section carries the `hidden` attribute in markup. A published row
   // (monthly_theme.is_active = true) fills the stage and reveals it; with no
   // row the attribute is left alone and the section never takes up space.
+  //
+  // The stage is a poster-style split: the uploaded photo becomes the focal
+  // artwork (clipped frame + echo + arc + month chip) while the headline copy
+  // sits in an editorial panel and layered geometric shapes fill the backstage.
+  // After injection a dominant-color palette is sampled from the photo and
+  // written back as `--mt-accent*` custom properties, palette-locking the
+  // whole composition to the artwork. Sampled colors are set as custom
+  // properties (runtime theming — the SCSS below consumes them), never as
+  // literal inline styles.
   function renderMonthlyTheme(t) {
-    return '<div class="monthly-theme__media">' +
-      (t.image_url
-        ? '<img src="' + escAttr(t.image_url) + '" alt="' + escAttr(t.title || 'Monthly Theme') + '" loading="lazy" />'
-        : '') +
-      '<div class="monthly-theme__wash" aria-hidden="true"></div>' +
+    const alt = t.title || 'Monthly Theme';
+    const monthLabel = t.month_label ? esc(t.month_label) : '';
+    const watermark = monthLabel ? esc(monthLabel.toUpperCase()) : '';
+
+    const chip = monthLabel
+      ? '<span class="monthly-theme__chip"><i data-lucide="calendar" aria-hidden="true"></i>' + monthLabel + '</span>'
+      : '';
+
+    const media = t.image_url
+      ? '<figure class="monthly-theme__media">' +
+        '<span class="monthly-theme__echo" aria-hidden="true"></span>' +
+        '<div class="monthly-theme__photo">' +
+        '<img src="' + escAttr(t.image_url) + '" alt="' + escAttr(alt) + '" loading="lazy" />' +
+        '<span class="monthly-theme__scrim" aria-hidden="true"></span>' +
+        '</div>' +
+        chip +
+        '<span class="monthly-theme__arc" aria-hidden="true"></span>' +
+        '</figure>'
+      : '<figure class="monthly-theme__media monthly-theme__media--fallback">' +
+        '<span class="monthly-theme__echo" aria-hidden="true"></span>' +
+        '<div class="monthly-theme__photo">' +
+        '<span class="monthly-theme__fallbackMark"><i data-lucide="panorama" aria-hidden="true"></i></span>' +
+        '<span class="monthly-theme__scrim" aria-hidden="true"></span>' +
+        '</div>' +
+        chip +
+        '<span class="monthly-theme__arc" aria-hidden="true"></span>' +
+        '</figure>';
+
+    return '' +
+      '<div class="monthly-theme__stage-bg" aria-hidden="true">' +
+      '<span class="monthly-theme__shape monthly-theme__shape--rings"></span>' +
+      '<span class="monthly-theme__shape monthly-theme__shape--diamond"></span>' +
+      '<span class="monthly-theme__shape monthly-theme__shape--dots"></span>' +
+      '<span class="monthly-theme__shape monthly-theme__shape--stripes"></span>' +
+      (watermark ? '<span class="monthly-theme__watermark">' + watermark + '</span>' : '') +
       '</div>' +
+      media +
       '<div class="monthly-theme__panel">' +
       '<span class="monthly-theme__eyebrow"><i data-lucide="sparkles" aria-hidden="true"></i>This Month&#39;s Theme</span>' +
-      (t.month_label
-        ? '<span class="monthly-theme__month"><i data-lucide="calendar" aria-hidden="true"></i>' + esc(t.month_label) + '</span>'
+      (t.title
+        ? '<h2 class="monthly-theme__title">' + esc(t.title) + '<span class="monthly-theme__titleline" aria-hidden="true"></span></h2>'
         : '') +
-      (t.title ? '<h2 class="monthly-theme__title">' + esc(t.title) + '</h2>' : '') +
-      (t.description ? '<p class="monthly-theme__text">' + esc(t.description) + '</p>' : '') +
+      (t.description
+        ? '<p class="monthly-theme__text">' + esc(t.description) + '</p>'
+        : '') +
       (t.scripture
         ? '<span class="monthly-theme__scripture"><i data-lucide="book-open" aria-hidden="true"></i><span>' + esc(t.scripture) + '</span></span>'
         : '') +
       '</div>';
+  }
+
+  // ------------------------------------------------------------
+  // Dominant-color sampler for the Monthly Theme stage
+  // ------------------------------------------------------------
+  // A tiny canvas quantizer (no external deps): the photo is downscaled,
+  // pixels are bucketed, and the palette feed produces an accent, a distinct
+  // second hue, soft/deep tints, and a contrast-safe "on accent" ink — all
+  // written back to the stage as --mt-accent* custom properties.
+  function hexFromRgb(rgb) {
+    function toHex(value) {
+      return Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0');
+    }
+    return '#' + toHex(rgb.r) + toHex(rgb.g) + toHex(rgb.b);
+  }
+
+  function mixRgb(a, b, t) {
+    return {
+      r: a.r + (b.r - a.r) * t,
+      g: a.g + (b.g - a.g) * t,
+      b: a.b + (b.b - a.b) * t
+    };
+  }
+
+  // Perceived luminance (W3C definition) — picks readable ink on accent fills.
+  function rgbLuminance(rgb) {
+    const channels = [rgb.r, rgb.g, rgb.b].map(function (v) {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  }
+
+  function sampleImagePalette(image) {
+    // Downsample proportional to (but bounded by) the source — representative
+    // colors, tiny enough to scan in a single frame.
+    const side = Math.min(56, Math.max(20, Math.floor(Math.sqrt(image.naturalWidth * image.naturalHeight) / 16)));
+    const canvas = document.createElement('canvas');
+    canvas.width = side;
+    canvas.height = side;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(image, 0, 0, side, side);
+    const data = ctx.getImageData(0, 0, side, side).data;
+
+    // Bucket pixels by 4-bit channels so similar colors collapse together.
+    const buckets = new Map();
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 125) continue; // skip near-transparent pixels
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+      let bucket = buckets.get(key);
+      if (!bucket) {
+        bucket = { r: 0, g: 0, b: 0, n: 0 };
+        buckets.set(key, bucket);
+      }
+      bucket.r += r;
+      bucket.g += g;
+      bucket.b += b;
+      bucket.n += 1;
+    }
+
+    const swatches = Array.from(buckets.values())
+      .map(function (bk) {
+        return { r: bk.r / bk.n, g: bk.g / bk.n, b: bk.b / bk.n, n: bk.n };
+      })
+      .sort(function (a, b) { return b.n - a.n; });
+
+    return swatches.length ? swatches.slice(0, 24) : null;
+  }
+
+  function buildThemeColors(swatches) {
+    const heaviest = swatches[0];
+
+    // Score every swatch for vibrancy — favor saturated, mid-light hues while
+    // letting frequency keep a tiny accent region from hijacking the palette.
+    let accent = heaviest;
+    let bestScore = -1;
+    for (let i = 0; i < swatches.length; i += 1) {
+      const s = swatches[i];
+      const max = Math.max(s.r, s.g, s.b);
+      const min = Math.min(s.r, s.g, s.b);
+      const lum = (max + min) / 2 / 255;
+      const sat = max === min ? 0 : (max - min) / (max + min);
+      const density = s.n / heaviest.n;
+      const score = sat * (1 - Math.abs(lum - 0.55) * 1.6) * (0.3 + 0.7 * density);
+      if (score > bestScore) {
+        bestScore = score;
+        accent = s;
+      }
+    }
+
+    // A second accent pulled from the strongest swatch that clearly differs.
+    let accentTwo = heaviest;
+    for (let i = 0; i < swatches.length; i += 1) {
+      const s = swatches[i];
+      const spread = Math.max(
+        Math.abs(s.r - accent.r),
+        Math.abs(s.g - accent.g),
+        Math.abs(s.b - accent.b)
+      );
+      if (spread > 64) {
+        accentTwo = s;
+        break;
+      }
+    }
+
+    const paper = { r: 255, g: 255, b: 255 };
+    const ink = { r: 13, g: 17, b: 11 }; // deep green-black stage backdrop
+    const onAccent = rgbLuminance(accent) >= 0.4
+      ? { r: 18, g: 22, b: 14 }
+      : { r: 255, g: 255, b: 255 };
+
+    return {
+      accent: accent,
+      accentTwo: accentTwo,
+      accentSoft: mixRgb(accent, paper, 0.45),
+      accentDeep: mixRgb(accent, ink, 0.62),
+      accentDeepTwo: mixRgb(accent, ink, 0.8),
+      onAccent: onAccent
+    };
+  }
+
+  function themeMonthlyStage(stage, imageUrl) {
+    if (!stage) return;
+
+    function finish() {
+      stage.classList.add('is-themed');
+    }
+
+    const image = new Image();
+    image.crossOrigin = 'Anonymous';
+    image.onload = function () {
+      try {
+        const swatches = sampleImagePalette(image);
+        if (swatches) {
+          const palette = buildThemeColors(swatches);
+          stage.style.setProperty('--mt-accent', hexFromRgb(palette.accent));
+          stage.style.setProperty('--mt-accent-rgb', palette.accent.r + ', ' + palette.accent.g + ', ' + palette.accent.b);
+          stage.style.setProperty('--mt-accent-2', hexFromRgb(palette.accentTwo));
+          stage.style.setProperty('--mt-accent-2-rgb', palette.accentTwo.r + ', ' + palette.accentTwo.g + ', ' + palette.accentTwo.b);
+          stage.style.setProperty('--mt-accent-soft', hexFromRgb(palette.accentSoft));
+          stage.style.setProperty('--mt-accent-deep', hexFromRgb(palette.accentDeep));
+          stage.style.setProperty('--mt-accent-deep-2', hexFromRgb(palette.accentDeepTwo));
+          stage.style.setProperty('--mt-on-accent', hexFromRgb(palette.onAccent));
+        }
+      } catch (err) {
+        // Canvas is tainted (cross-origin hardening) — brand fallback stands.
+      }
+      finish();
+    };
+    image.onerror = finish;
+    image.src = imageUrl;
   }
 
   async function loadMonthlyTheme() {
@@ -1382,9 +1577,16 @@
     });
     if (!themes.length) return; // no published theme — section stays hidden
 
-    slot.innerHTML = renderMonthlyTheme(themes[0]);
+    const theme = themes[0];
+    slot.innerHTML = renderMonthlyTheme(theme);
     section.hidden = false;
     initIcons();
+    if (theme.image_url) {
+      themeMonthlyStage(slot, theme.image_url);
+    } else {
+      // No photo to sample — reveal the stage with the brand-fallback palette.
+      slot.classList.add('is-themed');
+    }
   }
 
   // ============================================

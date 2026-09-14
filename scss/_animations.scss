@@ -79,14 +79,23 @@
   }
 }
 
-// Slow, ambient drift for decorative shapes on the monthly-theme stage. Killed
-// globally for reduced-motion users by the override at the bottom of this file.
-@keyframes monthlyFloat {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+// Long, subtle orbital rotation for the dashed accent ring that orbits the
+// monthly-theme stage's concentric target.
+@keyframes monthOrbit {
+  to {
+    transform: rotate(360deg);
   }
-  50% {
-    transform: translate3d(-14px, 12px, 0) rotate(5deg);
+}
+
+// Soft unified reveal used once the dynamic palette finishes extracting — the
+// backstage décor, echo, and arc fade in so the palette swap reads as a
+// deliberate stage lift rather than a hard color jump.
+@keyframes themeReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
