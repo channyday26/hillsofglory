@@ -88,44 +88,50 @@
             <p class="card__text" style="margin-bottom:var(--space-lg);">Update global contact details, banking info, hero video, and social links shown across the website.</p>
             <form class="admin-form" id="settingsForm" novalidate>
               <div class="form__group">
-                <label for="setAddress" class="form__label">Main Address</label>
-                <input type="text" id="setAddress" name="main_address" class="form__input" />
+                <label for="setAddress" class="form__label">Main Address <span class="form__required">*</span></label>
+                <input type="text" id="setAddress" name="main_address" class="form__input" maxlength="300" required />
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="setPhone" class="form__label">Phone</label>
-                  <input type="text" id="setPhone" name="contact_phone" class="form__input" />
+                  <label for="setPhone" class="form__label">Phone <span class="form__required">*</span></label>
+                  <input type="text" id="setPhone" name="contact_phone" class="form__input" maxlength="40" required />
                 </div>
                 <div class="form__group">
-                  <label for="setEmail" class="form__label">Email</label>
-                  <input type="email" id="setEmail" name="contact_email" class="form__input" />
+                  <label for="setEmail" class="form__label">Email <span class="form__required">*</span></label>
+                  <input type="email" id="setEmail" name="contact_email" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="setEmailError" />
+                  <div id="setEmailError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="setBank" class="form__label">Bank Details</label>
-                <textarea id="setBank" name="bank_details" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="setBank" class="form__label">Bank Details <span class="form__required">*</span></label>
+                <textarea id="setBank" name="bank_details" class="form__input form__input--textarea" rows="3" maxlength="1000" required></textarea>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="setFacebook" class="form__label">Facebook URL</label>
-                  <input type="url" id="setFacebook" name="facebook_url" class="form__input" />
+                  <label for="setFacebook" class="form__label">Facebook URL <span class="form__required">*</span></label>
+                  <input type="url" id="setFacebook" name="facebook_url" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="setFacebookError" />
+                  <div id="setFacebookError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="setInstagram" class="form__label">Instagram URL</label>
-                  <input type="url" id="setInstagram" name="instagram_url" class="form__input" />
+                  <label for="setInstagram" class="form__label">Instagram URL <span class="form__required">*</span></label>
+                  <input type="url" id="setInstagram" name="instagram_url" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="setInstagramError" />
+                  <div id="setInstagramError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="setYouTube" class="form__label">YouTube URL</label>
-                  <input type="url" id="setYouTube" name="youtube_url" class="form__input" />
+                  <label for="setYouTube" class="form__label">YouTube URL <span class="form__required">*</span></label>
+                  <input type="url" id="setYouTube" name="youtube_url" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="setYouTubeError" />
+                  <div id="setYouTubeError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="setX" class="form__label">X / Twitter URL</label>
-                  <input type="url" id="setX" name="x_url" class="form__input" />
+                  <label for="setX" class="form__label">X / Twitter URL <span class="form__required">*</span></label>
+                  <input type="url" id="setX" name="x_url" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="setXError" />
+                  <div id="setXError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="setHeroVideo" class="form__label">Hero Video URL</label>
-                <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" />
+                <label for="setHeroVideo" class="form__label">Hero Video URL <span class="form__required">*</span></label>
+                <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="setHeroVideoError" />
+                <div id="setHeroVideoError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
                 <label for="setSpotlightImage" class="form__label">Homepage Spotlight Image (Max 2MB)</label>
@@ -149,21 +155,21 @@
             <form class="admin-form" id="leadershipForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="leaderName" class="form__label">Name</label>
-                  <input type="text" id="leaderName" name="name" class="form__input" required />
+                  <label for="leaderName" class="form__label">Name <span class="form__required">*</span></label>
+                  <input type="text" id="leaderName" name="name" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="nameError" />
+                  <div id="nameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="leaderRole" class="form__label">Role</label>
-                  <input type="text" id="leaderRole" name="role" class="form__input" required />
+                  <label for="leaderRole" class="form__label">Role <span class="form__required">*</span></label>
+                  <input type="text" id="leaderRole" name="role" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="roleError" />
+                  <div id="roleError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
-<div class="form__group">
-    <label for="leaderBio" class="form__label">Bio <span class="form__required">*</span></label>
-    <textarea id="leaderBio" name="bio" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="bioError"></textarea>
-    <div id="bioError" class="error-message" aria-live="polite"></div>
-  </div>
-  <div class="form__group" id="nameError" style="display: none;"></div>
-  <div class="form__group" id="roleError" style="display: none;"></div>
+              <div class="form__group">
+                <label for="leaderBio" class="form__label">Bio <span class="form__required">*</span></label>
+                <textarea id="leaderBio" name="bio" class="form__input form__input--textarea" rows="3" maxlength="2000" required aria-invalid="false" aria-describedby="bioError"></textarea>
+                <div id="bioError" class="error-message" aria-live="polite"></div>
+              </div>
               <div class="form__group">
                 <label for="leaderImage" class="form__label">Profile Image (Max 2MB)</label>
                 <input type="file" id="leaderImage" name="image" class="form__input" accept="image/*" />
@@ -185,29 +191,31 @@
               <div class="form__row">
 <div class="form__group">
   <label for="minName" class="form__label">Name <span class="form__required">*</span></label>
-  <input type="text" id="minName" name="name" class="form__input" required aria-invalid="false" aria-describedby="minNameError" />
+  <input type="text" id="minName" name="name" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="minNameError" />
   <div id="minNameError" class="error-message" aria-live="polite"></div>
 </div>
 <div class="form__group">
   <label for="minCategory" class="form__label">Category <span class="form__required">*</span></label>
   <select id="minCategory" name="category" class="form__input" required aria-invalid="false" aria-describedby="minCategoryError">
+    <option value="Worship">Worship</option>
     <option value="General" selected>General</option>
+    <option value="Campus">Campus</option>
   </select>
   <div id="minCategoryError" class="error-message" aria-live="polite"></div>
 </div>
               </div>
               <div class="form__group">
-                <label for="minDesc" class="form__label">Description</label>
-                <textarea id="minDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="minDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="minDesc" name="description" class="form__input form__input--textarea" rows="3" maxlength="3000" required></textarea>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="minContact" class="form__label">Contact Person</label>
-                  <input type="text" id="minContact" name="contact_person" class="form__input" />
+                  <label for="minContact" class="form__label">Contact Person <span class="form__required">*</span></label>
+                  <input type="text" id="minContact" name="contact_person" class="form__input" maxlength="120" required />
                 </div>
                 <div class="form__group">
                   <label for="minSchool" class="form__label">Target School</label>
-                  <input type="text" id="minSchool" name="target_school" class="form__input" />
+                  <input type="text" id="minSchool" name="target_school" class="form__input" maxlength="160" />
                 </div>
               </div>
               <div class="form__group">
@@ -230,28 +238,31 @@
             <form class="admin-form" id="locationsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="locName" class="form__label">Campus Name</label>
-                  <input type="text" id="locName" name="name" class="form__input" required />
+                  <label for="locName" class="form__label">Campus Name <span class="form__required">*</span></label>
+                  <input type="text" id="locName" name="name" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="locNameError" />
+                  <div id="locNameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="locType" class="form__label">Type</label>
-                  <select id="locType" name="location_type" class="form__input" required>
+                  <label for="locType" class="form__label">Type <span class="form__required">*</span></label>
+                  <select id="locType" name="location_type" class="form__input" required aria-invalid="false" aria-describedby="locTypeError">
                     <option value="Main">Main</option>
                     <option value="Outreach">Outreach</option>
                   </select>
+                  <div id="locTypeError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="locAddress" class="form__label">Address</label>
-                <input type="text" id="locAddress" name="address" class="form__input" />
+                <label for="locAddress" class="form__label">Address <span class="form__required">*</span></label>
+                <input type="text" id="locAddress" name="address" class="form__input" maxlength="300" required />
               </div>
               <div class="form__group">
-                <label for="locMaps" class="form__label">Google Maps Link</label>
-                <input type="url" id="locMaps" name="google_maps_embed_link" class="form__input" />
+                <label for="locMaps" class="form__label">Google Maps Link <span class="form__required">*</span></label>
+                <input type="url" id="locMaps" name="google_maps_embed_link" class="form__input" maxlength="1000" required aria-invalid="false" aria-describedby="locMapsError" />
+                <div id="locMapsError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
-                <label for="locStatus" class="form__label">Status</label>
-                <select id="locStatus" name="status" class="form__input">
+                <label for="locStatus" class="form__label">Status <span class="form__required">*</span></label>
+                <select id="locStatus" name="status" class="form__input" required>
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
@@ -272,36 +283,37 @@
             <form class="admin-form" id="lifegroupsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="lgName" class="form__label">Group Name</label>
-                  <input type="text" id="lgName" name="group_name" class="form__input" required />
+                  <label for="lgName" class="form__label">Group Name <span class="form__required">*</span></label>
+                  <input type="text" id="lgName" name="group_name" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="lgNameError" />
+                  <div id="lgNameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="lgType" class="form__label">Group Type</label>
-                  <select id="lgType" name="group_type" class="form__input" required>
+                  <label for="lgType" class="form__label">Group Type <span class="form__required">*</span></label>
+                  <select id="lgType" name="group_type" class="form__input" required aria-invalid="false" aria-describedby="lgTypeError">
                     <option value="men">Men</option>
                     <option value="women">Women</option>
                     <option value="couple">Couples</option>
                   </select>
+                  <div id="lgTypeError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="lgLeader" class="form__label">Leader Name</label>
-                  <input type="text" id="lgLeader" name="leader_name" class="form__input" />
+                  <label for="lgLeader" class="form__label">Leader Name <span class="form__required">*</span></label>
+                  <input type="text" id="lgLeader" name="leader_name" class="form__input" maxlength="120" required />
                 </div>
-<div class="form__group">
-  <label for="scLocation" class="form__label">Location <span class="form__required">*</span></label>
-  <select id="scLocation" name="location_id" class="form__input" required aria-invalid="false" aria-describedby="scLocationError"></select>
-  <div id="scLocationError" class="error-message" aria-live="polite"></div>
-</div>
+                <div class="form__group">
+                  <label for="lgLocation" class="form__label">Location <span class="form__required">*</span></label>
+                  <input type="text" id="lgLocation" name="location" class="form__input" maxlength="160" required />
+                </div>
               </div>
               <div class="form__group">
-                <label for="lgTime" class="form__label">Meeting Time</label>
-                <input type="text" id="lgTime" name="meeting_time" class="form__input" />
+                <label for="lgTime" class="form__label">Meeting Time <span class="form__required">*</span></label>
+                <input type="text" id="lgTime" name="meeting_time" class="form__input" maxlength="80" placeholder="e.g. Wednesdays 7:00 PM" required />
               </div>
               <div class="form__group">
-                <label for="lgContact" class="form__label">Contact Info</label>
-                <input type="text" id="lgContact" name="contact_info" class="form__input" />
+                <label for="lgContact" class="form__label">Contact Info <span class="form__required">*</span></label>
+                <input type="text" id="lgContact" name="contact_info" class="form__input" maxlength="160" required />
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Lifegroup</button>
@@ -319,26 +331,26 @@
             <form class="admin-form" id="sermonsForm" novalidate>
 <div class="form__group">
   <label for="sermonTitle" class="form__label">Title <span class="form__required">*</span></label>
-  <input type="text" id="sermonTitle" name="title" class="form__input" required aria-invalid="false" aria-describedby="sermonTitleError" />
+  <input type="text" id="sermonTitle" name="title" class="form__input" maxlength="160" required aria-invalid="false" aria-describedby="sermonTitleError" />
   <div id="sermonTitleError" class="error-message" aria-live="polite"></div>
 </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="sermonSpeaker" class="form__label">Speaker</label>
-                  <input type="text" id="sermonSpeaker" name="speaker" class="form__input" />
+                  <label for="sermonSpeaker" class="form__label">Speaker <span class="form__required">*</span></label>
+                  <input type="text" id="sermonSpeaker" name="speaker" class="form__input" maxlength="120" required />
                 </div>
                 <div class="form__group">
-                  <label for="sermonDate" class="form__label">Date</label>
-                  <input type="date" id="sermonDate" name="date" class="form__input" />
+                  <label for="sermonDate" class="form__label">Date <span class="form__required">*</span></label>
+                  <input type="date" id="sermonDate" name="date" class="form__input" required />
                 </div>
               </div>
               <div class="form__group">
-                <label for="sermonYoutube" class="form__label">YouTube URL</label>
-                <input type="url" id="sermonYoutube" name="youtube_url" class="form__input" />
+                <label for="sermonYoutube" class="form__label">YouTube URL <span class="form__required">*</span></label>
+                <input type="url" id="sermonYoutube" name="youtube_url" class="form__input" maxlength="1000" placeholder="https://youtube.com/watch?v=..." required />
               </div>
               <div class="form__group">
-                <label for="sermonDesc" class="form__label">Description</label>
-                <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="sermonDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3" maxlength="5000" required></textarea>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Sermon</button>
@@ -357,8 +369,9 @@
             <form class="admin-form" id="specialEventsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="evTitle" class="form__label">Title</label>
-                  <input type="text" id="evTitle" name="title" class="form__input" required />
+                  <label for="evTitle" class="form__label">Title <span class="form__required">*</span></label>
+                  <input type="text" id="evTitle" name="title" class="form__input" maxlength="160" required aria-invalid="false" aria-describedby="evTitleError" />
+                  <div id="evTitleError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
                   <label for="evImage" class="form__label">Event Image (Max 2MB)</label>
@@ -367,17 +380,18 @@
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="evDate" class="form__label">Event Date</label>
-                  <input type="date" id="evDate" name="event_date" class="form__input" required />
+                  <label for="evDate" class="form__label">Event Date <span class="form__required">*</span></label>
+                  <input type="date" id="evDate" name="event_date" class="form__input" required aria-invalid="false" aria-describedby="evDateError" />
+                  <div id="evDateError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="evTime" class="form__label">Event Time</label>
-                  <input type="text" id="evTime" name="event_time" class="form__input" placeholder="e.g. 6:00 PM" />
+                  <label for="evTime" class="form__label">Event Time <span class="form__required">*</span></label>
+                  <input type="text" id="evTime" name="event_time" class="form__input" maxlength="40" placeholder="e.g. 6:00 PM" required />
                 </div>
               </div>
               <div class="form__group">
-                <label for="evDesc" class="form__label">Description</label>
-                <textarea id="evDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="evDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="evDesc" name="description" class="form__input form__input--textarea" rows="3" maxlength="3000" required></textarea>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Event</button>
@@ -397,21 +411,25 @@
               <div class="form__row">
                 <div class="form__group">
                   <label for="scName" class="form__label">Service Name <span class="form__required">*</span></label>
-                  <input type="text" id="scName" name="service_name" class="form__input" required aria-invalid="false" aria-describedby="scNameError" />
+                  <input type="text" id="scName" name="service_name" class="form__input" maxlength="120" required aria-invalid="false" aria-describedby="scNameError" />
+                  <div id="scNameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
                   <label for="scDay" class="form__label">Day <span class="form__required">*</span></label>
-                  <input type="text" id="scDay" name="day" class="form__input" placeholder="e.g. Sunday" required aria-invalid="false" aria-describedby="scDayError" />
+                  <input type="text" id="scDay" name="day" class="form__input" maxlength="30" placeholder="e.g. Sunday" required aria-invalid="false" aria-describedby="scDayError" />
+                  <div id="scDayError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__row">
                 <div class="form__group">
                   <label for="scTime" class="form__label">Time <span class="form__required">*</span></label>
-                  <input type="text" id="scTime" name="time" class="form__input" placeholder="e.g. 10:00 AM" required aria-invalid="false" aria-describedby="scTimeError" />
+                  <input type="text" id="scTime" name="time" class="form__input" maxlength="40" placeholder="e.g. 10:00 AM" required aria-invalid="false" aria-describedby="scTimeError" />
+                  <div id="scTimeError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
                   <label for="scLocation" class="form__label">Location <span class="form__required">*</span></label>
                   <select id="scLocation" name="location_id" class="form__input" required aria-invalid="false" aria-describedby="scLocationError"></select>
+                  <div id="scLocationError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
@@ -436,12 +454,12 @@
               <div class="form__row">
 <div class="form__group">
   <label for="mtMonth" class="form__label">Month Label <span class="form__required">*</span></label>
-  <input type="text" id="mtMonth" name="month_label" class="form__input" placeholder="e.g. September 2026" required aria-invalid="false" aria-describedby="mtMonthError" />
+  <input type="text" id="mtMonth" name="month_label" class="form__input" maxlength="60" placeholder="e.g. September 2026" required aria-invalid="false" aria-describedby="mtMonthError" />
   <div id="mtMonthError" class="error-message" aria-live="polite"></div>
 </div>
                 <div class="form__group">
-                  <label for="mtActive" class="form__label">Show Theme</label>
-                  <select id="mtActive" name="is_active" class="form__input">
+                  <label for="mtActive" class="form__label">Show Theme <span class="form__required">*</span></label>
+                  <select id="mtActive" name="is_active" class="form__input" required>
                     <option value="true">Active (visible)</option>
                     <option value="false">Inactive (hidden)</option>
                   </select>
@@ -449,17 +467,17 @@
               </div>
 <div class="form__group">
   <label for="mtTitle" class="form__label">Theme Title <span class="form__required">*</span></label>
-  <input type="text" id="mtTitle" name="title" class="form__input" placeholder="e.g. The Month of Breakthrough" required aria-invalid="false" aria-describedby="mtTitleError" />
+  <input type="text" id="mtTitle" name="title" class="form__input" maxlength="160" placeholder="e.g. The Month of Breakthrough" required aria-invalid="false" aria-describedby="mtTitleError" />
   <div id="mtTitleError" class="error-message" aria-live="polite"></div>
 </div>
 <div class="form__group">
   <label for="mtText" class="form__label">Message <span class="form__required">*</span></label>
-  <textarea id="mtText" name="description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="mtTextError"></textarea>
+  <textarea id="mtText" name="description" class="form__input form__input--textarea" rows="3" maxlength="3000" required aria-invalid="false" aria-describedby="mtTextError"></textarea>
   <div id="mtTextError" class="error-message" aria-live="polite"></div>
 </div>
 <div class="form__group">
   <label for="mtScripture" class="form__label">Scripture Verse <span class="form__required">*</span></label>
-  <input type="text" id="mtScripture" name="scripture" class="form__input" placeholder="e.g. Isaiah 43:19" required aria-invalid="false" aria-describedby="mtScriptureError" />
+  <input type="text" id="mtScripture" name="scripture" class="form__input" maxlength="300" placeholder="e.g. Isaiah 43:19" required aria-invalid="false" aria-describedby="mtScriptureError" />
   <div id="mtScriptureError" class="error-message" aria-live="polite"></div>
 </div>
               <div class="form__group">
@@ -482,26 +500,26 @@
             <form class="admin-form" id="liveStatusForm" novalidate>
               <div class="form__row">
 <div class="form__group">
-  <label for="lsLive" class="form__label">Status</label>
-  <select id="lsLive" name="is_live" class="form__input">
+  <label for="lsLive" class="form__label">Status <span class="form__required">*</span></label>
+  <select id="lsLive" name="is_live" class="form__input" required>
     <option value="false">Not Live (hidden)</option>
     <option value="true">Live Now (visible)</option>
   </select>
 </div>
 <div class="form__group">
   <label for="lsYoutube" class="form__label">YouTube Link <span class="form__required">*</span></label>
-  <input type="url" id="lsYoutube" name="youtube_url" class="form__input" placeholder="https://youtube.com/watch?v=..." required aria-invalid="false" aria-describedby="lsYoutubeError" />
+  <input type="url" id="lsYoutube" name="youtube_url" class="form__input" maxlength="1000" placeholder="https://youtube.com/watch?v=... or paste an embed" required aria-invalid="false" aria-describedby="lsYoutubeError" />
   <div id="lsYoutubeError" class="error-message" aria-live="polite"></div>
 </div>
               </div>
 <div class="form__group">
   <label for="lsTitle" class="form__label">Live Title <span class="form__required">*</span></label>
-  <input type="text" id="lsTitle" name="live_title" class="form__input" placeholder="e.g. Sunday Worship Service" required aria-invalid="false" aria-describedby="lsTitleError" />
+  <input type="text" id="lsTitle" name="live_title" class="form__input" maxlength="160" placeholder="e.g. Sunday Worship Service" required aria-invalid="false" aria-describedby="lsTitleError" />
   <div id="lsTitleError" class="error-message" aria-live="polite"></div>
 </div>
               <div class="form__group">
-                <label for="lsDesc" class="form__label">Description</label>
-                <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="lsDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3" maxlength="1000" required></textarea>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="save" class="" aria-hidden="true"></i> Save Status</button>

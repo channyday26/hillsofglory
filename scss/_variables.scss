@@ -44,6 +44,8 @@ $light-card-shadow: 0 4px 20px -2px rgba(45, 90, 3, 0.06), 0 2px 6px -1px rgba(0
 $light-card-shadow-hover: 0 20px 32px -4px rgba(45, 90, 3, 0.14), 0 8px 16px -2px rgba(217, 130, 43, 0.1);
 $light-live: #D9483A;             // Live stream accent (light mode)
 $light-live-rgb: 217, 72, 58;   // keep in sync with $light-live
+$light-error: #DC2626;            // Form/inline validation errors (light mode)
+$light-error-rgb: 220, 38, 38;  // keep in sync with $light-error
 $light-nav-glass: rgba(255, 255, 255, 0.78);  // navbar scrolled tint (light)
 $light-nav-shadow: 0 12px 32px -16px rgba(28, 25, 23, 0.28), 0 2px 8px -2px rgba(28, 25, 23, 0.08);
 
@@ -76,6 +78,8 @@ $dark-card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 $dark-card-shadow-hover: 0 20px 32px -4px rgba(0, 0, 0, 0.6), 0 0 24px 0 rgba(162, 197, 140, 0.15);
 $dark-live: #FF5A47;             // Live stream accent (dark mode)
 $dark-live-rgb: 255, 90, 71;   // keep in sync with $dark-live
+$dark-error: #F87171;            // Form/inline validation errors (dark mode)
+$dark-error-rgb: 248, 113, 113;  // keep in sync with $dark-error
 $dark-nav-glass: rgba(22, 24, 26, 0.78);  // navbar scrolled tint (dark)
 $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0, 0, 0.4);
 
@@ -111,6 +115,8 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
   --color-border-hover: #{$light-border-hover};
   --color-live: #{$light-live};
   --color-live-rgb: #{$light-live-rgb};
+  --color-error: #{$light-error};
+  --color-error-rgb: #{$light-error-rgb};
   --shadow-card: #{$light-card-shadow};
   --shadow-card-hover: #{$light-card-shadow-hover};
 
@@ -194,6 +200,8 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
   --color-border-hover: #{$dark-border-hover};
   --color-live: #{$dark-live};
   --color-live-rgb: #{$dark-live-rgb};
+  --color-error: #{$dark-error};
+  --color-error-rgb: #{$dark-error-rgb};
   --shadow-card: #{$dark-card-shadow};
   --shadow-card-hover: #{$dark-card-shadow-hover};
 

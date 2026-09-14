@@ -55,17 +55,6 @@
     btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
   }
 
-  // --- Button loading helpers -----------------------------------------------
-  // Toggles animated .btn--loading spinner + disabled + aria-busy so a button
-  // cannot fire twice. Always use with try/finally so every exit path
-  // (validation, upload error, network error) restores the button.
-  function setButtonLoading(btn, isLoading) {
-    if (!btn) return;
-    btn.disabled = isLoading;
-    btn.classList.toggle('btn--loading', isLoading);
-    btn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-  }
-
   function isButtonBusy(btn) {
     return !!(btn && btn.disabled);
   }
@@ -179,10 +168,10 @@
     if (error) { console.error(error); return; }
     list.innerHTML = (data || []).map(function (l) {
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
-        (l.image_url ? '<img src="' + l.image_url + '" alt="' + (l.name || '') + '" style="width:60px;height:60px;border-radius:var(--radius-full);object-fit:cover;" />' : '') +
-        '<div style="flex:1;"><h3 class="card__title" style="margin:0;">' + (l.name || '') + '</h3><p class="card__text" style="margin:0;">' + (l.role || '') + '</p></div>' +
-        '<button class="btn btn--secondary" data-action="edit-leader" data-id="' + (l.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-leader" data-id="' + (l.id || '') + '">Delete</button></div>';
+        (l.image_url ? '<img src="' + escAttr(l.image_url) + '" alt="' + escAttr(l.name || '') + '" style="width:60px;height:60px;border-radius:var(--radius-full);object-fit:cover;" />' : '') +
+        '<div style="flex:1;"><h3 class="card__title" style="margin:0;">' + esc(l.name || '') + '</h3><p class="card__text" style="margin:0;">' + esc(l.role || '') + '</p></div>' +
+        '<button class="btn btn--secondary" data-action="edit-leader" data-id="' + escAttr(l.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-leader" data-id="' + escAttr(l.id || '') + '">Delete</button></div>';
     }).join('');
   }
 
@@ -194,11 +183,11 @@
     list.innerHTML = (data || []).map(function (m) {
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
         '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + (m.name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + (m.category || '') + '</p>' +
+        '<h3 class="card__title" style="margin:0;">' + esc(m.name || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(m.category || '') + '</p>' +
         '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-ministry" data-id="' + (m.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-ministry" data-id="' + (m.id || '') + '">Delete</button>' +
+        '<button class="btn btn--secondary" data-action="edit-ministry" data-id="' + escAttr(m.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-ministry" data-id="' + escAttr(m.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
   }
@@ -211,11 +200,11 @@
     list.innerHTML = (data || []).map(function (l) {
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
         '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + (l.name || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + (l.location_type || '') + ' — ' + (l.address || '') + '</p>' +
+        '<h3 class="card__title" style="margin:0;">' + esc(l.name || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(l.location_type || '') + ' — ' + esc(l.address || '') + '</p>' +
         '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-location" data-id="' + (l.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-location" data-id="' + (l.id || '') + '">Delete</button>' +
+        '<button class="btn btn--secondary" data-action="edit-location" data-id="' + escAttr(l.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-location" data-id="' + escAttr(l.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
   }
@@ -246,11 +235,11 @@
     list.innerHTML = (data || []).map(function (s) {
       return '<div class="card" style="display:flex;align-items:center;gap:var(--space-md);">' +
         '<div style="flex:1;">' +
-        '<h3 class="card__title" style="margin:0;">' + (s.title || '') + '</h3>' +
-        '<p class="card__text" style="margin:0;">' + (s.speaker || '') + ' — ' + (s.date || '') + '</p>' +
+        '<h3 class="card__title" style="margin:0;">' + esc(s.title || '') + '</h3>' +
+        '<p class="card__text" style="margin:0;">' + esc(s.speaker || '') + ' — ' + esc(s.date || '') + '</p>' +
         '</div>' +
-        '<button class="btn btn--secondary" data-action="edit-sermon" data-id="' + (s.id || '') + '">Edit</button>' +
-        '<button class="btn btn--secondary" data-action="delete-sermon" data-id="' + (s.id || '') + '">Delete</button>' +
+        '<button class="btn btn--secondary" data-action="edit-sermon" data-id="' + escAttr(s.id || '') + '">Edit</button>' +
+        '<button class="btn btn--secondary" data-action="delete-sermon" data-id="' + escAttr(s.id || '') + '">Delete</button>' +
         '</div>';
     }).join('');
   }
@@ -598,15 +587,24 @@
   }
 
   // --- Helper: upload image to Supabase Storage ---
+  // Accept only well-known raster image types; SVG is excluded because an SVG
+  // can carry executable scripts when opened directly. Filenames are stripped
+  // of path separators and reserved characters so a crafted name cannot create
+  // nested "folders" inside the bucket.
+  const ALLOWED_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
   async function uploadImage(file) {
     const MAX_SIZE = 2 * 1024 * 1024; // 2MB
     if (file.size > MAX_SIZE) {
       throw new Error('File too large. Max size is 2MB (' + formatFileSize(file.size) + ').');
     }
-    const fileName = Date.now() + '-' + file.name.replace(/\s+/g, '_');
+    if (ALLOWED_IMAGE_MIME.indexOf(file.type) === -1) {
+      throw new Error('Unsupported file type "' + (file.type || 'unknown') + '". Use JPG, PNG, WebP, GIF or AVIF.');
+    }
+    const safeName = String(file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-100);
+    const fileName = Date.now() + '-' + safeName;
     const { data, error } = await supabase.storage
       .from('website-images')
-      .upload(fileName, file);
+      .upload(fileName, file, { upsert: false, contentType: file.type });
     if (error) throw error;
     const { data: urlData } = supabase.storage.from('website-images').getPublicUrl(fileName);
     return urlData.publicUrl;
@@ -673,40 +671,25 @@ const settingsForm = document.getElementById('settingsForm');
        const xUrl = valueOf('setX').trim();
        const heroVideoUrl = valueOf('setHeroVideo').trim();
 
-       // Basic validation - at least one contact method should be provided
-       if (!mainAddress && !contactPhone && !contactEmail && !bankDetails && 
-           !facebookUrl && !instagramUrl && !youtubeUrl && !xUrl && !heroVideoUrl) {
-         showToast('Please fill in at least one field.', 'error');
-         return;
-       }
+// Required-by-default validation. Every settings field carries
+        // `required` in the markup; format rules below only run on filled
+        // values (a field can never be empty at this point). These are
+        // link fields, so they must stay plain URLs restricted to allowed
+        // hosts — unlike the sermon/live fields, no <iframe> is accepted here.
+        const settingsCheck = validateRequiredFieldsInline(settingsForm, {
+          setEmail: function (v) { return isValidEmail(v) || 'Please enter a valid email address.'; },
+          setFacebook: function (v) { return isValidUrl(v) || 'Please enter a valid Facebook URL.'; },
+          setInstagram: function (v) { return isValidUrl(v) || 'Please enter a valid Instagram URL.'; },
+          setYouTube: function (v) { return isValidYouTubeUrl(v) || 'Please enter a valid YouTube URL.'; },
+          setX: function (v) { return isValidUrl(v) || 'Please enter a valid X / Twitter URL.'; },
+          setHeroVideo: function (v) { return isValidYouTubeUrl(v) || 'Please enter a valid Hero Video URL.'; }
+        });
 
-       // Validate email if provided
-       if (contactEmail && !isValidEmail(contactEmail)) {
-         showToast('Please enter a valid email address.', 'error');
-         return;
-       }
-
-       // Validate URLs if provided
-       if (facebookUrl && !isValidUrl(facebookUrl)) {
-         showToast('Please enter a valid Facebook URL.', 'error');
-         return;
-       }
-       if (instagramUrl && !isValidUrl(instagramUrl)) {
-         showToast('Please enter a valid Instagram URL.', 'error');
-         return;
-       }
-       if (youtubeUrl && !isValidUrl(youtubeUrl)) {
-         showToast('Please enter a valid YouTube URL.', 'error');
-         return;
-       }
-       if (xUrl && !isValidUrl(xUrl)) {
-         showToast('Please enter a valid X/Twitter URL.', 'error');
-         return;
-       }
-       if (heroVideoUrl && !isValidUrl(heroVideoUrl)) {
-         showToast('Please enter a valid Hero Video URL.', 'error');
-         return;
-       }
+        if (!settingsCheck.valid) {
+          showToast(settingsCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (settingsCheck.first) settingsCheck.first.focus();
+          return;
+        }
 
        setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
@@ -763,22 +746,126 @@ const settingsForm = document.getElementById('settingsForm');
 
    function isValidUrl(url) {
      try {
-       new URL(url);
-       return true;
+       const parsed = new URL(String(url).trim());
+       return parsed.protocol === 'http:' || parsed.protocol === 'https:';
      } catch {
        return false;
      }
    }
 
-   function validateRequiredFields(fields) {
-     const missing = [];
-     for (const [id, label] of fields) {
-       const el = document.getElementById(id);
-       if (el && !el.value.trim()) {
-         missing.push(label);
+   // User-facing link fields (socials, hero video, YouTube) are interpolated
+   // into href/src attributes on the public pages. Restrict video/YouTube
+   // fields to YouTube hosts so a wrong or malicious link cannot be embedded.
+   function isValidYouTubeUrl(url) {
+     if (!isValidUrl(url)) return false;
+     const host = new URL(String(url).trim()).hostname.replace(/^www\./, '');
+     return host === 'youtube.com' || host === 'youtu.be' || host === 'm.youtube.com';
+   }
+
+   // Admins may paste a YouTube embed <iframe> instead of a plain link.
+   // Extract the real src before URL validation — previously the URL check ran
+   // first and rejected the markup, so paste-and-extract never worked.
+   function extractYouTubeUrl(value) {
+     const raw = String(value || '').trim();
+     if (!raw || raw.indexOf('<iframe') === -1) return raw;
+     const doc = new DOMParser().parseFromString(raw, 'text/html');
+     const iframe = doc.querySelector('iframe[src]');
+     return iframe ? (iframe.getAttribute('src') || '').trim() : raw;
+   }
+
+   // --- Generic required-field validation ------------------------------------
+   // A control is "required by default" when it carries the `required`
+   // attribute; the CMS forms use novalidate, so this helper is the sole
+   // enforcement point. File inputs and hidden fields are never validated
+   // here, and optional fields simply omit the attribute (e.g. the ministry
+   // target_school field). Per-field format rules (email/URL) can be supplied
+   // as { fieldId: (value) => true | 'error message' }.
+
+   function labelForField(el) {
+     if (el.labels && el.labels.length) {
+       return (el.labels[0].textContent || '').replace(/\*/g, '').trim() || 'This field';
+     }
+     return 'This field';
+   }
+
+   function errorElementFor(el) {
+     const describedBy = el.getAttribute('aria-describedby');
+     if (describedBy) {
+       const firstId = describedBy.split(/\s+/)[0];
+       if (firstId) {
+         const existing = document.getElementById(firstId);
+         if (existing) return existing;
        }
      }
-     return missing;
+     const group = el.closest('.form__group');
+     if (group) {
+       const existing = group.querySelector('.error-message');
+       if (existing) return existing;
+       const created = document.createElement('div');
+       created.className = 'error-message';
+       created.setAttribute('aria-live', 'polite');
+       const newId = el.id ? 'error-' + el.id : 'error-' + Math.random().toString(36).slice(2, 8);
+       created.id = newId;
+       group.appendChild(created);
+       el.setAttribute('aria-describedby', newId);
+       return created;
+     }
+     return null;
+   }
+
+   function validateRequiredFieldsInline(form, extraRules) {
+     const controls = form.querySelectorAll('input, select, textarea');
+     const requiredFields = [];
+     controls.forEach(function (el) {
+       const type = (el.getAttribute('type') || '').toLowerCase();
+       if (type === 'file' || type === 'hidden' || type === 'submit' || type === 'button' || type === 'reset') return;
+       if (el.disabled) return;
+       if (el.required) requiredFields.push(el);
+     });
+
+     requiredFields.forEach(function (el) {
+       el.classList.remove('form__input--error');
+       el.setAttribute('aria-invalid', 'false');
+       const err = errorElementFor(el);
+       if (err) err.textContent = '';
+     });
+
+     let firstInvalid = null;
+     const missingLabels = [];
+     const ruleMessages = [];
+
+     requiredFields.forEach(function (el) {
+       const label = labelForField(el);
+       let message = '';
+       const value = el.value.trim();
+
+       if (!value) {
+         message = label + ' is required.';
+       } else if (extraRules && extraRules[el.id]) {
+         const rule = extraRules[el.id](value);
+         if (typeof rule === 'string') message = rule;
+       }
+
+       if (!message) return;
+
+       el.classList.add('form__input--error');
+       el.setAttribute('aria-invalid', 'true');
+       const err = errorElementFor(el);
+       if (err) err.textContent = message;
+
+       if (/is required\.?$/.test(message)) missingLabels.push(label);
+       else ruleMessages.push(message);
+
+       if (!firstInvalid) firstInvalid = el;
+     });
+
+     const summary = [];
+     if (missingLabels.length) {
+       summary.push(missingLabels.join(' and ') + (missingLabels.length > 1 ? ' are required.' : ' is required.'));
+     }
+     if (ruleMessages.length) summary.push(ruleMessages.join(' '));
+
+     return { valid: !firstInvalid, first: firstInvalid, summary: summary.join(' ') };
    }
 
    // --- Leadership CRUD ---
@@ -806,62 +893,21 @@ const settingsForm = document.getElementById('settingsForm');
        if (isButtonBusy(submitBtn)) return;
 
         // Validate form inputs (excluding file inputs)
-        const name = document.getElementById('leaderName').value.trim();
+const name = document.getElementById('leaderName').value.trim();
         const role = document.getElementById('leaderRole').value.trim();
         const bio = document.getElementById('leaderBio').value.trim();
 
-        // Clear previous error messages
-        document.getElementById('bioError').textContent = '';
+        // Required-by-default validation driven by the `required` attribute.
+        const leaderCheck = validateRequiredFieldsInline(leadershipForm);
 
-        // Validate required fields
-        const fieldsToValidate = [
-          { id: 'leaderName', label: 'Name', errorId: 'nameError', element: document.getElementById('leaderName') },
-          { id: 'leaderRole', label: 'Role', errorId: 'roleError', element: document.getElementById('leaderRole') },
-          { id: 'leaderBio', label: 'Bio', errorId: 'bioError', element: document.getElementById('leaderBio') }
-        ];
-        
-        // Initialize error elements
-        fieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
-        });
-        
-        let hasErrors = false;
-        const missingFields = [];
-        
-        fieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(`${id}Error`);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingFields.push(label);
-            hasErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(`${id}Error`);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasErrors) {
-          showToast(missingFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidField = fieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidField) firstInvalidField.element.focus();
+        if (!leaderCheck.valid) {
+          showToast(leaderCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (leaderCheck.first) leaderCheck.first.focus();
           return;
         }
 
         const imageInput = document.getElementById('leaderImage');
         const imageFile = imageInput ? imageInput.files[0] : null;
-
-        // Validate bio field again before submission
-        const bioValue = document.getElementById('leaderBio').value.trim();
-        if (!bioValue) {
-          document.getElementById('bioError').textContent = 'Bio is required.';
-          showToast('Bio is required.', 'error');
-          return;
-        }
 
         setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
@@ -870,9 +916,9 @@ const settingsForm = document.getElementById('settingsForm');
          if (imageFile) imageUrl = await uploadImage(imageFile);
           let error;
           if (leadershipEditingId) {
-            ({ error } = await supabase.from('leadership_team').update({ name, role, bio: bioValue, image_url: imageUrl }).eq('id', leadershipEditingId));
+            ({ error } = await supabase.from('leadership_team').update({ name, role, bio: bio, image_url: imageUrl }).eq('id', leadershipEditingId));
            } else {
-            ({ error } = await supabase.from('leadership_team').insert([{ name, role, bio: bioValue, image_url: imageUrl }]));
+            ({ error } = await supabase.from('leadership_team').insert([{ name, role, bio: bio, image_url: imageUrl }]));
           }
 
          if (error) {
@@ -985,41 +1031,14 @@ const settingsForm = document.getElementById('settingsForm');
        const contact = document.getElementById('minContact').value.trim();
        const school = document.getElementById('minSchool').value.trim();
 
-        // Validate required fields
-        const minFieldsToValidate = [
-          { id: 'minName', label: 'Name', errorId: 'minNameError', element: document.getElementById('minName') },
-          { id: 'minCategory', label: 'Category', errorId: 'minCategoryError', element: document.getElementById('minCategory') }
-        ];
-        
-        // Initialize error elements
-        minFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
-        });
-        
-        let hasMinErrors = false;
-        const missingMinFields = [];
-        
-        minFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingMinFields.push(label);
-            hasMinErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasMinErrors) {
-          showToast(missingMinFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidMinField = minFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidMinField) firstInvalidMinField.element.focus();
+        // Validate required fields (target_school is deliberately optional — it
+        // only carries `required` for Campus ministries intent, and its
+        // absence of the attribute makes the generic validator skip it).
+        const ministryCheck = validateRequiredFieldsInline(ministriesForm);
+
+        if (!ministryCheck.valid) {
+          showToast(ministryCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (ministryCheck.first) ministryCheck.first.focus();
           return;
         }
 
@@ -1134,15 +1153,14 @@ locationsForm.addEventListener('submit', async function (e) {
         const maps = document.getElementById('locMaps').value.trim();
         const status = document.getElementById('locStatus').value;
 
-        const missing = validateRequiredFields([['locName', 'Campus Name'], ['locType', 'Type']]);
-        if (missing.length > 0) {
-          showToast(missing.join(' and ') + ' are required.', 'error');
-          return;
-        }
+        // Validate required fields plus the Google Maps embed URL format.
+        const locationCheck = validateRequiredFieldsInline(locationsForm, {
+          locMaps: function (v) { return isValidUrl(v) || 'Please enter a valid Google Maps URL.'; }
+        });
 
-        // Validate URL if provided
-        if (maps && !isValidUrl(maps)) {
-          showToast('Please enter a valid Google Maps URL.', 'error');
+        if (!locationCheck.valid) {
+          showToast(locationCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (locationCheck.first) locationCheck.first.focus();
           return;
         }
 
@@ -1260,11 +1278,14 @@ locationsForm.addEventListener('submit', async function (e) {
        const time = document.getElementById('lgTime').value.trim();
        const contact = document.getElementById('lgContact').value.trim();
 
-       const missing = validateRequiredFields([['lgName', 'Group Name'], ['lgType', 'Group Type']]);
-       if (missing.length > 0) {
-         showToast(missing.join(' and ') + ' are required.', 'error');
-         return;
-       }
+// Required-by-default validation driven by the `required` attribute.
+        const lifegroupCheck = validateRequiredFieldsInline(lifegroupsForm);
+
+        if (!lifegroupCheck.valid) {
+          showToast(lifegroupCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (lifegroupCheck.first) lifegroupCheck.first.focus();
+          return;
+        }
 
        const payload = {
          group_name: name,
@@ -1302,8 +1323,9 @@ locationsForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-lifegroup') {
-        const id = e.target.dataset.id;
+      const editBtn = e.target.closest('[data-action="edit-lifegroup"]');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
         const { data, error } = await supabase.from('lifegroups').select('*').eq('id', id).single();
         if (error || !data) {
           showToast('Could not load that lifegroup.', 'error');
@@ -1376,51 +1398,20 @@ locationsForm.addEventListener('submit', async function (e) {
        const title = document.getElementById('sermonTitle').value.trim();
        const speaker = document.getElementById('sermonSpeaker').value.trim();
        const date = document.getElementById('sermonDate').value;
-       const youtube = document.getElementById('sermonYoutube').value.trim();
+       const youtube = extractYouTubeUrl(document.getElementById('sermonYoutube').value.trim());
        const desc = document.getElementById('sermonDesc').value.trim();
 
-        // Validate required fields
-        const sermonFieldsToValidate = [
-          { id: 'sermonTitle', label: 'Title', errorId: 'sermonTitleError', element: document.getElementById('sermonTitle') }
-        ];
-        
-        // Initialize error elements
-        sermonFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
+// Required-by-default validation. The YouTube field accepts a plain link
+        // or a pasted <iframe> embed, so the format rule extracts first.
+        const sermonCheck = validateRequiredFieldsInline(sermonsForm, {
+          sermonYoutube: function (v) { return isValidYouTubeUrl(extractYouTubeUrl(v)) || 'Please enter a valid YouTube link or embed URL.'; }
         });
-        
-        let hasSermonErrors = false;
-        const missingSermonFields = [];
-        
-        sermonFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingSermonFields.push(label);
-            hasSermonErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasSermonErrors) {
-          showToast(missingSermonFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidSermonField = sermonFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidSermonField) firstInvalidSermonField.element.focus();
+
+        if (!sermonCheck.valid) {
+          showToast(sermonCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (sermonCheck.first) sermonCheck.first.focus();
           return;
         }
-
-       // Validate YouTube URL if provided
-       if (youtube && !isValidUrl(youtube)) {
-         showToast('Please enter a valid YouTube URL.', 'error');
-         return;
-       }
 
        const payload = { title, speaker, date, youtube_url: youtube, description: desc };
 
@@ -1451,8 +1442,9 @@ locationsForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-sermon') {
-        const id = e.target.dataset.id;
+      const editBtn = e.target.closest('[data-action="edit-sermon"]');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
         const { data, error } = await supabase.from('sermons').select('*').eq('id', id).single();
         if (error || !data) {
           showToast('Could not load that sermon.', 'error');
@@ -1532,41 +1524,12 @@ locationsForm.addEventListener('submit', async function (e) {
        const time = document.getElementById('evTime').value.trim();
        const desc = document.getElementById('evDesc').value.trim();
 
-        // Validate required fields
-        const eventFieldsToValidate = [
-          { id: 'evTitle', label: 'Title', errorId: 'evTitleError', element: document.getElementById('evTitle') },
-          { id: 'evDate', label: 'Event Date', errorId: 'evDateError', element: document.getElementById('evDate') }
-        ];
-        
-        // Initialize error elements
-        eventFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
-        });
-        
-        let hasEventErrors = false;
-        const missingEventFields = [];
-        
-        eventFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingEventFields.push(label);
-            hasEventErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasEventErrors) {
-          showToast(missingEventFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidEventField = eventFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidEventField) firstInvalidEventField.element.focus();
+        // Required-by-default validation driven by the `required` attribute.
+        const eventCheck = validateRequiredFieldsInline(specialEventsForm);
+
+        if (!eventCheck.valid) {
+          showToast(eventCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (eventCheck.first) eventCheck.first.focus();
           return;
         }
 
@@ -1622,8 +1585,9 @@ locationsForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-special-event') {
-        const id = e.target.dataset.id;
+      const editBtn = e.target.closest('[data-action="edit-special-event"]');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
         const { data, error } = await supabase.from('special_events').select('*').eq('id', id).single();
         if (error || !data) {
           showToast('Could not load that event.', 'error');
@@ -1704,43 +1668,12 @@ locationsForm.addEventListener('submit', async function (e) {
        const imageInput = document.getElementById('scImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
 
-        // Validate required fields
-        const scheduleFieldsToValidate = [
-          { id: 'scName', label: 'Service name', errorId: 'scNameError', element: document.getElementById('scName') },
-          { id: 'scDay', label: 'Day', errorId: 'scDayError', element: document.getElementById('scDay') },
-          { id: 'scTime', label: 'Time', errorId: 'scTimeError', element: document.getElementById('scTime') },
-          { id: 'scLocation', label: 'Location', errorId: 'scLocationError', element: document.getElementById('scLocation') }
-        ];
-        
-        // Initialize error elements
-        scheduleFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
-        });
-        
-        let hasScheduleErrors = false;
-        const missingScheduleFields = [];
-        
-        scheduleFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingScheduleFields.push(label);
-            hasScheduleErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasScheduleErrors) {
-          showToast(missingScheduleFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidScheduleField = scheduleFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidScheduleField) firstInvalidScheduleField.element.focus();
+        // Required-by-default validation driven by the `required` attribute.
+        const scheduleCheck = validateRequiredFieldsInline(schedulesForm);
+
+        if (!scheduleCheck.valid) {
+          showToast(scheduleCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (scheduleCheck.first) scheduleCheck.first.focus();
           return;
         }
 
@@ -1776,8 +1709,9 @@ locationsForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-schedule') {
-        const id = e.target.dataset.id;
+      const editBtn = e.target.closest('[data-action="edit-schedule"]');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
         const { data, error } = await supabase.from('service_schedules').select('*').eq('id', id).single();
         if (error || !data) {
           showToast('Could not load that schedule.', 'error');
@@ -1845,43 +1779,12 @@ locationsForm.addEventListener('submit', async function (e) {
        const imageInput = document.getElementById('mtImage');
        const imageFile = imageInput ? imageInput.files[0] : null;
 
-        // Validate required fields
-        const themeFieldsToValidate = [
-          { id: 'mtMonth', label: 'Month label', errorId: 'mtMonthError', element: document.getElementById('mtMonth') },
-          { id: 'mtTitle', label: 'Theme title', errorId: 'mtTitleError', element: document.getElementById('mtTitle') },
-          { id: 'mtText', label: 'Message', errorId: 'mtTextError', element: document.getElementById('mtText') },
-          { id: 'mtScripture', label: 'Scripture verse', errorId: 'mtScriptureError', element: document.getElementById('mtScripture') }
-        ];
-        
-        // Initialize error elements
-        themeFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
-        });
-        
-        let hasThemeErrors = false;
-        const missingThemeFields = [];
-        
-        themeFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingThemeFields.push(label);
-            hasThemeErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasThemeErrors) {
-          showToast(missingThemeFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidThemeField = themeFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidThemeField) firstInvalidThemeField.element.focus();
+        // Required-by-default validation driven by the `required` attribute.
+        const themeCheck = validateRequiredFieldsInline(monthlyThemeForm);
+
+        if (!themeCheck.valid) {
+          showToast(themeCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (themeCheck.first) themeCheck.first.focus();
           return;
         }
 
@@ -1914,7 +1817,8 @@ locationsForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-monthly-theme') {
+      const editBtn = e.target.closest('[data-action="edit-monthly-theme"]');
+      if (editBtn) {
         const { data, error } = await supabase.from('monthly_theme').select('*').limit(1).maybeSingle();
         if (error || !data) {
           showToast('Could not load the current theme.', 'error');
@@ -1971,57 +1875,20 @@ liveStatusForm.addEventListener('submit', async function (e) {
        const live_description = document.getElementById('lsDesc').value.trim();
        let youtube_url = document.getElementById('lsYoutube').value.trim();
 
-        // Validate required fields
-        const liveFieldsToValidate = [
-          { id: 'lsTitle', label: 'Live title', errorId: 'lsTitleError', element: document.getElementById('lsTitle') },
-          { id: 'lsYoutube', label: 'YouTube URL', errorId: 'lsYoutubeError', element: document.getElementById('lsYoutube') }
-        ];
-        
-        // Initialize error elements
-        liveFieldsToValidate.forEach(({ errorId }) => {
-          const errorElement = document.getElementById(errorId);
-          if (errorElement) errorElement.textContent = '';
+// Required-by-default validation. The YouTube field accepts a plain link
+        // or a pasted <iframe> embed, so the format rule extracts first.
+        const liveCheck = validateRequiredFieldsInline(liveStatusForm, {
+          lsYoutube: function (v) { return isValidYouTubeUrl(extractYouTubeUrl(v)) || 'Please enter a valid YouTube link or embed URL.'; }
         });
-        
-        let hasLiveErrors = false;
-        const missingLiveFields = [];
-        
-        liveFieldsToValidate.forEach(({ id, label, element }) => {
-          if (!element.value.trim() && element.required) {
-            element.setAttribute('aria-invalid', 'true');
-            element.style.borderColor = '#ff4444';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = `${label} is required.`;
-            missingLiveFields.push(label);
-            hasLiveErrors = true;
-          } else {
-            element.setAttribute('aria-invalid', 'false');
-            element.style.borderColor = '';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) errorElement.textContent = '';
-          }
-        });
-        
-        if (hasLiveErrors) {
-          showToast(missingLiveFields.join(' and ') + ' are required.', 'error');
-          const firstInvalidLiveField = liveFieldsToValidate.find(({ element }) => !element.value.trim() && element.required);
-          if (firstInvalidLiveField) firstInvalidLiveField.element.focus();
+
+        if (!liveCheck.valid) {
+          showToast(liveCheck.summary || 'Please fix the highlighted fields.', 'error');
+          if (liveCheck.first) liveCheck.first.focus();
           return;
         }
 
-       // Validate YouTube URL if provided
-       if (youtube_url && !isValidUrl(youtube_url)) {
-         showToast('Please enter a valid YouTube URL.', 'error');
-         return;
-       }
-
-       // If user pasted an iframe, extract the src URL
-       if (youtube_url.includes('<iframe')) {
-         const match = youtube_url.match(/src="([^"]+)"/);
-         if (match && match[1]) {
-           youtube_url = match[1];
-         }
-       }
+       // Normalize a pasted <iframe> to its src before saving.
+       youtube_url = extractYouTubeUrl(youtube_url);
 
        setButtonLoading(submitBtn, true);
        const startedAt = Date.now();
@@ -2046,7 +1913,8 @@ liveStatusForm.addEventListener('submit', async function (e) {
      });
 
     document.addEventListener('click', async function (e) {
-      if (e.target.dataset.action === 'edit-live-status') {
+      const editBtn = e.target.closest('[data-action="edit-live-status"]');
+      if (editBtn) {
         const { data, error } = await supabase.from('live_status').select('*').limit(1).maybeSingle();
         if (error || !data) {
           showToast('Could not load the live status.', 'error');
@@ -2088,4 +1956,26 @@ liveStatusForm.addEventListener('submit', async function (e) {
   // --- Requests ---
   // Loader, renderer, tabs and delete all live in the consolidated block near
   // the top of this file. Nothing to wire here.
+
+  // --- Live inline validation feedback ---
+  // The moment the admin touches a field that failed validation, the error
+  // state and message clear. Feedback is immediate instead of waiting for the
+  // next submit. Handles text inputs, selects, textareas and file inputs.
+  document.addEventListener('input', clearFieldError);
+  document.addEventListener('change', clearFieldError);
+
+  function clearFieldError(e) {
+    const target = e.target;
+    if (!target || typeof target.matches !== 'function') return;
+    if (!target.matches('input.form__input, select.form__input, textarea.form__input')) return;
+    target.classList.remove('form__input--error');
+    target.setAttribute('aria-invalid', 'false');
+    const describedBy = target.getAttribute('aria-describedby');
+    if (describedBy) {
+      describedBy.split(' ').forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el && el.classList.contains('error-message')) el.textContent = '';
+      });
+    }
+  }
 })();

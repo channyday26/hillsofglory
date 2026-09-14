@@ -1709,6 +1709,44 @@
   color: var(--color-text-muted);
 }
 
+// Required-field marker. Uses the gold secondary accent so the asterisk reads
+// as a brand signal rather than a raw error; screen readers announce the
+// textual "(required)" from aria-required/required on the control itself.
+.form__required {
+  color: var(--color-secondary);
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+// Inline per-field validation message, announced via the aria-live region.
+.error-message {
+  min-height: 1.15em;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--color-error);
+
+  &:empty {
+    display: none;
+  }
+}
+
+// Invalid control state, driven by admin-cms.js via aria-invalid + this class.
+// Solid border + soft glow keeps the error visible in both themes while the
+// custom focus ring below stays reachable for keyboard users.
+.form__input--error,
+.form__input[aria-invalid="true"] {
+  border-color: var(--color-error);
+  background-color: rgba(var(--color-error-rgb), 0.05);
+
+  &:focus {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(var(--color-error-rgb), 0.18);
+  }
+}
+
 .upload-preview {
   display: flex;
   align-items: center;
