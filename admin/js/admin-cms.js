@@ -681,8 +681,7 @@ const settingsForm = document.getElementById('settingsForm');
           setFacebook: function (v) { return isValidUrl(v) || 'Please enter a valid Facebook URL.'; },
           setInstagram: function (v) { return isValidUrl(v) || 'Please enter a valid Instagram URL.'; },
           setYouTube: function (v) { return isValidYouTubeUrl(v) || 'Please enter a valid YouTube URL.'; },
-          setX: function (v) { return isValidUrl(v) || 'Please enter a valid X / Twitter URL.'; },
-          setHeroVideo: function (v) { return isValidYouTubeUrl(v) || 'Please enter a valid Hero Video URL.'; }
+          setX: function (v) { return isValidUrl(v) || 'Please enter a valid X / Twitter URL.'; }
         });
 
         if (!settingsCheck.valid) {
