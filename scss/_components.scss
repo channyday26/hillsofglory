@@ -2124,11 +2124,9 @@
   min-width: 0;
   padding: clamp(1.5rem, 3.2vw, 2.4rem);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-glass-border);
   background: var(--color-glass);
   -webkit-backdrop-filter: blur(18px) saturate(1.35);
   backdrop-filter: blur(18px) saturate(1.35);
-  box-shadow: var(--shadow-card-hover);
 
   @media (max-width: 960px) {
     padding: 1rem;
@@ -2196,7 +2194,7 @@
 
 .schedule-row {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 8fr) auto auto;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 8fr) auto;
   align-items: center;
   gap: 0.75rem 1.1rem;
   padding: 1.05rem 0.75rem;
@@ -2215,30 +2213,18 @@
 
   &:hover {
     background-color: var(--color-accent-glow);
-
-    .schedule-row__link {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-      color: #FFFFFF;
-      transform: translateY(-2px);
-
-      .lucide {
-        transform: translate(2px, -2px);
-      }
-    }
   }
 
   @media (max-width: 560px) {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      'day     link'
-      'service time';
+      'day       .'
+      'service   time';
     row-gap: 0.2rem;
 
     .schedule-row__day { grid-area: day; }
     .schedule-row__service { grid-area: service; }
     .schedule-row__time { grid-area: time; justify-self: end; }
-    .schedule-row__link { grid-area: link; justify-self: end; }
   }
 }
 
@@ -2289,54 +2275,6 @@
   @media (max-width: 560px) {
     font-size: 0.95rem;
     color: var(--color-text-secondary);
-  }
-}
-
-.schedule-row__link {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-hover);
-  color: var(--color-text);
-  transition: transform var(--transition-fast),
-              background-color var(--transition-fast),
-              border-color var(--transition-fast),
-              color var(--transition-fast);
-
-  .ti,
-  .lucide {
-    width: 1.15em;
-    height: 1.15em;
-    transition: transform var(--transition-fast);
-  }
-}
-
-.schedule-showcase__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  margin-top: auto;
-  padding: 1.25rem 0.5rem 0;
-  border-top: 1px solid var(--color-border);
-
-  > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.87rem;
-    color: var(--color-text-secondary);
-
-    .ti,
-    .lucide {
-      width: 1em;
-      height: 1em;
-      flex-shrink: 0;
-    }
   }
 }
 
@@ -7343,7 +7281,7 @@ form#prayerRequestForm {
   isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  grid-template-areas: 'media panel';
+  grid-template-areas: 'media panel' 'schedule schedule';
   gap: clamp(1.75rem, 4vw, 3rem);
   align-items: stretch;
   overflow: hidden;
@@ -7372,7 +7310,8 @@ form#prayerRequestForm {
     grid-template-columns: 1fr;
     grid-template-areas:
       'media'
-      'panel';
+      'panel'
+      'schedule';
   }
 
   @media (prefers-reduced-transparency: reduce) {
@@ -7380,6 +7319,55 @@ form#prayerRequestForm {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: var(--shadow-card);
+  }
+}
+
+// Compact schedule timetable spanning the showcase's lower row, tucked under
+// the media and panel columns.
+.main-church__schedule {
+  grid-area: schedule;
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border-radius: var(--radius-lg);
+
+  .schedule-showcase__intro {
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.8rem;
+  }
+
+  .schedule-showcase__pill {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.7rem;
+  }
+
+  .schedule-showcase__title {
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  }
+
+  .schedule-row {
+    gap: 0.5rem 0.85rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  .schedule-row__day {
+    gap: 0.6rem;
+  }
+
+  .schedule-row__day-text {
+    font-size: 1rem;
+    line-height: 1.15;
+  }
+
+  .schedule-row__thumb {
+    width: 34px;
+    height: 34px;
+  }
+
+  .schedule-row__service {
+    font-size: 0.85rem;
+  }
+
+  .schedule-row__time {
+    font-size: 0.88rem;
   }
 }
 
@@ -7668,6 +7656,13 @@ form#prayerRequestForm {
   > p.card__text {
     break-inside: avoid;
   }
+}
+
+// Search bar above the outreach cards, centered like the section header.
+.outreach-toolbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
 }
 
 .outreach-column {

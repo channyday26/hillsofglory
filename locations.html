@@ -125,6 +125,39 @@
               </div>
               <span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>
             </div>
+            <div class="schedule-showcase__timetable main-church__schedule animate-fade-up stagger-2">
+              <div class="schedule-showcase__intro">
+                <span class="schedule-showcase__pill"><i data-lucide="calendar-clock"></i> Gathering Times</span>
+                <h3 class="schedule-showcase__title">Weekly Service Schedule</h3>
+              </div>
+              <ul class="schedule-showcase__list" id="mainChurchScheduleGrid">
+                <li class="schedule-row">
+                  <span class="schedule-row__day"><span class="schedule-row__day-text">Sunday</span></span>
+                  <span class="schedule-row__service">Worship &amp; Word</span>
+                  <time class="schedule-row__time" datetime="06:00">6:00 AM</time>
+                </li>
+                <li class="schedule-row">
+                  <span class="schedule-row__day"><span class="schedule-row__day-text">Sunday</span></span>
+                  <span class="schedule-row__service">Worship &amp; Word</span>
+                  <time class="schedule-row__time" datetime="08:00">8:00 AM</time>
+                </li>
+                <li class="schedule-row">
+                  <span class="schedule-row__day"><span class="schedule-row__day-text">Sunday</span></span>
+                  <span class="schedule-row__service">Worship &amp; Word</span>
+                  <time class="schedule-row__time" datetime="10:45">10:45 AM</time>
+                </li>
+                <li class="schedule-row">
+                  <span class="schedule-row__day"><span class="schedule-row__day-text">Wednesday</span></span>
+                  <span class="schedule-row__service">Prot&eacute;g&eacute;</span>
+                  <time class="schedule-row__time" datetime="18:00">6:00 PM</time>
+                </li>
+                <li class="schedule-row">
+                  <span class="schedule-row__day"><span class="schedule-row__day-text">Saturday</span></span>
+                  <span class="schedule-row__service">Prayer Encounter</span>
+                  <time class="schedule-row__time" datetime="05:00">5:00 AM</time>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -137,6 +170,18 @@
           <h2 class="section-title">Outreach Locations</h2>
           <p class="section-subtitle">Our growing family of outreach churches serving communities near and far.</p>
         </div>
+        <div class="outreach-toolbar animate-fade-up stagger-1">
+          <div class="lifegroups-toolbar__search">
+            <i data-lucide="search" class="lifegroups-toolbar__search-icon" aria-hidden="true"></i>
+            <input type="search" id="outreachSearch" class="lifegroups-toolbar__input"
+                   placeholder="Search by location name or address..." autocomplete="off"
+                   aria-label="Search outreach locations" />
+            <button type="button" class="lifegroups-toolbar__clear" id="outreachSearchClear"
+                    aria-label="Clear search" title="Clear search" hidden>
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
         <div class="outreach-columns" id="outreachGrid">
           <!-- Populated dynamically from Supabase -->
           <article class="outreach-column animate-fade-up">
@@ -147,6 +192,25 @@
             <span class="outreach-column__chip"><i data-lucide="tent"></i> Outreach</span>
             <p class="outreach-column__address"><i data-lucide="map-pin"></i> Outreach locations will appear here once they are added.</p>
           </article>
+        </div>
+        <div class="load-more-wrap">
+          <button type="button" class="btn btn--outline load-more" id="outreachLoadMore" data-label="Show more locations" hidden>
+            <i data-lucide="plus" class="load-more__icon" aria-hidden="true"></i>
+            <span class="load-more__label">Show more locations</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- International Locations -->
+    <section class="section" id="internationalLocations" aria-label="International Locations" hidden>
+      <div class="container">
+        <div class="section-header animate-fade-up">
+          <h2 class="section-title">International Locations</h2>
+          <p class="section-subtitle">Our global outreach family serving communities beyond the Philippines.</p>
+        </div>
+        <div class="outreach-columns" id="internationalGrid">
+          <!-- Populated dynamically from Supabase -->
         </div>
       </div>
     </section>

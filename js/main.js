@@ -363,8 +363,6 @@
         '<span class="schedule-row__day-text">' + esc(s.day || '') + '</span></span>' +
         '<span class="schedule-row__service">' + esc(s.service_name || 'Service') + '</span>' +
         '<time class="schedule-row__time" datetime="' + escAttr(s.time || '') + '">' + esc(s.time || '') + '</time>' +
-        '<a href="locations.html" class="schedule-row__link" aria-label="View service details">' +
-        '<i data-lucide="arrow-up-right"></i></a>' +
         '</li>';
     }).join('');
 
@@ -996,99 +994,288 @@
   // ============================================
   // Locations — Main church showcase + outreach cards
   // ============================================
+  // Outreach cards are served in chunks (6 first, then 3 per "Show More") from
+  // live Supabase queries. The search term is embedded in the query itself so
+  // the database does the filtering; a debounced keystroke resets the pager.
+  // Schedules are fetched once and shared by the main timetable and every
+  // outreach / international card.
+
+  const OUTREACH_FIRST_PAGE = 6;
+  const OUTREACH_PAGE_SIZE = 3;
+  const OUTREACH_SEARCH_DEBOUNCE = 150;
+  const outreachPager = { offset: 0, exhausted: false, loading: false, first: true };
+  let outreachQuery = '';
+  let outreachSearchTimer = 0;
+  let outreachRequestId = 0;
+  let outreachRendered = 0;
+  let locationSchedulesByLocation = {};
+
+  // A location is international when its address names a country other than the
+  // Philippines. Blank addresses default to the main outreach grid. Centralised
+  // here so a future `country` column can replace the heuristic in one place.
+  function isInternationalLocation(loc) {
+    const address = ((loc && loc.address) || '').trim();
+    return address !== '' && !/philippines/i.test(address);
+  }
+
   async function loadLocations() {
     const mainCampusCard = document.getElementById('mainCampusCard');
     const outreachGrid = document.getElementById('outreachGrid');
-    if (!mainCampusCard && !outreachGrid) return;
+    const internationalGrid = document.getElementById('internationalGrid');
+    if (!mainCampusCard && !outreachGrid && !internationalGrid) return;
 
-    const locations = await fetchTable('locations', function (q) {
-      return q.eq('status', 'Active').order('sort_order', { ascending: true });
-    });
     const schedules = await fetchTable('service_schedules', function (q) {
       return q.order('sort_order', { ascending: true });
     });
-
-    const schedulesByLocation = {};
+    locationSchedulesByLocation = {};
     schedules.forEach(function (s) {
-      if (!schedulesByLocation[s.location_id]) schedulesByLocation[s.location_id] = [];
-      schedulesByLocation[s.location_id].push(s);
+      if (!locationSchedulesByLocation[s.location_id]) locationSchedulesByLocation[s.location_id] = [];
+      locationSchedulesByLocation[s.location_id].push(s);
     });
 
-    function mainCard(loc) {
-      return '<div class="main-church__showcase animate-fade-up stagger-1">' +
-        '<div class="main-church__media-wrap">' +
-        '<span class="main-church__ghost" aria-hidden="true"></span>' +
-        '<figure class="main-church__arch">' +
-        '<img src="images/hills_building.png" alt="' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" />' +
-        '<span class="main-church__sticker"><i data-lucide="map-pin"></i> Main Church</span>' +
-        '</figure>' +
-        '</div>' +
-        '<div class="main-church__panel">' +
-        '<span class="main-church__eyebrow"><i data-lucide="landmark"></i> Our Central Home</span>' +
-        '<h3 class="main-church__name">' + esc(loc.name || 'Hills of Glory Main Church') + '</h3>' +
-        '<p class="main-church__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || 'Location details coming soon.') + '</p>' +
-        '<span class="main-church__rule" aria-hidden="true"></span>' +
-        '<div class="main-church__map">' +
-        (loc.google_maps_embed_link
-          ? '<iframe class="main-church__iframe" src="' + escAttr(loc.google_maps_embed_link) + '" title="Map to ' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'
-          : '<div class="main-church__map-fallback"><i data-lucide="map"></i><span>Interactive map coming soon.</span></div>') +
-        '</div>' +
-        '<span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>' +
-        '</div>' +
-        '</div>';
-    }
-
-    function outreachCard(loc, i) {
-      const locSchedules = schedulesByLocation[loc.id] || [];
-      const scheduleBody = locSchedules.length
-        ? locSchedules.map(function (s) {
-            return '<div class="outreach-column__row"><span>' + esc(s.day) + '</span><strong>' + esc(s.service_name || 'Service') + '</strong><time>' + esc(s.time || '') + '</time></div>';
-          }).join('')
-        : '<p class="card__text">Service times coming soon.</p>';
-
-      const rank = i + 1;
-      const idx = rank < 10 ? '0' + rank : String(rank);
-
-      return '<article class="outreach-column animate-fade-up">' +
-        '<div class="outreach-column__head">' +
-        '<span class="outreach-column__index" aria-hidden="true">' + idx + '</span>' +
-        '<h3 class="outreach-column__name">' + esc(loc.name || '') + '</h3>' +
-        '</div>' +
-        '<span class="outreach-column__chip"><i data-lucide="tent"></i> Outreach</span>' +
-        '<p class="outreach-column__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || '') + '</p>' +
-        '<div class="location-accordion">' +
-        '<button type="button" class="location-accordion__trigger" aria-expanded="false">' +
-        '<span><i data-lucide="clock"></i> Service Schedule</span><i data-lucide="chevron-down"></i></button>' +
-        '<div class="location-accordion__body" hidden>' + scheduleBody + '</div>' +
-        '</div>' +
-        (loc.google_maps_embed_link
-          ? '<div class="outreach-column__footer"><a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a></div>'
-          : '') +
-        '</article>';
-    }
+    const mains = await fetchTable('locations', function (q) {
+      return q.eq('location_type', 'Main').eq('status', 'Active').order('sort_order', { ascending: true }).limit(1);
+    });
 
     if (mainCampusCard) {
-      const main = locations.find(function (l) { return l.location_type === 'Main'; });
-      if (main) {
-        mainCampusCard.innerHTML = mainCard(main);
-      } else {
-        mainCampusCard.innerHTML = '<p class="card__text">Main church details coming soon.</p>';
-      }
+      mainCampusCard.innerHTML = mains.length
+        ? mainCard(mains[0])
+        : '<p class="card__text">Main church details coming soon.</p>';
     }
 
-    if (outreachGrid) {
-      const outreaches = locations.filter(function (l) { return l.location_type !== 'Main'; });
-      if (!outreaches.length) {
-        outreachGrid.innerHTML = '<p class="card__text">No outreach locations listed yet.</p>';
-      } else {
-        outreachGrid.innerHTML = outreaches.map(function (loc, i) {
-          return outreachCard(loc, i);
-        }).join('');
-      }
-    }
+    if (outreachGrid) loadOutreaches(false);
+    if (internationalGrid) loadInternational();
 
     wireAccordions();
     initIcons();
+  }
+
+  // Sunday-first day order for the main church timetable.
+  const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  function timeMinutes(value) {
+    const m = String(value || '').trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+    if (!m) return 0;
+    let hour = parseInt(m[1], 10);
+    const minute = m[2] ? parseInt(m[2], 10) : 0;
+    const meridiem = (m[3] || '').toLowerCase();
+    if (meridiem === 'pm' && hour < 12) hour += 12;
+    if (meridiem === 'am' && hour === 12) hour = 0;
+    return hour * 60 + minute;
+  }
+
+  function scheduleSort(a, b) {
+    const dayA = DAY_ORDER.indexOf((a.day || '').trim());
+    const dayB = DAY_ORDER.indexOf((b.day || '').trim());
+    if (dayA !== dayB) return (dayA === -1 ? 99 : dayA) - (dayB === -1 ? 99 : dayB);
+    return timeMinutes(a.time) - timeMinutes(b.time);
+  }
+
+  // Fallback rows mirror the homepage timetable until CMS data is available.
+  const fallbackRows = [
+    { day: 'Sunday', service_name: 'Worship & Word', time: '6:00 AM' },
+    { day: 'Sunday', service_name: 'Worship & Word', time: '8:00 AM' },
+    { day: 'Sunday', service_name: 'Worship & Word', time: '10:45 AM' },
+    { day: 'Wednesday', service_name: 'Protégé', time: '6:00 PM' },
+    { day: 'Saturday', service_name: 'Prayer Encounter', time: '5:00 AM' }
+  ];
+
+    function scheduleRowHtml(s) {
+    const thumb = s.image_url
+      ? '<img class="schedule-row__thumb" src="' + escAttr(s.image_url) + '" alt="" loading="lazy" />'
+      : '';
+    return '<li class="schedule-row">' +
+      '<span class="schedule-row__day">' + thumb +
+      '<span class="schedule-row__day-text">' + esc(s.day || '') + '</span></span>' +
+      '<span class="schedule-row__service">' + esc(s.service_name || 'Service') + '</span>' +
+      '<time class="schedule-row__time" datetime="' + escAttr(s.time || '') + '">' + esc(s.time || '') + '</time>' +
+      '</li>';
+  }
+
+  function mainCard(loc) {
+    const locSchedules = (locationSchedulesByLocation[loc.id] || []).slice().sort(scheduleSort);
+    const rows = (locSchedules.length ? locSchedules : fallbackRows)
+      .map(scheduleRowHtml)
+      .join('');
+
+    return '<div class="main-church__showcase animate-fade-up stagger-1">' +
+      '<div class="main-church__media-wrap">' +
+      '<span class="main-church__ghost" aria-hidden="true"></span>' +
+      '<figure class="main-church__arch">' +
+      '<img src="images/hills_building.png" alt="' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" />' +
+      '<span class="main-church__sticker"><i data-lucide="map-pin"></i> Main Church</span>' +
+      '</figure>' +
+      '</div>' +
+      '<div class="main-church__panel">' +
+      '<span class="main-church__eyebrow"><i data-lucide="landmark"></i> Our Central Home</span>' +
+      '<h3 class="main-church__name">' + esc(loc.name || 'Hills of Glory Main Church') + '</h3>' +
+      '<p class="main-church__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || 'Location details coming soon.') + '</p>' +
+      '<span class="main-church__rule" aria-hidden="true"></span>' +
+      '<div class="main-church__map">' +
+      (loc.google_maps_embed_link
+        ? '<iframe class="main-church__iframe" src="' + escAttr(loc.google_maps_embed_link) + '" title="Map to ' + escAttr(loc.name || 'Hills of Glory Main Church') + '" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'
+        : '<div class="main-church__map-fallback"><i data-lucide="map"></i><span>Interactive map coming soon.</span></div>') +
+      '</div>' +
+      '<span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>' +
+      '</div>' +
+      '<div class="schedule-showcase__timetable main-church__schedule animate-fade-up stagger-2">' +
+      '<div class="schedule-showcase__intro">' +
+      '<span class="schedule-showcase__pill"><i data-lucide="calendar-clock"></i> Gathering Times</span>' +
+      '<h3 class="schedule-showcase__title">Weekly Service Schedule</h3>' +
+      '</div>' +
+      '<ul class="schedule-showcase__list" id="mainChurchScheduleGrid">' + rows + '</ul>' +
+      '</div>' +
+      '</div>';
+  }
+
+  function outreachCard(loc, rank) {
+    const locSchedules = locationSchedulesByLocation[loc.id] || [];
+    const scheduleBody = locSchedules.length
+      ? locSchedules.map(function (s) {
+          return '<div class="outreach-column__row"><span>' + esc(s.day) + '</span><strong>' + esc(s.service_name || 'Service') + '</strong><time>' + esc(s.time || '') + '</time></div>';
+        }).join('')
+      : '<p class="card__text">Service times coming soon.</p>';
+
+    const idx = rank < 10 ? '0' + rank : String(rank);
+
+    return '<article class="outreach-column animate-fade-up">' +
+      '<div class="outreach-column__head">' +
+      '<span class="outreach-column__index" aria-hidden="true">' + idx + '</span>' +
+      '<h3 class="outreach-column__name">' + esc(loc.name || '') + '</h3>' +
+      '</div>' +
+      '<span class="outreach-column__chip"><i data-lucide="tent"></i> Outreach</span>' +
+      '<p class="outreach-column__address"><i data-lucide="map-pin"></i> ' + esc(loc.address || '') + '</p>' +
+      '<div class="location-accordion">' +
+      '<button type="button" class="location-accordion__trigger" aria-expanded="false">' +
+      '<span><i data-lucide="clock"></i> Service Schedule</span><i data-lucide="chevron-down"></i></button>' +
+      '<div class="location-accordion__body" hidden>' + scheduleBody + '</div>' +
+      '</div>' +
+      (loc.google_maps_embed_link
+        ? '<div class="outreach-column__footer"><a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a></div>'
+        : '') +
+      '</article>';
+  }
+
+  async function loadOutreaches(append) {
+    const grid = document.getElementById('outreachGrid');
+    if (!grid) return;
+    // Only "Show More" is rate-limited. A keystroke change must never be
+    // swallowed because an earlier request is still open.
+    if (append && (outreachPager.loading || outreachPager.exhausted)) return;
+
+    const btn = document.getElementById('outreachLoadMore');
+    const requestId = ++outreachRequestId;
+    const term = outreachQuery;
+    outreachPager.loading = true;
+    setLoadMoreState(btn, 'loading');
+
+    const size = outreachPager.first ? OUTREACH_FIRST_PAGE : OUTREACH_PAGE_SIZE;
+    const batch = await fetchTable('locations', function (q) {
+      let query = q.eq('location_type', 'Outreach').eq('status', 'Active');
+      if (term) {
+        const like = escapeLike(term);
+        query = query.or('name.ilike.%' + like + '%,address.ilike.%' + like + '%');
+      }
+      return query.order('sort_order', { ascending: true }).range(outreachPager.offset, outreachPager.offset + size);
+    });
+    // Filter out international locations (non-Philippines) for the outreach grid
+    const rows = batch.filter(function (loc) { return !isInternationalLocation(loc); });
+
+    // Superseded — a newer search or page owns the grid and clears `loading`.
+    if (requestId !== outreachRequestId) return;
+
+    outreachPager.loading = false;
+    outreachPager.exhausted = batch.length <= size;
+    outreachPager.offset += rows.length;
+    outreachPager.first = false;
+
+    if (!append) grid.innerHTML = '';
+
+    if (!rows.length && !append) {
+      grid.innerHTML = term
+        ? '<p class="card__text">No outreach locations match your search. Try a different keyword.</p>'
+        : '<p class="card__text">No outreach locations listed yet. Check back soon.</p>';
+    } else if (rows.length) {
+      // Column numbers continue across "Show More" pages.
+      const startRank = outreachRendered + 1;
+      grid.insertAdjacentHTML('beforeend', rows.map(function (loc, i) {
+        return outreachCard(loc, startRank + i);
+      }).join(''));
+      outreachRendered += rows.length;
+    }
+
+    initIcons();
+    wireAccordions();
+    setLoadMoreState(btn, outreachPager.exhausted ? 'exhausted' : 'ready');
+  }
+
+  async function loadInternational() {
+    const grid = document.getElementById('internationalGrid');
+    if (!grid) return;
+    const section = document.getElementById('internationalLocations');
+
+    const locations = await fetchTable('locations', function (q) {
+      return q.eq('location_type', 'Outreach').eq('status', 'Active').order('sort_order', { ascending: true });
+    });
+    const international = locations.filter(isInternationalLocation);
+
+    // The section stays hidden until at least one international outreach exists.
+    if (!international.length) {
+      if (section) section.hidden = true;
+      return;
+    }
+    if (section) section.hidden = false;
+    grid.innerHTML = international.map(function (loc, i) {
+      return outreachCard(loc, i + 1);
+    }).join('');
+    initIcons();
+    wireAccordions();
+  }
+
+  function wireOutreachControls() {
+    const search = document.getElementById('outreachSearch');
+    const clear = document.getElementById('outreachSearchClear');
+
+    // Live search: debounced keystrokes re-query the database and reset the
+    // pager back to the first page of matching locations.
+    if (search) {
+      search.addEventListener('input', function () {
+        const term = search.value.trim();
+        clearTimeout(outreachSearchTimer);
+        outreachSearchTimer = setTimeout(function () {
+          if (term === outreachQuery) return;
+          outreachQuery = term;
+          outreachPager.offset = 0;
+          outreachPager.exhausted = false;
+          outreachPager.first = true;
+          outreachRendered = 0;
+          if (clear) clear.hidden = !term;
+          loadOutreaches(false);
+        }, OUTREACH_SEARCH_DEBOUNCE);
+      });
+    }
+
+    if (clear) {
+      clear.addEventListener('click', function () {
+        if (!search) return;
+        search.value = '';
+        clear.hidden = true;
+        outreachQuery = '';
+        outreachPager.offset = 0;
+        outreachPager.exhausted = false;
+        outreachPager.first = true;
+        outreachRendered = 0;
+        loadOutreaches(false);
+        search.focus();
+      });
+    }
+
+    const more = document.getElementById('outreachLoadMore');
+    if (more) {
+      more.addEventListener('click', function () {
+        loadOutreaches(true);
+      });
+    }
   }
 
   function wireAccordions() {
@@ -1808,6 +1995,7 @@
     // never stacks duplicate listeners.
     wireSermonsControls();
     wireLifegroupControls();
+    wireOutreachControls();
 
     // Data features wait for the client
     waitForSupabase(function () {
