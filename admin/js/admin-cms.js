@@ -292,6 +292,7 @@
       searchColumns: ['name', 'role', 'bio'],
       emptyText: 'No leaders yet. Add a leader below.',
       countLabel: 'leaders',
+      exportTitle: 'Leadership',
       columns: [
         { label: 'Leader', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (l) { return identityCell(l.image_url, l.name, 'user'); } },
@@ -315,6 +316,7 @@
       searchColumns: ['name', 'category', 'description', 'contact_person'],
       emptyText: 'No ministries yet. Add a ministry below.',
       countLabel: 'ministries',
+      exportTitle: 'Ministries',
       columns: [
         { label: 'Ministry', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (m) { return identityCell(m.image_url, m.name, 'heart-handshake', true); } },
@@ -340,6 +342,7 @@
       searchColumns: ['name', 'address', 'location_type'],
       emptyText: 'No locations yet. Add a location below.',
       countLabel: 'locations',
+      exportTitle: 'Locations',
       columns: [
         { label: 'Campus', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (l) { return identityCell(l.image_url, l.name, 'map-pin', true); } },
@@ -365,6 +368,7 @@
       searchColumns: ['service_name', 'day', 'time'],
       emptyText: 'No service schedules yet. Add one below.',
       countLabel: 'schedules',
+      exportTitle: 'Service Schedules',
       columns: [
         { label: 'Service', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (s) { return identityCell(s.image_url, s.service_name, 'clock', true); } },
@@ -389,6 +393,7 @@
       searchColumns: ['group_name', 'leader_name', 'location', 'meeting_time'],
       emptyText: 'No lifegroups yet. Add a lifegroup below.',
       countLabel: 'lifegroups',
+      exportTitle: 'Lifegroups',
       columns: [
         { label: 'Group', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (lg) { return primaryCell(lg.group_name); } },
@@ -414,6 +419,7 @@
       searchColumns: ['title', 'speaker'],
       emptyText: 'No sermons yet. Add a sermon below.',
       countLabel: 'sermons',
+      exportTitle: 'Sermons',
       columns: [
         { label: 'Title', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (s) { return primaryCell(s.title); } },
@@ -437,6 +443,11 @@
     if (!cfg.alwaysRebuild && tableShellsBuilt[key]) return false;
     tableShellsBuilt[key] = true;
 
+    // Export button ids live on the shell, derived from the container so each
+    // section (and each request tab shell) gets a stable, unique pair.
+    cfg.printId = cfg.printId || cfg.containerId + 'Print';
+    cfg.excelId = cfg.excelId || cfg.containerId + 'Excel';
+
     const headings = cfg.columns.map(function (col) {
       return '<th' + (col.thClass ? ' class="' + col.thClass + '"' : '') + ' scope="col">' + esc(col.label) + '</th>';
     }).join('');
@@ -444,7 +455,7 @@
     container.innerHTML =
       '<div class="data-table">' +
         '<div class="data-table__toolbar">' +
-          '<div class="data-table__toolbar-group">' +
+          '<div class="data-table__toolbar-group data-table__toolbar-group--left">' +
             (cfg.dateFromId && cfg.dateToId
               ? '<div class="data-table__datefilter">' +
                   '<label class="data-table__datefilter-label" for="' + escAttr(cfg.dateFromId) + '">From</label>' +
@@ -458,6 +469,16 @@
               '<input type="search" id="' + escAttr(cfg.searchId) + '" class="data-table__search-input" ' +
                 'placeholder="' + escAttr(cfg.searchPlaceholder) + '" aria-label="' + escAttr(cfg.searchLabel) + '" autocomplete="off" />' +
             '</div>' +
+          '</div>' +
+          '<div class="data-table__toolbar-group data-table__toolbar-group--right">' +
+            '<button type="button" class="btn btn--sm btn--outline data-table__print" ' +
+              'id="' + escAttr(cfg.printId) + '" aria-label="Print ' + escAttr(cfg.exportTitle || 'records') + '" ' +
+              'title="Print ' + escAttr(cfg.exportTitle || 'records') + ' (respects active filters)">' +
+              '<i data-lucide="printer" aria-hidden="true"></i> Print</button>' +
+            '<button type="button" class="btn btn--sm btn--outline data-table__excel" ' +
+              'id="' + escAttr(cfg.excelId) + '" aria-label="Export ' + escAttr(cfg.exportTitle || 'records') + ' to Excel" ' +
+              'title="Download ' + escAttr(cfg.exportTitle || 'records') + ' as Excel (respects active filters)">' +
+              '<i data-lucide="file-spreadsheet" aria-hidden="true"></i> Excel</button>' +
           '</div>' +
         '</div>' +
         '<div class="data-table__scroll">' +
@@ -496,6 +517,26 @@
       more.addEventListener('click', function () {
         if (isButtonBusy(more)) return;
         loadMoreRecords(cfg, more);
+      });
+    }
+
+    // Print + Excel: both run on the full filtered result set — whatever the
+    // search box and date range currently admit — not just the page on screen.
+    const printBtn = document.getElementById(cfg.printId);
+    if (printBtn && !printBtn._bound) {
+      printBtn._bound = true;
+      printBtn.addEventListener('click', function () {
+        if (isButtonBusy(printBtn)) return;
+        printFilteredRecords(cfg, printBtn);
+      });
+    }
+
+    const excelBtn = document.getElementById(cfg.excelId);
+    if (excelBtn && !excelBtn._bound) {
+      excelBtn._bound = true;
+      excelBtn.addEventListener('click', function () {
+        if (isButtonBusy(excelBtn)) return;
+        exportFilteredRecords(cfg, excelBtn);
       });
     }
 
@@ -605,6 +646,218 @@
     }
     const moreBtn = document.getElementById(cfg.moreId);
     if (moreBtn) moreBtn.hidden = (cfg.offset + pageCount) >= total;
+  }
+
+  // --- Export / print (full filtered result set) --------------------------
+  // Print and Excel both honour whatever filters are active in a table (the
+  // search term plus an optional date range) and span EVERY matching row — not
+  // just the page currently in the viewport. PostgREST pages are walked until
+  // the whole filtered result set has been collected.
+
+  function exportColumns(cfg) {
+    return cfg.columns.filter(function (col) { return col.label !== 'Actions'; });
+  }
+
+  // Column renderers produce HTML; pull a plain-text value from them without
+  // ever inserting that HTML into the real document.
+  function cellText(html) {
+    if (!html) return '';
+    const holder = document.createElement('div');
+    holder.innerHTML = String(html);
+    return (holder.textContent || '').trim();
+  }
+
+  async function fetchAllFiltered(cfg) {
+    const searchCols = typeof cfg.searchColumns === 'function' ? cfg.searchColumns() : cfg.searchColumns;
+    const pageSize = 1000;
+    let offset = 0;
+    const all = [];
+    for (;;) {
+      let query = supabase.from(cfg.table).select('*');
+      if (cfg.term) {
+        const pattern = '%' + dbEscapePattern(cfg.term) + '%';
+        query = query.or(searchCols.map(function (col) {
+          return col + '.ilike.' + pattern;
+        }).join(','));
+      }
+      if (cfg.dateColumn) {
+        if (cfg.dateFrom) query = query.gte(cfg.dateColumn, cfg.dateFrom + 'T00:00:00');
+        if (cfg.dateTo) query = query.lte(cfg.dateColumn, cfg.dateTo + 'T23:59:59.999');
+      }
+      if (cfg.orderColumn) {
+        query = query.order(cfg.orderColumn, { ascending: cfg.ascending });
+      }
+      const { data, error } = await query.range(offset, offset + pageSize - 1);
+      if (error) throw error;
+      all.push.apply(all, data || []);
+      if (!data || data.length < pageSize) break;
+      offset += pageSize;
+    }
+    return all;
+  }
+
+  function filterSummary(cfg) {
+    const parts = [];
+    if (cfg.term) parts.push('search: "' + cfg.term + '"');
+    if (cfg.dateFrom) parts.push('from ' + cfg.dateFrom);
+    if (cfg.dateTo) parts.push('to ' + cfg.dateTo);
+    return parts.length ? 'Filtered results — ' + parts.join(', ') : 'All records';
+  }
+
+  function exportRows(cfg, records) {
+    const cols = exportColumns(cfg);
+    return {
+      cols: cols.map(function (col) { return col.label; }),
+      rows: records.map(function (record) {
+        return cols.map(function (col) { return cellText(col.render(record)); });
+      })
+    };
+  }
+
+  // Excel 2003 SpreadsheetML: an .xls file of XML that Excel opens natively
+  // (no binary/library dependencies). Every cell is Typed "String" so times
+  // like "10:00 AM" and leading zeros survive untouched.
+  function buildSpreadsheetXml(sheetName, cols, rows) {
+    const sheet = String(sheetName).replace(/[:\\/?*\[\]]/g, ' ').trim().slice(0, 31) || 'Sheet';
+    const rowTag = function (cells, header) {
+      const style = header ? ' ss:StyleID="Header"' : '';
+      return '<Row>' + cells.map(function (c) {
+        return '<Cell' + style + '><Data ss:Type="String">' + esc(c) + '</Data></Cell>';
+      }).join('') + '</Row>';
+    };
+    const out = [];
+    out.push('<?xml version="1.0" encoding="UTF-8"?>');
+    out.push('<?mso-application progid="Excel.Sheet"?>');
+    out.push('<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+      'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">');
+    out.push('<Styles><Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/>' +
+      '<Interior ss:Color="#336303" ss:Pattern="Solid"/></Style></Styles>');
+    out.push('<Worksheet ss:Name="' + esc(sheet) + '">');
+    out.push('<Table>');
+    out.push(rowTag(cols, true));
+    rows.forEach(function (cells) { out.push(rowTag(cells, false)); });
+    out.push('</Table>');
+    out.push('</Worksheet>');
+    out.push('</Workbook>');
+    return out.join('\r\n');
+  }
+
+  function downloadSpreadsheetXml(xml, filename) {
+    const blob = new Blob(['\ufeff' + xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function exportDateStamp() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  async function exportFilteredRecords(cfg, btn) {
+    const startedAt = Date.now();
+    setButtonLoading(btn, true);
+    try {
+      const records = await fetchAllFiltered(cfg);
+      if (!records.length) {
+        showToast('No records to export.', 'error');
+        return;
+      }
+      const built = exportRows(cfg, records);
+      const sheetName = cfg.exportTitle || cfg.countLabel || 'Records';
+      const filename = 'hills-of-glory-' + sheetName.toLowerCase().replace(/\s+/g, '-') +
+        '-' + exportDateStamp() + '.xls';
+      downloadSpreadsheetXml(buildSpreadsheetXml(sheetName, built.cols, built.rows), filename);
+      showToast('Exported ' + records.length + ' ' + (cfg.countLabel || 'records') + ' to Excel.', 'success');
+    } catch (err) {
+      showToast('Could not export records.', 'error');
+      console.error(err);
+    } finally {
+      finishButtonLoading(btn, startedAt);
+    }
+  }
+
+  function buildPrintHtml(title, note, cols, rows) {
+    const headHtml = '<tr>' + cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
+    const bodyHtml = rows.map(function (cells) {
+      return '<tr>' + cells.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>';
+    }).join('');
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" />' +
+      '<title>' + esc(title) + '</title>' +
+      '<style>' +
+      'body{font-family:Segoe UI,Arial,sans-serif;color:#1A1A1A;margin:24px;}' +
+      'h1{font-size:20px;margin:0 0 2px;}' +
+      '.meta{color:#555;font-size:12px;margin:0 0 18px;}' +
+      'table{width:100%;border-collapse:collapse;font-size:12px;}' +
+      'th,td{border:1px solid #999;padding:6px 9px;text-align:left;vertical-align:top;word-break:break-word;}' +
+      'th{background:#eee;font-weight:700;}' +
+      '@media print{body{margin:12px;}}' +
+      '</style></head><body>' +
+      '<h1>' + esc(title) + '</h1>' +
+      '<p class="meta">Hills of Glory International Christian Center Inc. — ' +
+        esc(note) + ' — generated ' + esc(new Date().toLocaleString()) + '</p>' +
+      '<table><thead>' + headHtml + '</thead><tbody>' + bodyHtml + '</tbody></table>' +
+      '</body></html>';
+  }
+
+  function printHtml(html, title) {
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('title', title);
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    let printed = false;
+    const doPrint = function () {
+      if (printed) return;
+      printed = true;
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (err) {
+        console.error(err);
+      }
+      setTimeout(function () { iframe.remove(); }, 1000);
+    };
+    // The load event covers browsers where it fires after write/close; the
+    // timeout is the safety net for the rest (about:blank load may presage).
+    if (iframe.contentWindow.addEventListener) {
+      iframe.contentWindow.addEventListener('load', doPrint);
+    }
+    setTimeout(doPrint, 300);
+  }
+
+  async function printFilteredRecords(cfg, btn) {
+    const startedAt = Date.now();
+    setButtonLoading(btn, true);
+    try {
+      const records = await fetchAllFiltered(cfg);
+      if (!records.length) {
+        showToast('No records to print.', 'error');
+        return;
+      }
+      const built = exportRows(cfg, records);
+      const title = cfg.exportTitle || cfg.countLabel || 'Records';
+      printHtml(buildPrintHtml(title, filterSummary(cfg), built.cols, built.rows), title);
+      showToast('Preparing ' + records.length + ' ' + (cfg.countLabel || 'records') + ' for print.', 'success');
+    } catch (err) {
+      showToast('Could not prepare the printout.', 'error');
+      console.error(err);
+    } finally {
+      finishButtonLoading(btn, startedAt);
+    }
   }
 
   // --- Section loaders (entry points for initCMSData + post-write reloads) --
@@ -814,6 +1067,7 @@
       dateToId: 'requestsDateTo',
       emptyText: 'No ' + tab.title.toLowerCase() + ' yet.',
       countLabel: 'requests',
+      exportTitle: tab.title,
       columns: [
         { label: 'Name', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (r) { return primaryCell(r.visitor_name || 'Anonymous'); } },
@@ -1565,16 +1819,14 @@ const name = document.getElementById('leaderName').value.trim();
 // --- Locations CRUD ---
    const locationsForm = document.getElementById('locationsForm');
    if (locationsForm) {
-     // Edit state: null = adding; otherwise the row id being updated.
-     let locationsEditingId = null;
-     let locationsEditingImage = '';
-     const locationsSubmit = locationsForm.querySelector('button[type="submit"]');
-     const locationsCancelEdit = document.getElementById('locationsCancelEdit');
+// Edit state: null = adding; otherwise the row id being updated.
+      let locationsEditingId = null;
+      const locationsSubmit = locationsForm.querySelector('button[type="submit"]');
+      const locationsCancelEdit = document.getElementById('locationsCancelEdit');
 
-     function resetLocationsForm() {
-       locationsEditingId = null;
-       locationsEditingImage = '';
-       locationsForm.reset();
+      function resetLocationsForm() {
+        locationsEditingId = null;
+        locationsForm.reset();
        if (locationsCancelEdit) locationsCancelEdit.hidden = true;
        if (locationsSubmit) {
          locationsSubmit.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Add Location';
@@ -1608,16 +1860,16 @@ locationsForm.addEventListener('submit', async function (e) {
         setButtonLoading(submitBtn, true);
         const startedAt = Date.now();
         try {
-          let image_url = locationsEditingImage;
-          const imageInput = document.getElementById('locImage');
-          const imageFile = imageInput ? imageInput.files[0] : null;
-          if (imageFile) image_url = await uploadImage(imageFile);
+          // NOTE: the locations table has no image_url column — any payload
+          // key it did not define (PostgREST rejects unknown columns) used to
+          // make every add/edit fail. Only the columns that exist are sent.
+          const payload = { name, location_type: type, address, google_maps_embed_link: maps, status };
 
           let error;
           if (locationsEditingId) {
-            ({ error } = await supabase.from('locations').update({ name, location_type: type, address, google_maps_embed_link: maps, status, image_url }).eq('id', locationsEditingId));
+            ({ error } = await supabase.from('locations').update(payload).eq('id', locationsEditingId));
           } else {
-            ({ error } = await supabase.from('locations').insert([{ name, location_type: type, address, google_maps_embed_link: maps, status, image_url }]));
+            ({ error } = await supabase.from('locations').insert([payload]));
           }
 
           if (error) {
@@ -1670,7 +1922,6 @@ locationsForm.addEventListener('submit', async function (e) {
             return;
           }
           locationsEditingId = id;
-          locationsEditingImage = data.image_url || '';
           document.getElementById('locName').value = data.name || '';
           document.getElementById('locType').value = data.location_type || 'Main';
           document.getElementById('locAddress').value = data.address || '';

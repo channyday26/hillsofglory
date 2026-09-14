@@ -236,24 +236,28 @@
             <form class="admin-form" id="locationsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="locName" class="form__label">Campus Name</label>
-                  <input type="text" id="locName" name="name" class="form__input" required />
+                  <label for="locName" class="form__label">Campus Name <span class="form__required">*</span></label>
+                  <input type="text" id="locName" name="name" class="form__input" required aria-invalid="false" aria-describedby="locNameError" />
+                  <div id="locNameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="locType" class="form__label">Type</label>
-                  <select id="locType" name="location_type" class="form__input" required>
+                  <label for="locType" class="form__label">Type <span class="form__required">*</span></label>
+                  <select id="locType" name="location_type" class="form__input" required aria-invalid="false" aria-describedby="locTypeError">
                     <option value="Main">Main</option>
                     <option value="Outreach">Outreach</option>
                   </select>
+                  <div id="locTypeError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="locAddress" class="form__label">Address</label>
-                <input type="text" id="locAddress" name="address" class="form__input" />
+                <label for="locAddress" class="form__label">Address <span class="form__required">*</span></label>
+                <input type="text" id="locAddress" name="address" class="form__input" required aria-invalid="false" aria-describedby="locAddressError" />
+                <div id="locAddressError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
-                <label for="locMaps" class="form__label">Google Maps Link</label>
-                <input type="url" id="locMaps" name="google_maps_embed_link" class="form__input" />
+                <label for="locMaps" class="form__label">Google Maps Link <span class="form__required">*</span></label>
+                <input type="url" id="locMaps" name="google_maps_embed_link" class="form__input" placeholder="https://maps.google.com/..." required aria-invalid="false" aria-describedby="locMapsError" />
+                <div id="locMapsError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
                 <label for="locStatus" class="form__label">Status</label>
@@ -278,36 +282,41 @@
             <form class="admin-form" id="lifegroupsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="lgName" class="form__label">Group Name</label>
-                  <input type="text" id="lgName" name="group_name" class="form__input" required />
+                  <label for="lgName" class="form__label">Group Name <span class="form__required">*</span></label>
+                  <input type="text" id="lgName" name="group_name" class="form__input" required aria-invalid="false" aria-describedby="lgNameError" />
+                  <div id="lgNameError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="lgType" class="form__label">Group Type</label>
-                  <select id="lgType" name="group_type" class="form__input" required>
+                  <label for="lgType" class="form__label">Group Type <span class="form__required">*</span></label>
+                  <select id="lgType" name="group_type" class="form__input" required aria-invalid="false" aria-describedby="lgTypeError">
                     <option value="men">Men</option>
                     <option value="women">Women</option>
                     <option value="couple">Couples</option>
                   </select>
+                  <div id="lgTypeError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="lgLeader" class="form__label">Leader Name</label>
-                  <input type="text" id="lgLeader" name="leader_name" class="form__input" />
+                  <label for="lgLeader" class="form__label">Leader Name <span class="form__required">*</span></label>
+                  <input type="text" id="lgLeader" name="leader_name" class="form__input" required aria-invalid="false" aria-describedby="lgLeaderError" />
+                  <div id="lgLeaderError" class="error-message" aria-live="polite"></div>
                 </div>
-<div class="form__group">
-  <label for="scLocation" class="form__label">Location <span class="form__required">*</span></label>
-  <select id="scLocation" name="location_id" class="form__input" required aria-invalid="false" aria-describedby="scLocationError"></select>
-  <div id="scLocationError" class="error-message" aria-live="polite"></div>
-</div>
+                <div class="form__group">
+                  <label for="lgLocation" class="form__label">Location <span class="form__required">*</span></label>
+                  <input type="text" id="lgLocation" name="location" class="form__input" placeholder="e.g. San Isidro, Angeles City" required aria-invalid="false" aria-describedby="lgLocationError" />
+                  <div id="lgLocationError" class="error-message" aria-live="polite"></div>
+                </div>
               </div>
               <div class="form__group">
-                <label for="lgTime" class="form__label">Meeting Time</label>
-                <input type="text" id="lgTime" name="meeting_time" class="form__input" />
+                <label for="lgTime" class="form__label">Meeting Time <span class="form__required">*</span></label>
+                <input type="text" id="lgTime" name="meeting_time" class="form__input" placeholder="e.g. Saturdays, 4:00 PM" required aria-invalid="false" aria-describedby="lgTimeError" />
+                <div id="lgTimeError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
-                <label for="lgContact" class="form__label">Contact Info</label>
-                <input type="text" id="lgContact" name="contact_info" class="form__input" />
+                <label for="lgContact" class="form__label">Contact Info <span class="form__required">*</span></label>
+                <input type="text" id="lgContact" name="contact_info" class="form__input" required aria-invalid="false" aria-describedby="lgContactError" />
+                <div id="lgContactError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Lifegroup</button>

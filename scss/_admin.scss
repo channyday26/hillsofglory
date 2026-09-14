@@ -508,7 +508,10 @@
 .data-table {
   .data-table__toolbar {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
     margin-bottom: var(--space-md);
   }
 
@@ -518,6 +521,16 @@
     justify-content: flex-end;
     gap: var(--space-md);
     flex-wrap: wrap;
+  }
+
+  .data-table__toolbar-group--left {
+    justify-content: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .data-table__toolbar-group--right {
+    justify-content: flex-end;
   }
 
   .data-table__datefilter {
