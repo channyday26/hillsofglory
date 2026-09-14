@@ -124,8 +124,14 @@
                 </div>
               </div>
               <div class="form__group">
-                <label for="setHeroVideo" class="form__label">Hero Video URL</label>
-                <input type="url" id="setHeroVideo" name="hero_video_url" class="form__input" />
+                <label for="setHeroVideo" class="form__label">Hero Video (Max 5MB)</label>
+                <input type="file" id="setHeroVideo" name="hero_video_url" class="form__input" accept="video/mp4,video/webm,video/ogg" aria-describedby="setHeroVideoHint" />
+                <p class="form__hint" id="setHeroVideoHint">Background video for the homepage hero. Pick a new file to replace it, or leave empty to keep the current video below.</p>
+                <input type="hidden" id="setHeroVideoValue" />
+                <div class="upload-preview" id="setHeroVideoPreviewWrap" hidden>
+                  <video id="setHeroVideoPreview" src="" muted preload="metadata"></video>
+                  <span>Current hero video</span>
+                </div>
               </div>
               <div class="form__group">
                 <label for="setSpotlightImage" class="form__label">Homepage Spotlight Image (Max 2MB)</label>

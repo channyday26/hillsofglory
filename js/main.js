@@ -1759,6 +1759,28 @@
   }
 
   // ============================================
+  // Home — Hero background video
+  // ============================================
+  // The hero ships with local fallback sources. When the CMS has uploaded a
+  // hero video, replace those sources with the public Storage URL so the
+  // landing page renders the admin-managed clip.
+  async function loadHeroVideo() {
+    const video = document.querySelector('.hero__video');
+    if (!video) return;
+    const settings = await fetchTable('church_settings');
+    if (!settings.length) return;
+    const url = settings[0].hero_video_url;
+    if (!url) return;
+    while (video.firstChild) video.removeChild(video.firstChild);
+    const source = document.createElement('source');
+    source.src = url;
+    const type = /\.webm($|\?)/i.test(url) ? 'video/webm' : (/\.ogg($|\?)/i.test(url) ? 'video/ogg' : 'video/mp4');
+    source.type = type;
+    video.appendChild(source);
+    video.load();
+  }
+
+  // ============================================
   // Wait for Supabase SDK, then initialize
   // ============================================
   function waitForSupabase(callback, attempts) {
@@ -1790,6 +1812,7 @@
     // Data features wait for the client
     waitForSupabase(function () {
       loadFooter();
+      loadHeroVideo();
       loadHomeSchedules();
       loadHomeSermons();
       loadSermonsList(false);

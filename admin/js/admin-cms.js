@@ -121,7 +121,25 @@
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     set('setAddress', data.main_address); set('setPhone', data.contact_phone); set('setEmail', data.contact_email);
     set('setBank', data.bank_details); set('setFacebook', data.facebook_url); set('setInstagram', data.instagram_url);
-    set('setYouTube', data.youtube_url); set('setX', data.x_url); set('setHeroVideo', data.hero_video_url);
+    set('setYouTube', data.youtube_url); set('setX', data.x_url);
+
+    // Hero video is an upload control: the current URL goes into a hidden
+    // field (so saving without a new file keeps it), and the preview mirrors it.
+    const heroVideoFile = document.getElementById('setHeroVideo');
+    if (heroVideoFile) heroVideoFile.value = '';
+    set('setHeroVideoValue', data.hero_video_url);
+    const heroPreview = document.getElementById('setHeroVideoPreview');
+    const heroWrap = document.getElementById('setHeroVideoPreviewWrap');
+    if (heroPreview && heroWrap) {
+      const heroUrl = data.hero_video_url || '';
+      if (heroUrl) {
+        heroPreview.src = heroUrl;
+        heroWrap.hidden = false;
+      } else {
+        heroPreview.removeAttribute('src');
+        heroWrap.hidden = true;
+      }
+    }
 
     // Spotlight image is an upload control: the current URL goes into a hidden
     // field (so saving without a new file keeps it), and the preview mirrors it.
@@ -982,6 +1000,28 @@
     return urlData.publicUrl;
   }
 
+  // --- Helper: upload a hero video to Supabase Storage ---
+  // Same pattern as images, capped at 5MB. Only real playable web video MIME
+  // types are accepted so a rogue binary can never be stored as a "video".
+  const ALLOWED_VIDEO_MIME = ['video/mp4', 'video/webm', 'video/ogg'];
+  async function uploadVideo(file) {
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      throw new Error('File too large. Max size is 5MB (' + formatFileSize(file.size) + ').');
+    }
+    if (ALLOWED_VIDEO_MIME.indexOf(file.type) === -1) {
+      throw new Error('Unsupported file type "' + (file.type || 'unknown') + '". Use MP4, WebM or OGG.');
+    }
+    const safeName = String(file.name || 'video').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-100);
+    const fileName = Date.now() + '-' + safeName;
+    const { data, error } = await supabase.storage
+      .from('website-images')
+      .upload(fileName, file, { upsert: false, contentType: file.type });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('website-images').getPublicUrl(fileName);
+    return urlData.publicUrl;
+  }
+
   // --- Settings Form ---
   // church_settings is a singleton: migration 005 pins it to the constant id
   // below with CHECK (id = <constant>), which together with the primary key
@@ -1041,7 +1081,6 @@ const settingsForm = document.getElementById('settingsForm');
        const instagramUrl = valueOf('setInstagram').trim();
        const youtubeUrl = valueOf('setYouTube').trim();
        const xUrl = valueOf('setX').trim();
-       const heroVideoUrl = valueOf('setHeroVideo').trim();
 
 // Required-by-default validation. Every settings field carries
         // `required` in the markup; format rules below only run on filled
@@ -1072,6 +1111,14 @@ const settingsForm = document.getElementById('settingsForm');
          const spotFileInput = document.getElementById('setSpotlightImage');
          if (spotFileInput && spotFileInput.files && spotFileInput.files[0]) {
            spotlightImage = await uploadImage(spotFileInput.files[0]);
+         }
+
+         // Hero video uploads the same way as the spotlight image; an empty
+         // file input keeps the currently stored URL.
+         let heroVideoUrl = valueOf('setHeroVideoValue');
+         const heroVideoFileInput = document.getElementById('setHeroVideo');
+         if (heroVideoFileInput && heroVideoFileInput.files && heroVideoFileInput.files[0]) {
+           heroVideoUrl = await uploadVideo(heroVideoFileInput.files[0]);
          }
 
          const payload = {
