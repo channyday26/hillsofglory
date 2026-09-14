@@ -37,6 +37,15 @@
   }
 }
 
+// Toast entry: rises from the bottom-anchored toast pile. Uses the `translate`
+// longhand so it never fights the .toast leave transition's transform channel.
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
 // Indeterminate spinner for in-flight loads (see .load-more)
 @keyframes spin {
   to {
@@ -64,18 +73,19 @@
   }
 }
 
-// Pulsing halo for the "LIVE" indicator — the dot itself stays put while a
-// soft ring expands and fades. Reduced-motion users get a static dot via the
-// global animation-duration override below.
+// Pulsing halo for the "LIVE" indicator — a pseudo-element ring scales and
+// fades on the compositor (transform/opacity only). The previous box-shadow
+// spread version repainted the dot's layout box every frame, forever.
+// Reduced-motion users get a static dot via the global iteration-count
+// override below (the ring finishes at opacity 0).
 @keyframes livePulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(var(--color-live-rgb), 0.55);
+  from {
+    transform: scale(1);
+    opacity: 0.55;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(var(--color-live-rgb), 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(var(--color-live-rgb), 0);
+  to {
+    transform: scale(2.6);
+    opacity: 0;
   }
 }
 
@@ -100,16 +110,19 @@
 }
 
 // Utility Classes
+// Fill mode `backwards` holds the pre-state during stagger delays but releases
+// the final keyframe on completion — `both`/`forwards` would keep the animation
+// fill frame's transform in the cascade and permanently override :hover/:active.
 .animate-fade-up {
-  animation: fadeInUp 0.5s var(--spring-snappy) both;
+  animation: fadeInUp 0.5s var(--spring-snappy) backwards;
 }
 
 .animate-fade-scale {
-  animation: fadeInScale 0.4s var(--spring-snappy) both;
+  animation: fadeInScale 0.4s var(--spring-snappy) backwards;
 }
 
 .animate-slide-down {
-  animation: slideDown 0.4s var(--spring-snappy) both;
+  animation: slideDown 0.4s var(--spring-snappy) backwards;
 }
 
 // Stagger delays for grid items
@@ -131,24 +144,28 @@
 @media (prefers-reduced-motion: no-preference) {
   html.reveal-ready [data-reveal] {
     opacity: 0;
-    will-change: opacity, transform;
+    will-change: opacity, translate, scale;
+    // Animate the independent `translate`/`scale` longhands (not `transform`)
+    // so interaction states (.hover-lift, :active) can keep using `transform`
+    // without losing the cascade to this rule's higher specificity.
     transition:
       opacity 550ms var(--ease-out-expo) var(--reveal-delay, 0ms),
-      transform 550ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+      translate 550ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+      scale 550ms var(--ease-out-expo) var(--reveal-delay, 0ms);
   }
 
   // Entry offsets — translate/opacity only, never scale(0).
-  html.reveal-ready [data-reveal='up'] { transform: translateY(24px); }
-  html.reveal-ready [data-reveal='down'] { transform: translateY(-24px); }
-  html.reveal-ready [data-reveal='left'] { transform: translateX(-32px); }
-  html.reveal-ready [data-reveal='right'] { transform: translateX(32px); }
-  html.reveal-ready [data-reveal='scale'] { transform: scale(0.94); }
-  html.reveal-ready [data-reveal='fade'] { transform: none; }
+  html.reveal-ready [data-reveal='up'] { translate: 0 24px; }
+  html.reveal-ready [data-reveal='down'] { translate: 0 -24px; }
+  html.reveal-ready [data-reveal='left'] { translate: -32px 0; }
+  html.reveal-ready [data-reveal='right'] { translate: 32px 0; }
+  html.reveal-ready [data-reveal='scale'] { scale: 0.94; }
 
   // Revealed state — engine's is-revealed or force-release API.
   html.reveal-ready [data-reveal].is-revealed {
     opacity: 1;
-    transform: none;
+    translate: none;
+    scale: none;
   }
 }
 
@@ -158,10 +175,13 @@
               box-shadow var(--transition-base),
               border-color var(--transition-base);
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-card-hover);
-    border-color: var(--color-border-hover);
+  // Touch fires sticky false-hovers on tap — gate the lift to fine pointers.
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--color-border-hover);
+    }
   }
 
   &:active {
@@ -175,8 +195,13 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    // Delays must be zeroed too: a `both`/`backwards`-filled entrance held its
+    // invisible pre-state for the whole stagger slot even for RM users, so
+    // content flashed in late instead of simply being there.
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 

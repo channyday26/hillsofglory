@@ -16,7 +16,14 @@
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 
   <!-- Compiled CSS -->
-  <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/main.css" />
+  <script>
+    // Pre-paint gate for the scroll-reveal engine (js/scroll-reveal.js): applied
+    // before body renders, so [data-reveal] elements are never painted visible first
+    // on slow mobile. CSS hides nothing unless html has this class AND the user
+    // allows motion, so no-JS and reduced-motion visitors are unaffected.
+    if ('IntersectionObserver' in window) document.documentElement.classList.add('reveal-ready');
+  </script>
 
   <!-- jQuery & Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>

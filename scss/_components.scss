@@ -24,8 +24,10 @@
               border-color var(--transition-fast),
               color var(--transition-fast);
 
-  &:hover {
-    transform: translateY(-2px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 
   &:active {
@@ -141,10 +143,13 @@
               border-color var(--transition-base),
               background-color var(--transition-base);
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-card-hover);
-    border-color: var(--color-border-hover);
+  // Touch latches :hover until the next tap — gate the lift to fine pointers.
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--color-border-hover);
+    }
   }
 }
 
@@ -169,10 +174,12 @@
     -webkit-backdrop-filter: none;
   }
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-card-hover);
-    border-color: var(--color-border-hover);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--color-border-hover);
+    }
   }
 }
 
@@ -191,8 +198,10 @@
     transition: transform 0.5s var(--spring-gentle);
   }
 
-  &:hover img {
-    transform: scale(1.04);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover img {
+      transform: scale(1.04);
+    }
   }
 }
 
@@ -407,10 +416,17 @@
     flex-shrink: 0;
   }
 
-  &:hover {
-    background-color: var(--color-surface-hover);
-    color: var(--color-primary);
-    transform: translateY(-2px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: var(--color-surface-hover);
+      color: var(--color-primary);
+      transform: translateY(-2px);
+    }
+  }
+
+  // Tactile press for touch (iOS fires :active on real buttons).
+  &:active {
+    transform: scale(0.96);
   }
 
   &--active {
@@ -777,16 +793,24 @@
 }
 
 // --- Mobile Filter Drawer ---
+// Always-mounted panel toggled with .is-open (same architecture as the mobile
+// nav overlay): visibility + inert for state, transition for motion. Keyframed
+// entrances with a hidden flip animated IN but teleported OUT on close.
 .sermons-drawer {
   position: fixed;
   inset: 0;
   z-index: 1100;
   display: flex;
   flex-direction: column;
+  visibility: hidden;
   pointer-events: none;
+  // Stay painted through the panel's slide-out, then drop.
+  transition: visibility 0s linear 320ms;
 
-  &:not([hidden]) {
+  &.is-open {
+    visibility: visible;
     pointer-events: auto;
+    transition: visibility 0s;
   }
 
   @media (min-width: 768px) {
@@ -798,12 +822,17 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease-out forwards;
+  // backdrop-filter cannot ride an opacity fade (Safari paints it regardless),
+  // so the blur joins only while open; the tint itself cross-fades.
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out-expo);
 
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
+  .is-open & {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 1;
   }
 }
 
@@ -817,11 +846,13 @@
   background: var(--color-surface-solid);
   display: flex;
   flex-direction: column;
-  animation: slideInRight 0.3s var(--spring-snappy) forwards;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
 
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
+  .is-open & {
+    transform: translateX(0);
+    transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   @media (max-width: 480px) {
@@ -856,16 +887,25 @@
   background: transparent;
   color: var(--color-text);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+              transform var(--transition-fast);
 
   .lucide {
     width: 1.3em;
     height: 1.3em;
   }
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: var(--color-accent-glow);
+      color: var(--color-primary);
+    }
+  }
+
+  // Tactile press (button :active fires on touch iOS/Android).
+  &:active {
+    transform: scale(0.9);
     background-color: var(--color-accent-glow);
-    color: var(--color-primary);
   }
 }
 
@@ -943,16 +983,6 @@
 .sermons-drawer__btn-apply {
   width: 100%;
   padding: 0.9rem 1rem;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
 }
 
 // --- Simplified Minimal Subscribe CTA ---
@@ -1468,8 +1498,10 @@
   }
 }
 
-.special-event:hover .special-event__media img {
-  transform: scale(1.045);
+@media (hover: hover) and (pointer: fine) {
+  .special-event:hover .special-event__media img {
+    transform: scale(1.045);
+  }
 }
 
 .special-event__body {
@@ -1611,6 +1643,13 @@
   color: var(--color-primary);
   cursor: pointer;
   padding: 0.4rem 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+
+  // Press feedback for the tap-first toggle (button => iOS honors :active).
+  &:active {
+    color: var(--color-primary-hover);
+    transform: translateY(1px);
+  }
 
   .ti,
   .lucide {
@@ -1627,13 +1666,45 @@
 }
 
 .location-accordion__body {
-  margin-top: var(--space-sm);
-  padding: var(--space-md);
-  background-color: var(--color-accent-glow);
-  border-radius: var(--radius-sm);
+  // Height interpolation without JS measuring: a single implicit grid row that
+  // tween 0fr -> 1fr. Exit is faster than entry (system response snaps).
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    grid-template-rows 200ms var(--ease-out-expo),
+    opacity 160ms var(--ease-out-expo),
+    margin-top 200ms var(--ease-out-expo);
+
+  &--open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: var(--space-sm);
+    transition:
+      grid-template-rows 300ms var(--ease-out-expo),
+      opacity 260ms var(--ease-out-expo),
+      margin-top 300ms var(--ease-out-expo);
+  }
+}
+
+// The animatable content wrapper. min-height:0 + overflow:hidden is what makes
+// the 0fr track actually clip; visuals live here so collapse hides padding too.
+.location-accordion__inner {
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  padding: var(--space-md);
+  background-color: var(--color-accent-glow);
+  border-radius: var(--radius-sm);
+  translate: 0 -6px;
+  transition: translate 300ms var(--ease-out-expo);
+}
+
+.location-accordion__body--open .location-accordion__inner {
+  translate: 0 0;
 }
 
 // --- Forms & Inputs ---
@@ -1790,6 +1861,7 @@
 
 .toast {
   pointer-events: auto;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1801,7 +1873,18 @@
   border: 1px solid var(--color-border);
   font-weight: 600;
   font-size: 0.95rem;
-  animation: slideDown 0.35s var(--spring-snappy) both;
+  // Enter via keyframe (off the transform channel), leave via transition so it
+  // stays interruptible and actually visible (a `both`-filled animation would
+  // pin opacity in the animation cascade and swallow the exit styles).
+  animation: toastIn 350ms var(--spring-snappy) backwards;
+  transition:
+    opacity 220ms var(--ease-out-expo),
+    translate 220ms var(--ease-out-expo);
+
+  &.toast--leaving {
+    opacity: 0;
+    translate: 0 12px;
+  }
 
   .toast__icon {
     font-size: 1.35rem;
@@ -6851,10 +6934,16 @@ $protege-navy: #1b2a4a;
               border-color var(--transition-base),
               box-shadow var(--transition-base);
 
-  &:hover {
-    transform: translateY(-3px);
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-card);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-border-hover);
+      box-shadow: var(--shadow-card);
+    }
+
+    .impact__pillar:hover .impact__pillar-icon {
+      transform: rotate(-6deg) scale(1.06);
+    }
   }
 }
 
@@ -6884,17 +6973,13 @@ $protege-navy: #1b2a4a;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
   color: var(--color-primary);
-  background: var(--color-accent-glow);
+    background: var(--color-accent-glow);
   border: 1px solid var(--color-border);
   transition: transform var(--transition-base);
 
   .lucide {
     width: 1.35em;
     height: 1.35em;
-  }
-
-  .impact__pillar:hover & {
-    transform: rotate(-6deg) scale(1.06);
   }
 }
 
@@ -7109,10 +7194,16 @@ $protege-navy: #1b2a4a;
               border-color var(--transition-base),
               box-shadow var(--transition-base);
 
-  &:hover {
-    transform: translateY(-3px);
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-card);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-border-hover);
+      box-shadow: var(--shadow-card);
+    }
+
+    .contact-tile:hover .contact-tile__icon {
+      transform: rotate(-6deg) scale(1.06);
+    }
   }
 }
 
@@ -7131,10 +7222,6 @@ $protege-navy: #1b2a4a;
   .lucide {
     width: 1.35em;
     height: 1.35em;
-  }
-
-  .contact-tile:hover & {
-    transform: rotate(-6deg) scale(1.06);
   }
 }
 
@@ -7796,7 +7883,7 @@ form#prayerRequestForm {
   }
 }
 
-.outreach-column .location-accordion__body {
+.outreach-column .location-accordion__inner {
   gap: 0;
   padding: 0.25rem 0.85rem;
 }
@@ -8011,7 +8098,7 @@ form#prayerRequestForm {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 3.2s var(--spring-gentle);
+    transition: transform 500ms var(--spring-gentle);
   }
 }
 
@@ -8026,11 +8113,9 @@ form#prayerRequestForm {
     linear-gradient(118deg, rgba(var(--mt-accent-rgb), 0.32) 0%, rgba(var(--mt-accent-rgb), 0) 46%);
 }
 
-.monthly-theme:hover .monthly-theme__photo img {
-  transform: scale(1.05);
-
-  @media (prefers-reduced-motion: reduce) {
-    transform: none;
+@media (hover: hover) and (pointer: fine) {
+  .monthly-theme:hover .monthly-theme__photo img {
+    transform: scale(1.05);
   }
 }
 
@@ -8351,16 +8436,27 @@ form#prayerRequestForm {
   }
 }
 
-// Pulsing dot used by the navbar button and the live badge. The expanded ring
-// animation is killed globally for prefers-reduced-motion.
+// Pulsing dot used by the navbar button and the live badge. The halo is a
+// pseudo-element ring that scales/fades on the compositor; reduced-motion
+// users get the static dot because the global override snaps the ring's
+// single iteration to its opacity-0 end frame.
 .live-dot {
+  position: relative;
   display: inline-block;
   width: 9px;
   height: 9px;
   flex-shrink: 0;
   border-radius: var(--radius-full);
   background: var(--color-live);
-  animation: livePulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(var(--color-live-rgb), 0.55);
+    animation: livePulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
 }
 
 .live-showcase {

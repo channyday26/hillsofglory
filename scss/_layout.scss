@@ -19,10 +19,14 @@
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  will-change: height, margin-bottom;
   contain: layout style;
-  transition: height var(--transition-nav),
-              margin-bottom var(--transition-nav);
+  // Bar geometry (height/overlap margin) is inherently layout — kept, but at
+  // 160ms (~10 reflow frames) instead of a 420ms tween. Sizing/typography
+  // changes below were removed from their transitions entirely so the morph
+  // costs one relayout pass per frame, not ten.
+  transition:
+    height var(--transition-fast),
+    margin-bottom var(--transition-fast);
 
   &::before {
     content: '';
@@ -40,7 +44,7 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: opacity;
-    transition: opacity var(--transition-nav);
+    transition: opacity var(--transition-base);
   }
 
   &.is-scrolled {
@@ -115,8 +119,8 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: padding;
-  transition: padding var(--transition-nav);
+  // padding swaps instantly on the scrolled state (see .navbar): tweening it
+  // reflowed all flex children every frame for no visible gain at 160ms.
 
   .navbar.is-scrolled & {
     padding: 0;
@@ -242,7 +246,8 @@
   height: 44px;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
-  transition: width var(--transition-nav), height var(--transition-nav);
+  // Sized instantly — width/height tweens reflowed + re-decoded the image
+  // every frame of the navbar morph.
 
   @media (min-width: 961px) and (max-width: 1120px) {
     width: 36px;
@@ -259,8 +264,6 @@
   letter-spacing: -0.01em;
   text-transform: uppercase;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  transition: font-size var(--transition-nav);
-
   span {
     display: block;
     font-size: 0.72rem;
@@ -272,7 +275,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    transition: font-size var(--transition-nav);
   }
 
   @media (min-width: 961px) and (max-width: 1120px) {
@@ -345,7 +347,6 @@
   gap: 0.15rem;
   flex-shrink: 1;
   min-width: 0;
-  transition: gap var(--transition-nav);
 
   .navbar.is-scrolled & {
     gap: 0.4rem;
@@ -438,9 +439,10 @@
   border: none;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   white-space: nowrap;
-  transition: color var(--transition-nav),
-              padding var(--transition-nav),
-              text-shadow var(--transition-nav);
+  // color/text-shadow only: a per-link padding tween multiplied the navbar
+  // morph's reflow cost across the whole row.
+  transition: color var(--transition-fast),
+              text-shadow var(--transition-fast);
 
   @media (min-width: 961px) and (max-width: 1120px) {
     font-size: 0.75rem;
@@ -495,9 +497,11 @@
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   }
 
-  &:hover::after {
-    transform: translateX(-50%) scaleX(1);
-    opacity: 1;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::after {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+    }
   }
 
   &--active {
@@ -547,11 +551,12 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  // backdrop-filter and padding are excluded: neither is compositable mid-
+  // tween, and the 10px->16px blur animation forced a backdrop re-blur every
+  // frame on scroll state. Glass swap is now instant; tint/shadow fade.
   transition: background-color var(--transition-base),
               border-color var(--transition-base),
-              box-shadow var(--transition-base),
-              backdrop-filter var(--transition-base),
-              padding var(--transition-base);
+              box-shadow var(--transition-base);
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.15);
@@ -745,7 +750,7 @@
     // ±45°, the middle bar dissolves, leaving the crisp X glyph. The spring
     // curve keeps the motion tactile rather than floaty.
     .floating-menu-btn__bar {
-      transition: transform 560ms cubic-bezier(0.32, 0.72, 0, 1),
+      transition: transform 340ms cubic-bezier(0.32, 0.72, 0, 1),
                   opacity var(--transition-base);
     }
 
@@ -761,11 +766,8 @@
       transform-origin: 12px 18px;
     }
 
-    &:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: var(--fab-shadow), 0 14px 36px -10px rgba(0, 0, 0, 0.3);
-    }
-
+    // No :hover here — this button only renders on touch layouts (≤960px),
+    // where hover is sticky-after-tap. Press feedback lives on :active below.
     &:active {
       transform: translateY(0) scale(0.96);
     }
@@ -799,7 +801,9 @@
     // the panel re-enables vertical panning for its own scroll area.
     touch-action: none;
     // Stay painted during the panel's exit transform; hide only after it ends.
-    transition: visibility 0s linear 520ms;
+    // Cut must exceed the longest close animation (~260ms panel exit) — links
+    // now close with zero delay, so 320ms leaves them no clipped tail.
+    transition: visibility 0s linear 320ms;
 
     .mobile-menu-overlay__backdrop {
       position: absolute;
@@ -836,8 +840,10 @@
       transform-origin: bottom right;
       opacity: 0;
       transform: scale(0.4) translateY(30px) translateZ(0);
-      transition: opacity 280ms cubic-bezier(0.25, 1, 0.5, 1),
-                  transform 520ms cubic-bezier(0.32, 0.72, 0, 1);
+      // Asymmetric: quick snap-out when closing (this closed-state transition),
+      // slower grow-out-of-the-FAB when opening (override in .is-open below).
+      transition: opacity 200ms var(--spring-snappy),
+                  transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     .mobile-menu-overlay__nav {
@@ -861,26 +867,36 @@
       border-radius: var(--radius-md);
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 320ms cubic-bezier(0.25, 1, 0.5, 1),
-                  transform 320ms cubic-bezier(0.25, 1, 0.5, 1),
+      // Closing: every link retargets immediately (zero delay) so nothing
+      // waits its stagger slot before vanishing behind the visibility cut.
+      transition: opacity 220ms var(--spring-snappy),
+                  transform 220ms var(--spring-snappy),
                   background-color var(--transition-fast),
                   color var(--transition-fast);
       position: relative;
 
-      &:hover {
+      // Press feedback for touch (taps never reach :hover reliably); :hover is
+      // gated to fine pointers so Android taps don't latch a sticky highlight
+      // through the menu's exit. The open-cascade transition-delay is cleared
+      // here so hover feedback is never held hostage by a stagger slot.
+      &:active {
         background: var(--color-accent-glow);
-        color: var(--color-primary);
+        transition-delay: 0ms;
       }
-    }
 
-    // Link entrance stagger when the card opens.
-    @for $i from 1 through 8 {
-      .mobile-menu-overlay__link:nth-child(#{$i}) {
-        transition-delay: #{($i - 1) * 45ms};
+      @media (hover: hover) and (pointer: fine) {
+        &:hover {
+          background: var(--color-accent-glow);
+          color: var(--color-primary);
+          transition-delay: 0ms;
+        }
       }
     }
   }
 
+  // Opening cascade only — delays applied in the .is-open context, never the
+  // closed state, so the close is instant and the stagger reads as an exit-free
+  // entrance.
   .mobile-menu-overlay.is-open {
     visibility: visible;
     pointer-events: auto;
@@ -893,11 +909,19 @@
     .mobile-menu-overlay__panel {
       opacity: 1;
       transform: scale(1) translateY(0);
+      transition: opacity 280ms cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 420ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     .mobile-menu-overlay__link {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    @for $i from 1 through 8 {
+      .mobile-menu-overlay__link:nth-child(#{$i}) {
+        transition-delay: #{($i - 1) * 45}ms;
+      }
     }
   }
 
@@ -961,10 +985,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 
-  &:hover {
-    transform: scale(1.08);
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-secondary);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: scale(1.08);
+      background-color: var(--color-surface-hover);
+      border-color: var(--color-secondary);
+    }
   }
 
   &:active {
@@ -1044,9 +1070,7 @@
   color: var(--color-text);
   cursor: pointer;
   transition: transform var(--transition-fast),
-              background-color var(--transition-fast),
-              width var(--transition-nav),
-              height var(--transition-nav);
+              background-color var(--transition-fast);
 
   &:hover {
     background-color: var(--color-surface-hover);
@@ -1327,9 +1351,15 @@
     font-size: 0.95rem;
     transition: color var(--transition-fast), transform var(--transition-fast);
 
-    &:hover {
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--color-primary);
+        transform: translateX(3px);
+      }
+    }
+
+    &:active {
       color: var(--color-primary);
-      transform: translateX(3px);
     }
   }
 }
@@ -1377,9 +1407,15 @@
       object-fit: contain;
     }
 
-    &:hover {
-      transform: translateY(-3px);
-      color: #FFFFFF;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        transform: translateY(-3px);
+        color: #FFFFFF;
+      }
+    }
+
+    &:active {
+      transform: scale(0.94);
     }
 
     .ti,

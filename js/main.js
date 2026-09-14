@@ -85,24 +85,35 @@
 
   let savedScrollY = 0;
 
+  // Lock the viewport WITHOUT repositioning the body. Fixing the body
+  // (`position: fixed` + negative top, or `body { overflow: hidden }`) turns
+  // it into a non-scrolling box, which breaks `position: sticky` on the
+  // navbar — and overflow on the body doesn't propagate to the viewport at
+  // all while `html` has its own overflow (`_base.scss: overflow-x: clip`),
+  // which is why the filter drawer previously rubber-banded the page behind
+  // it on iOS. Overflow set on the root element propagates and sticky holds.
+  function lockViewport() {
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+  }
+
+  function unlockViewport() {
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.overscrollBehavior = '';
+    // Nothing was moved; re-pin instantly (`html` has `scroll-behavior:
+    // smooth`, so a plain scrollTo would animate).
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+  }
+
   function openOverlay() {
     if (mobileMenuOverlay) mobileMenuOverlay.classList.add('is-open');
     if (floatingMenuBtn) {
       floatingMenuBtn.setAttribute('aria-expanded', 'true');
       floatingMenuBtn.setAttribute('aria-label', 'Close navigation menu');
     }
-    // Lock the viewport WITHOUT repositioning the body. Fixing the body
-    // (`position: fixed` + negative top, or `body { overflow: hidden }`) turns
-    // it into a non-scrolling box, which breaks `position: sticky` on the
-    // navbar: the header stops sticking and slides up out of view — the visible
-    // "scroll jump" on open. Overflow set on the root element propagates to the
-    // viewport and leaves sticky intact. Touch scrolling is already impossible
-    // while the modal is open because the overlay covers the viewport with
-    // `touch-action: none`.
-    savedScrollY = window.scrollY || window.pageYOffset || 0;
-    document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.overscrollBehavior = 'none';
-    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+    lockViewport();
     // Move focus to the first link after the entrance animation starts so the
     // grow choreography plays without an abrupt focus jump.
     var firstLink = mobileMenuOverlay && mobileMenuOverlay.querySelector('.mobile-menu-overlay__link');
@@ -115,11 +126,7 @@
       floatingMenuBtn.setAttribute('aria-expanded', 'false');
       floatingMenuBtn.setAttribute('aria-label', 'Open navigation menu');
     }
-    document.documentElement.style.overflow = '';
-    document.documentElement.style.overscrollBehavior = '';
-    // The body was never moved, so the offset is untouched; re-pin it instantly
-    // (`html` has `scroll-behavior: smooth`, so a plain scrollTo would animate).
-    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+    unlockViewport();
     if (floatingMenuBtn) floatingMenuBtn.focus();
   }
 
@@ -275,12 +282,22 @@
     toast.innerHTML = '<i data-lucide="' + iconClass + '" class="toast__icon"></i><span>' + esc(message) + '</span>';
     container.appendChild(toast);
     initIcons();
-    setTimeout(function () {
-      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-8px)';
-      setTimeout(function () { toast.remove(); }, 320);
-    }, 4000);
+    let leaving = false;
+    function dismiss() {
+      if (leaving) return;
+      leaving = true;
+      toast.classList.add('toast--leaving');
+      // Remove after the CSS leave transition; the timer is the fallback if the
+      // tab is backgrounded (transitions pause) so a toast can never linger.
+      let gone = false;
+      const kill = function () { if (!gone) { gone = true; toast.remove(); } };
+      toast.addEventListener('transitionend', kill, { once: true });
+      setTimeout(kill, 320);
+    }
+    // Tap-to-dismiss: on phones the toast can sit over form fields; give users
+    // an early out instead of the full dwell.
+    toast.addEventListener('click', dismiss);
+    setTimeout(dismiss, 4000);
   }
 
   // ============================================
@@ -693,16 +710,19 @@
 
     function openFilterDrawer() {
       if (!filterDrawer) return;
-      filterDrawer.hidden = false;
-      document.body.style.overflow = 'hidden';
+      filterDrawer.classList.add('is-open');
+      if ('inert' in filterDrawer) filterDrawer.inert = false;
+      lockViewport();
       if (filterToggle) filterToggle.setAttribute('aria-expanded', 'true');
     }
 
     function closeFilterDrawer() {
       if (!filterDrawer) return;
-      filterDrawer.hidden = true;
-      document.body.style.overflow = '';
+      filterDrawer.classList.remove('is-open');
+      if ('inert' in filterDrawer) filterDrawer.inert = true;
+      unlockViewport();
       if (filterToggle) filterToggle.setAttribute('aria-expanded', 'false');
+      if (filterToggle) filterToggle.focus();
     }
 
     function syncMobileFilters() {
@@ -754,7 +774,7 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && filterDrawer && !filterDrawer.hidden) {
+      if (e.key === 'Escape' && filterDrawer && filterDrawer.classList.contains('is-open')) {
         closeFilterDrawer();
       }
     });
@@ -875,6 +895,8 @@
     });
   }
 
+  let videoModalCloseTimer = null;
+
   function openVideoModal(youtubeId) {
     if (!youtubeId) return;
     let modal = document.querySelector('.video-modal');
@@ -902,18 +924,30 @@
     const player = modal.querySelector('.video-modal__player');
     player.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(youtubeId) +
       '?autoplay=1&rel=0" title="Sermon video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-    requestAnimationFrame(function () { modal.classList.add('is-open'); });
+    if (videoModalCloseTimer) {
+      clearTimeout(videoModalCloseTimer);
+      videoModalCloseTimer = null;
+    }
+    // Flush styles so the closed state is computed before is-open lands —
+    // otherwise the very first open (element freshly appended) paints straight
+    // into the end state and the CSS transition never runs.
+    void modal.offsetWidth;
+    modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
   }
 
+  // Cancellable so a fast re-open (easy on touchscreens) is not wiped by the
+  // previous close's iframe-clearing timer.
   function closeVideoModal() {
     const modal = document.querySelector('.video-modal');
     if (!modal) return;
     modal.classList.remove('is-open');
     document.body.style.overflow = '';
-    setTimeout(function () {
+    videoModalCloseTimer = setTimeout(function () {
+      videoModalCloseTimer = null;
       const player = modal.querySelector('.video-modal__player');
-      if (player) player.innerHTML = '';
+      // Only clear if still closed — a re-open during the fade-out keeps its video.
+      if (player && !modal.classList.contains('is-open')) player.innerHTML = '';
     }, 300);
   }
 
@@ -1148,7 +1182,7 @@
       '<div class="location-accordion">' +
       '<button type="button" class="location-accordion__trigger" aria-expanded="false">' +
       '<span><i data-lucide="clock"></i> Service Schedule</span><i data-lucide="chevron-down"></i></button>' +
-      '<div class="location-accordion__body" hidden>' + scheduleBody + '</div>' +
+      '<div class="location-accordion__body" inert><div class="location-accordion__inner">' + scheduleBody + '</div></div>' +
       '</div>' +
       (loc.google_maps_embed_link
         ? '<div class="outreach-column__footer"><a href="' + escAttr(loc.google_maps_embed_link) + '" target="_blank" rel="noopener" class="btn btn--outline btn--sm"><i data-lucide="map"></i> View Map</a></div>'
@@ -1287,12 +1321,12 @@
         trigger.setAttribute('aria-expanded', String(!expanded));
         const body = trigger.nextElementSibling;
         if (body) {
-          if (expanded) {
-            body.hidden = true;
-          } else {
-            body.hidden = false;
-            body.classList.add('animate-fade-up');
-          }
+          // Height is interpolated via grid-template-rows (see _components.scss)
+          // so both directions animate; `inert` keeps collapsed rows out of
+          // the tab order and a11y tree without display:none, which cannot
+          // transition.
+          body.classList.toggle('location-accordion__body--open', !expanded);
+          if ('inert' in body) body.inert = expanded;
         }
       });
     });
@@ -1948,9 +1982,10 @@
   // ============================================
   // Home — Hero background video
   // ============================================
-  // The hero ships with local fallback sources. When the CMS has uploaded a
-  // hero video, replace those sources with the public Storage URL so the
-  // landing page renders the admin-managed clip.
+  // The hero ships with local fallback <source>s. When the CMS has uploaded a
+  // hero video, PREPEND its Storage URL instead of replacing them: the browser
+  // tries sources in order, so a 404'd or codec-less CMS clip silently falls
+  // back to the bundled video instead of leaving the hero blank on mobile.
   async function loadHeroVideo() {
     const video = document.querySelector('.hero__video');
     if (!video) return;
@@ -1958,13 +1993,22 @@
     if (!settings.length) return;
     const url = settings[0].hero_video_url;
     if (!url) return;
-    while (video.firstChild) video.removeChild(video.firstChild);
     const source = document.createElement('source');
     source.src = url;
     const type = /\.webm($|\?)/i.test(url) ? 'video/webm' : (/\.ogg($|\?)/i.test(url) ? 'video/ogg' : 'video/mp4');
     source.type = type;
-    video.appendChild(source);
+    // Skip if the CMS already injected this exact URL (bfcache/replay calls).
+    if (url === loadHeroVideo.lastUrl) return;
+    loadHeroVideo.lastUrl = url;
+    video.insertBefore(source, video.firstChild);
     video.load();
+    // Autoplay policies can reject after load() re-evaluates the element;
+    // swallow so a blocked start (or network error) leaves the poster frame
+    // rather than an unhandled rejection.
+    const attempt = video.play();
+    if (attempt && typeof attempt.catch === 'function') {
+      attempt.catch(function () {});
+    }
   }
 
   // ============================================
@@ -1986,6 +2030,12 @@
   }
 
   async function init() {
+    // iOS Safari only applies :active styles to elements that are not natively
+    // activatable (<div>/<article> cards, the FAB) when a touch handler exists
+    // on the document. This passive no-op unlocks every :active press state
+    // (card lift-back, filter-pill and accordion squish) on touch devices.
+    document.addEventListener('touchstart', function () {}, { passive: true });
+
     // UI-only features run immediately (no Supabase needed)
     initPrayerForm();
     initJoinForm();

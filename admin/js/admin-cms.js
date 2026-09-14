@@ -1215,12 +1215,20 @@
     toast.querySelector('span').textContent = message;
     container.appendChild(toast);
     if (window.initIcons) window.initIcons();
-    setTimeout(function () {
-      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-8px)';
-      setTimeout(function () { toast.remove(); }, 320);
-    }, 4000);
+    // Shared .toast CSS handles the keyframe entry, leave transition, and tap
+    // affordance — mirror of the public-site showToast lifecycle.
+    let leaving = false;
+    function dismiss() {
+      if (leaving) return;
+      leaving = true;
+      toast.classList.add('toast--leaving');
+      let gone = false;
+      const kill = function () { if (!gone) { gone = true; toast.remove(); } };
+      toast.addEventListener('transitionend', kill, { once: true });
+      setTimeout(kill, 320);
+    }
+    toast.addEventListener('click', dismiss);
+    setTimeout(dismiss, 4000);
   }
 
   // --- Helper: format file size ---
