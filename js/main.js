@@ -394,7 +394,7 @@
     const thumb = videoId
       ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg'
       : 'images/preach.png';
-    return '<div class="card hover-lift animate-fade-up" data-youtube="' + escAttr(videoId || '') + '">' +
+    return '<div class="card hover-lift" data-reveal="up" data-youtube="' + escAttr(videoId || '') + '">' +
       '<div class="card__media">' +
       '<img src="' + escAttr(thumb) + '" alt="' + escAttr(s.title || 'Sermon') + '" loading="lazy" />' +
       '</div>' +
@@ -434,7 +434,7 @@
       : (s.youtube_url
           ? '<a href="' + escAttr(s.youtube_url) + '" target="_blank" rel="noopener" class="btn btn--primary"><i data-lucide="play"></i> Watch Now</a>'
           : '');
-    return '<div class="card card--featured hover-lift animate-fade-up" data-youtube="' + escAttr(videoId || '') + '">' +
+    return '<div class="card card--featured hover-lift" data-reveal="up" data-youtube="' + escAttr(videoId || '') + '">' +
       '<div class="card__media">' +
       '<img src="' + escAttr(thumb) + '" alt="' + escAttr(s.title || 'Sermon') + '" loading="lazy" />' +
       '</div>' +
@@ -930,7 +930,7 @@
     if (!leaders.length) return; // keep static fallback
 
     grid.innerHTML = leaders.map(function (l) {
-      return '<div class="card hover-lift animate-fade-up">' +
+      return '<div class="card hover-lift" data-reveal="up">' +
         (l.image_url
           ? '<div class="card__media"><img src="' + escAttr(l.image_url) + '" alt="' + escAttr(l.name || '') + '" loading="lazy" /></div>'
           : '') +
@@ -969,7 +969,7 @@
         return;
       }
       grid.innerHTML = items.map(function (m) {
-        return '<article class="ministry-card animate-fade-up">' +
+        return '<article class="ministry-card" data-reveal="up">' +
           (m.image_url
             ? '<div class="ministry-card__media"><img src="' + escAttr(m.image_url) + '" alt="' + escAttr(m.name || '') + '" loading="lazy" /></div>'
             : '') +
@@ -1098,7 +1098,7 @@
       .map(scheduleRowHtml)
       .join('');
 
-    return '<div class="main-church__showcase animate-fade-up stagger-1">' +
+    return '<div class="main-church__showcase" data-reveal="up">' +
       '<div class="main-church__media-wrap">' +
       '<span class="main-church__ghost" aria-hidden="true"></span>' +
       '<figure class="main-church__arch">' +
@@ -1118,7 +1118,7 @@
       '</div>' +
       '<span class="main-church__map-caption"><i data-lucide="navigation"></i> Tap the map for directions to our campus.</span>' +
       '</div>' +
-      '<div class="schedule-showcase__timetable main-church__schedule animate-fade-up stagger-2">' +
+      '<div class="schedule-showcase__timetable main-church__schedule" data-reveal="up">' +
       '<div class="schedule-showcase__intro">' +
       '<span class="schedule-showcase__pill"><i data-lucide="calendar-clock"></i> Gathering Times</span>' +
       '<h3 class="schedule-showcase__title">Weekly Service Schedule</h3>' +
@@ -1138,7 +1138,7 @@
 
     const idx = rank < 10 ? '0' + rank : String(rank);
 
-    return '<article class="outreach-column animate-fade-up">' +
+    return '<article class="outreach-column" data-reveal="up">' +
       '<div class="outreach-column__head">' +
       '<span class="outreach-column__index" aria-hidden="true">' + idx + '</span>' +
       '<h3 class="outreach-column__name">' + esc(loc.name || '') + '</h3>' +
@@ -1349,7 +1349,7 @@
 
   function renderLifegroupCard(g) {
     const meta = lifegroupMeta(g.group_type);
-    return '<article class="card hover-lift animate-fade-up lifegroup-card">' +
+    return '<article class="card hover-lift lifegroup-card" data-reveal="up">' +
       '<span class="lifegroup-card__type"><i data-lucide="' + meta.icon + '" aria-hidden="true"></i> ' + esc(meta.label) + '</span>' +
       '<h3 class="lifegroup-card__title">' + esc(g.group_name || 'Lifegroup') + '</h3>' +
       (g.leader_name ? '<p class="lifegroup-card__meta"><i data-lucide="user" aria-hidden="true"></i>' + esc(g.leader_name) + '</p>' : '') +
@@ -1498,7 +1498,7 @@
   }
 
   function renderSpecialEvent(ev) {
-    return '<article class="special-event hover-lift animate-fade-up">' +
+    return '<article class="special-event hover-lift" data-reveal="up">' +
       (ev.image_url
         ? '<div class="special-event__media"><img src="' + escAttr(ev.image_url) +
           '" alt="' + escAttr(ev.title || 'Special event') + '" loading="lazy" /></div>'

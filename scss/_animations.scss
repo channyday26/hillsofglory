@@ -120,6 +120,38 @@
 .stagger-5 { animation-delay: 300ms; }
 .stagger-6 { animation-delay: 360ms; }
 
+// ============================================
+// Global Scroll Reveal (driven by js/scroll-reveal.js)
+// Hidden pre-states apply ONLY when html.reveal-ready has been set
+// by the engine AND the user allows motion — so reduced-motion,
+// non-IO-browser, and no-JS visitors always see static content.
+// Animates transform + opacity only: composited, layout-shift-free,
+// because pre-reveal elements still occupy their final box.
+// ============================================
+@media (prefers-reduced-motion: no-preference) {
+  html.reveal-ready [data-reveal] {
+    opacity: 0;
+    will-change: opacity, transform;
+    transition:
+      opacity 550ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+      transform 550ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+  }
+
+  // Entry offsets — translate/opacity only, never scale(0).
+  html.reveal-ready [data-reveal='up'] { transform: translateY(24px); }
+  html.reveal-ready [data-reveal='down'] { transform: translateY(-24px); }
+  html.reveal-ready [data-reveal='left'] { transform: translateX(-32px); }
+  html.reveal-ready [data-reveal='right'] { transform: translateX(32px); }
+  html.reveal-ready [data-reveal='scale'] { transform: scale(0.94); }
+  html.reveal-ready [data-reveal='fade'] { transform: none; }
+
+  // Revealed state — engine's is-revealed or force-release API.
+  html.reveal-ready [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 // Smooth tactile lift for interactive cards
 .hover-lift {
   transition: transform var(--transition-base),

@@ -129,7 +129,7 @@
     <!-- Welcome & Core Values -->
     <section class="section identity" aria-labelledby="identityTitle">
       <div class="container">
-        <div class="section-header animate-fade-up">
+        <div class="section-header" data-reveal="up">
           <span class="section-badge"><i data-lucide="users"></i> Who We Are</span>
           <h2 class="section-title" id="identityTitle">A Community of Believers</h2>
           <p class="section-subtitle">
@@ -137,10 +137,10 @@
           </p>
         </div>
 
-        <div class="identity-plane animate-fade-up stagger-1">
+        <div class="identity-plane" data-reveal-group data-reveal-interval="80">
           <span class="identity-plane__watermark" aria-hidden="true">Family</span>
 
-          <article class="identity-card">
+          <article class="identity-card" data-reveal="up">
             <span class="identity-card__head">
               <span class="identity-card__medallion"><i data-lucide="music"></i></span>
               <span class="identity-card__tag">Spirit-led Worship</span>
@@ -151,7 +151,7 @@
             </p>
           </article>
 
-          <article class="identity-card identity-card--gold">
+          <article class="identity-card identity-card--gold" data-reveal="up">
             <span class="identity-card__head">
               <span class="identity-card__medallion"><i data-lucide="book"></i></span>
               <span class="identity-card__tag">Biblical Truth</span>
@@ -162,7 +162,7 @@
             </p>
           </article>
 
-          <article class="identity-card">
+          <article class="identity-card" data-reveal="up">
             <span class="identity-card__head">
               <span class="identity-card__medallion"><i data-lucide="users-round"></i></span>
               <span class="identity-card__tag">Lifegroups</span>
@@ -174,7 +174,7 @@
           </article>
         </div>
 
-        <div class="identity-story animate-fade-up stagger-3">
+        <div class="identity-story" data-reveal="up">
           <a href="about.html" class="btn btn--outline">
             Continue Reading Our Story <i data-lucide="arrow-up-right"></i>
           </a>
@@ -190,7 +190,7 @@
 <!-- Service Schedules -->
     <section class="section section--alt section--schedules" aria-label="Service Schedules">
       <div class="container">
-        <div class="section-header animate-fade-up">
+        <div class="section-header" data-reveal="up">
           <span class="section-badge">Gather With Us</span>
           <h2 class="section-title">Weekly Service Schedules</h2>
           <p class="section-subtitle">
@@ -198,7 +198,7 @@
           </p>
         </div>
 
-        <div class="schedule-showcase animate-fade-up">
+        <div class="schedule-showcase" data-reveal="up">
           <div class="schedule-showcase__visual-wrap">
             <span class="schedule-showcase__flair" aria-hidden="true"></span>
             <div class="schedule-showcase__visual">
@@ -219,7 +219,7 @@
               <h3 class="schedule-showcase__title">Gathering Times</h3>
             </div>
 
-            <ul class="schedule-showcase__list" id="homeScheduleGrid">
+            <ul class="schedule-showcase__list" id="homeScheduleGrid" data-reveal-group>
               <li class="schedule-row">
                 <span class="schedule-row__day">Sunday</span>
                 <span class="schedule-row__service">Worship &amp; Word</span>
@@ -254,7 +254,7 @@
     <!-- Happening Right Now (live stream, dynamic — hidden unless live) -->
     <section class="section section--live" id="liveSection" aria-label="Happening Right Now" hidden>
       <div class="container">
-        <div class="section-header animate-fade-up">
+        <div class="section-header" data-reveal="up">
           <span class="section-badge section-badge--live"><i data-lucide="radio"></i> Live on YouTube</span>
           <h2 class="section-title">Happening Right Now</h2>
           <p class="section-subtitle">
@@ -268,7 +268,7 @@
 <!-- God's Purpose -->
     <section class="section section--purpose" aria-label="God's Purpose">
       <div class="container">
-        <div class="purpose-stage animate-fade-up">
+        <div class="purpose-stage" data-reveal="up">
           <span class="purpose-stage__watermark" aria-hidden="true">PURPOSE</span>
           <span class="purpose-stage__orb purpose-stage__orb--gold" aria-hidden="true"></span>
           <span class="purpose-stage__orb purpose-stage__orb--green" aria-hidden="true"></span>
@@ -325,7 +325,7 @@
     <!-- Prayer of Acceptance -->
     <section class="section section--alt" aria-labelledby="acceptanceTitle">
       <div class="container">
-        <div class="section-header animate-fade-up">
+        <div class="section-header" data-reveal="up">
           <span class="section-badge"><i data-lucide="heart"></i> A New Beginning</span>
           <h2 class="section-title" id="acceptanceTitle">Prayer of Acceptance</h2>
           <p class="section-subtitle">
@@ -333,7 +333,7 @@
           </p>
         </div>
 
-        <div class="acceptance-tablet animate-fade-up stagger-1">
+        <div class="acceptance-tablet" data-reveal="up">
           <span class="acceptance-tablet__emblem" aria-hidden="true">
             <i data-lucide="heart-handshake"></i>
           </span>
@@ -348,7 +348,7 @@
           </blockquote>
         </div>
 
-        <div class="acceptance-next animate-fade-up stagger-2">
+        <div class="acceptance-next" data-reveal="up" data-reveal-delay="80">
           <p class="acceptance-next__label">What's Next Step</p>
           <a href="lifegroups.html" class="btn btn--primary btn--lg">
             <i data-lucide="users"></i> Join a Lifegroup Today!
@@ -363,7 +363,7 @@
     <!-- Latest Sermons Highlight -->
     <section class="section" aria-label="Latest Sermons">
       <div class="container">
-        <div class="section-header animate-fade-up">
+        <div class="section-header" data-reveal="up">
           <span class="section-badge">Media &amp; Teachings</span>
           <h2 class="section-title">Latest Sermons</h2>
           <p class="section-subtitle">
@@ -371,7 +371,7 @@
           </p>
         </div>
 
-        <div class="grid-3" id="homeSermonsGrid">
+        <div class="grid-3" id="homeSermonsGrid" data-reveal-group>
           <!-- Fallback static cards while loading -->
           <div class="card hover-lift">
             <div class="card__media">
@@ -501,6 +501,7 @@
 
   <!-- Scripts -->
   <script src="js/supabase-client.js"></script>
+  <script src="js/scroll-reveal.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
