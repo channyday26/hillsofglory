@@ -197,7 +197,11 @@
 
     function syncNavbarState() {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-      const shouldBeScrolled = scrollY > 48;
+      // Hysteresis band: enter the compact state past 48px, release below 36px.
+      // A single threshold lets a slow flick across the boundary flip the class
+      // every scroll event, restarting the height/layout morph on each pass.
+      // (The 36px floor also sits under most mobile URL-bar collapse drift.)
+      const shouldBeScrolled = isScrolled ? scrollY > 36 : scrollY > 48;
       if (shouldBeScrolled !== isScrolled) {
         isScrolled = shouldBeScrolled;
         navbar.classList.toggle('is-scrolled', isScrolled);
@@ -1989,6 +1993,31 @@
   async function loadHeroVideo() {
     const video = document.querySelector('.hero__video');
     if (!video) return;
+
+    // Looping muted background video + sticky glass backdrop-filter composite
+    // together, so a video still decoding below the fold forces the navbar's
+    // blurred backdrop layer to re-rasterize every scroll frame. Pause it once
+    // fully offscreen; only resume if *we* were the ones who paused it (never
+    // override a deliberate user pause).
+    if ('IntersectionObserver' in window) {
+      let pausedByScroller = false;
+      new IntersectionObserver(function (entries) {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          if (pausedByScroller) {
+            pausedByScroller = false;
+            const attempt = video.play();
+            if (attempt && typeof attempt.catch === 'function') {
+              attempt.catch(function () {});
+            }
+          }
+        } else if (!video.paused) {
+          pausedByScroller = true;
+          video.pause();
+        }
+      }, { threshold: 0 }).observe(video);
+    }
+
     const settings = await fetchTable('church_settings');
     if (!settings.length) return;
     const url = settings[0].hero_video_url;

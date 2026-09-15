@@ -154,6 +154,12 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
   --nav-height: 120px;
   --nav-height-scrolled: 72px;
 
+  // Navbar glass blur cost (GPU: radius x saturate per composited frame).
+  // Reduced to 12px / 1.3 under the max-width: 960px query at the file end
+  // to spare thermally-limited mobile GPUs.
+  --nav-blur: 20px;
+  --nav-saturate: 1.6;
+
   // Navbar scrolled-state glass + depth (theme-aware via [data-theme="dark"]).
   --nav-glass: #{$light-nav-glass};
   --nav-shadow-scrolled: #{$light-nav-shadow};
@@ -239,5 +245,14 @@ $dark-nav-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.7), 0 2px 8px -2px rgba(0, 0
     --fab-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.25);
     --modal-panel-bg: var(--color-surface-solid);
     --modal-backdrop: rgba(18, 20, 22, 0.55);
+  }
+}
+
+// Mobile glass is read at smaller sizes with less content detail behind it —
+// a 20px blur on a thermally-limited GPU buys nothing over 12px there.
+@media (max-width: 960px) {
+  :root {
+    --nav-blur: 12px;
+    --nav-saturate: 1.3;
   }
 }

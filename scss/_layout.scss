@@ -34,8 +34,10 @@
     inset: 0;
     z-index: -1;
     background-color: var(--nav-glass);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    // backdrop-filter is INTENTIONALLY not set here: a live blur on a
+    // permanently-composited (will-change) layer re-rasterizes the full-width
+    // backdrop every scroll frame even at opacity 0. Both are scoped to
+    // .is-scrolled below, so the blur only costs while the glass is visible.
     box-shadow: var(--nav-shadow-scrolled);
     opacity: 0;
     pointer-events: none;
@@ -43,8 +45,7 @@
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: opacity;
-    transition: opacity var(--transition-base);
+    transition: opacity var(--transition-fast);
   }
 
   &.is-scrolled {
@@ -54,6 +55,9 @@
 
   &.is-scrolled::before {
     opacity: 1;
+    backdrop-filter: blur(var(--nav-blur)) saturate(var(--nav-saturate));
+    -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(var(--nav-saturate));
+    will-change: opacity;
   }
 
   @media (max-width: 960px) {
@@ -71,30 +75,6 @@
     &::before {
       box-shadow: none !important;
     }
-
-    // Scrolled: dissolve the sharp bottom edge instead of a hard cut.
-    // The mask fades both the glass tint and the backdrop blur together.
-    // Content floats well above the dissolve zone (2rem bottom padding),
-    // so the mask holds full opacity through that area, then falls off with
-    // diminishing deltas for a smoothstep-style, optically seamless tail.
-    &.is-scrolled::before {
-      -webkit-mask-image: linear-gradient(to bottom,
-        #000 0%,
-        #000 62%,
-        rgba(0, 0, 0, 0.94) 74%,
-        rgba(0, 0, 0, 0.72) 83%,
-        rgba(0, 0, 0, 0.42) 90%,
-        rgba(0, 0, 0, 0.16) 95%,
-        transparent 100%);
-      mask-image: linear-gradient(to bottom,
-        #000 0%,
-        #000 62%,
-        rgba(0, 0, 0, 0.94) 74%,
-        rgba(0, 0, 0, 0.72) 83%,
-        rgba(0, 0, 0, 0.42) 90%,
-        rgba(0, 0, 0, 0.16) 95%,
-        transparent 100%);
-    }
   }
 }
 
@@ -104,8 +84,6 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background-color: var(--color-surface-solid);
-    mask-image: none;
-    -webkit-mask-image: none;
   }
 }
 
@@ -140,13 +118,10 @@
   }
 
   @media (max-width: 960px) {
-    // Default state: symmetric padding (vertical matches the 1rem horizontal).
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1rem 0.5rem;
 
     .navbar.is-scrolled & {
-      // 2rem bottom padding lifts the controls clear of the dissolving
-      // glass tail while scrolled.
-      padding: 0.5rem 1rem 2rem;
+      padding: 0.5rem 1rem;
     }
   }
 }
@@ -175,11 +150,21 @@
     height: 28px;
   }
 
-  .navbar.is-scrolled .navbar__title {
-    font-size: 0.95rem;
+  // Scoped under `.navbar` (0-2-0) so it beats the plain `.navbar__title`
+  // base defined later in this file — media order alone would lose the cascade.
+  .navbar .navbar__title {
+    font-size: 1.6rem;
 
     span {
-      font-size: 0.55rem;
+      font-size: 0.71rem;
+    }
+  }
+
+  .navbar.is-scrolled .navbar__title {
+    font-size: 1.3rem;
+
+    span {
+      font-size: 0.57rem;
       letter-spacing: 0.02em;
     }
   }
@@ -258,12 +243,18 @@
 .navbar__title {
   font-family: var(--font-brand);
   font-weight: 900;
-  font-size: 1.25rem;
+  font-size: 1.65rem;
   color: #FFFFFF;
   line-height: 1.1;
   letter-spacing: -0.01em;
   text-transform: uppercase;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  // font-size is NOT transitioned on purpose: it relayouts + reshapes glyph
+  // text on every frame, and Chromium quantizes intermediate text metrics to
+  // device pixels — the "smooth" tween rendered as stepped jitter during the
+  // navbar morph. The mobile scrolled state swaps sizes instantly (160ms bar
+  // geometry fade covers the visual gap).
+
   span {
     display: block;
     font-size: 0.72rem;
@@ -285,38 +276,9 @@
     }
   }
 
-  @media (max-width: 960px) {
-    font-size: 1.15rem;
-
-    span {
-      font-size: 0.65rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    font-size: 1.05rem;
-
-    span {
-      font-size: 0.6rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.95rem;
-
-    span {
-      font-size: 0.55rem;
-      letter-spacing: 0.02em;
-    }
-  }
-
-  @media (max-width: 380px) {
-    font-size: 0.88rem;
-
-    span {
-      font-size: 0.5rem;
-    }
-  }
+  // Mobile brand sizes (1.6rem / 0.71rem, scrolled 1.3rem / 0.57rem) live in
+  // the mobile navbar block above, where they also win the cascade against
+  // this base rule via `.navbar .navbar__title` specificity.
 
   .navbar.is-scrolled & {
     text-shadow: none;
