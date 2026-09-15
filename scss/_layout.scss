@@ -20,18 +20,26 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   contain: layout style;
-  // Bar geometry (height/overlap margin) is inherently layout — kept, but at
-  // 160ms (~10 reflow frames) instead of a 420ms tween. Sizing/typography
-  // changes below were removed from their transitions entirely so the morph
-  // costs one relayout pass per frame, not ten.
+  // Bar geometry morph is DESKTOP-only now: the mobile block pins the bar to a
+  // static height, so there is nothing left to tween there — only the fade.
+  // 400ms expo-out matches the glass band's opacity fade exactly, so the
+  // shrink and the tint swell/retreat as one movement instead of two clocks.
   transition:
-    height var(--transition-fast),
-    margin-bottom var(--transition-fast);
+    height var(--transition-smooth),
+    margin-bottom var(--transition-smooth);
 
   &::before {
     content: '';
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    left: 0;
+    // Fixed height instead of `inset: 0`: the glass band never grows or shrinks
+    // with the bar, so scrolling can't "pop out"/stretch the tint — its only
+    // animation is the opacity fade below. Desktop: the slim scrolled height,
+    // pinned to the viewport top while the transparent bar morphs around it.
+    // Mobile: overridden to 100% (the bar itself is static there).
+    height: var(--nav-height-scrolled);
     z-index: -1;
     background-color: var(--nav-glass);
     // backdrop-filter is INTENTIONALLY not set here: a live blur on a
@@ -45,7 +53,16 @@
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transition: opacity var(--transition-fast);
+    // THE scroll effect: tint fades in on scroll-down, fades out back at the
+    // top — composited opacity only, no geometry. The 0s/back-drop entries
+    // hold the blur alive for the whole 400ms fade-out, then step it off;
+    // entering is handled on `.is-scrolled::before` where blur is instant.
+    // Literal timings because the transition-delay slot cannot consume the
+    // time+curve pair packed in the transition tokens.
+    transition:
+      opacity 400ms cubic-bezier(0.25, 1, 0.5, 1),
+      backdrop-filter 0s linear 400ms,
+      -webkit-backdrop-filter 0s linear 400ms;
   }
 
   &.is-scrolled {
@@ -58,15 +75,26 @@
     backdrop-filter: blur(var(--nav-blur)) saturate(var(--nav-saturate));
     -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(var(--nav-saturate));
     will-change: opacity;
+    // Entering: blur joins the fade immediately (everything not listed here
+    // reverts to 0s defaults, overriding the base rule's delayed step-off).
+    transition: opacity var(--transition-smooth);
   }
 
+  // --- Mobile: static slim bar in BOTH scroll states ---
+  // One height, one overlap reservation, zero geometry animation; the only
+  // scroll effect left is the glass ::before opacity fade.
   @media (max-width: 960px) {
-    height: 88px;
-    margin-bottom: -88px;
+    height: 76px;
+    margin-bottom: -76px;
+    transition: none;
 
     &.is-scrolled {
-      margin-bottom: 0;
+      // Neutralize BOTH base scrolled swaps on mobile: the (0-2-0)
+      // `margin-bottom: 0` would un-reserve the hero overlap, and
+      // `height: var(--nav-height-scrolled)` (72px) would shrink the
+      // supposedly static 76px bar 4px mid-scroll.
       height: 76px;
+      margin-bottom: -76px;
     }
 
     // Mobile keeps the slim bar borderless/shadow-free.
@@ -74,6 +102,8 @@
 
     &::before {
       box-shadow: none !important;
+      // Bar is static here, so the glass band covers it edge-to-edge.
+      height: 100%;
     }
   }
 }
@@ -87,6 +117,15 @@
   }
 }
 
+// The glass fade timings above are literals (a delay slot cannot unpack the
+// time+curve tokens), so they need their own reduced-motion pin: instant swap.
+@media (prefers-reduced-motion: reduce) {
+  .navbar::before,
+  .navbar.is-scrolled::before {
+    transition: none;
+  }
+}
+
 .navbar__container {
   display: flex;
   align-items: center;
@@ -97,11 +136,19 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
-  // padding swaps instantly on the scrolled state (see .navbar): tweening it
-  // reflowed all flex children every frame for no visible gain at 160ms.
+  // Padding tweens in step with the bar's height morph (both
+  // --transition-smooth, one 400ms clock). The scrolled swap is DESKTOP-only:
+  // mobile keeps one constant padding in every scroll state so the brand row
+  // holds its exact position across the glass fade. (Unscoped, this (0-2-0)
+  // rule would outrank the mobile media rule's padding (0-1-0) — media
+  // queries add no specificity.)
 
-  .navbar.is-scrolled & {
-    padding: 0;
+  transition: padding var(--transition-smooth);
+
+  @media (min-width: 961px) {
+    .navbar.is-scrolled & {
+      padding: 0;
+    }
   }
 
   @media (min-width: 961px) and (max-width: 1200px) {
@@ -118,94 +165,67 @@
   }
 
   @media (max-width: 960px) {
+    // Constant on mobile (no scrolled swap): the brand row keeps the hero
+    // state's generous top/bottom padding while the glass fades in, and the
+    // bar's height is fixed so nothing moves between scroll states.
     padding: 0.75rem 1rem 0.5rem;
-
-    .navbar.is-scrolled & {
-      padding: 0.5rem 1rem;
-    }
   }
 }
 
-// --- Mobile only: progressively compact the navbar contents on scroll ---
-// Desktop keeps full-size brand/controls; the slimmer sticky bar on mobile
-// shrinks the logo, wordmark, and control sizes. All rules are scoped to the
-// mobile media query so the desktop layout is untouched.
+// --- Mobile navbar contents: one static size set per scroll state ---
+// "Hills of Glory" is 1.5rem, the subtitle 0.65rem, the logo 40x40, and the
+// theme switch keeps its rendered 6px-padded size — none of them scale when
+// the glass fades in/out. Rules are scoped by media query, so the desktop
+// morph is untouched.
 @media (max-width: 960px) {
   .navbar__nav {
     display: none !important;
   }
 
-  .navbar__brand {
+  // Scoped `.navbar ...` (0-2-0): the plain-class base rules defined later
+  // in this file (the 44px logo, flex-shrink: 0 on the brand) would win the
+  // cascade over a media-only override otherwise.
+  .navbar .navbar__brand {
     min-width: 0;
     flex-shrink: 1;
     gap: 0.5rem;
   }
 
-  .navbar.is-scrolled .navbar__brand {
-    gap: 0.4rem;
+  .navbar .navbar__logo {
+    width: 40px;
+    height: 40px;
   }
 
-  .navbar.is-scrolled .navbar__logo {
-    width: 28px;
-    height: 28px;
-  }
-
-  // Scoped under `.navbar` (0-2-0) so it beats the plain `.navbar__title`
-  // base defined later in this file — media order alone would lose the cascade.
   .navbar .navbar__title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
 
     span {
-      font-size: 0.71rem;
-    }
-  }
-
-  .navbar.is-scrolled .navbar__title {
-    font-size: 1.3rem;
-
-    span {
-      font-size: 0.57rem;
-      letter-spacing: 0.02em;
+      font-size: 0.65rem;
     }
   }
 
   .theme-switch {
-    padding: 4px;
+    padding: 6px;
     flex-shrink: 0;
-  }
-
-  .navbar.is-scrolled .theme-switch {
-    padding: 3px;
   }
 
   .navbar__actions {
     gap: 0.5rem;
     flex-shrink: 0;
   }
-
-  .navbar.is-scrolled .navbar__actions {
-    gap: 0.35rem;
-  }
 }
 
-@media (max-width: 640px) {
-  .navbar__logo {
-    width: 36px;
-    height: 36px;
-  }
-}
-
+// Static mobile brand row: only the gap still tightens, so the 40px logo and
+// 1.5rem wordmark keep fitting on narrow phones.
 @media (max-width: 480px) {
-  .navbar__logo {
-    width: 32px;
-    height: 32px;
+  .navbar .navbar__brand {
+    gap: 0.45rem;
   }
 }
 
 @media (max-width: 380px) {
-  .navbar__logo {
-    width: 28px;
-    height: 28px;
+  .navbar .navbar__brand {
+    gap: 0.4rem;
   }
 }
 
@@ -216,6 +236,8 @@
   z-index: 1001;
   flex-shrink: 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  // Shadow lift dissolves with the glass fade rather than cutting on toggle.
+  transition: text-shadow var(--transition-smooth);
 
   .navbar.is-scrolled & {
     text-shadow: none;
@@ -249,11 +271,11 @@
   letter-spacing: -0.01em;
   text-transform: uppercase;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  // font-size is NOT transitioned on purpose: it relayouts + reshapes glyph
-  // text on every frame, and Chromium quantizes intermediate text metrics to
-  // device pixels — the "smooth" tween rendered as stepped jitter during the
-  // navbar morph. The mobile scrolled state swaps sizes instantly (160ms bar
-  // geometry fade covers the visual gap).
+  // Only PAINT is transitioned: color/text-shadow cross-fade with the scrolled
+  // glass state on the same cadence as the background fade. font-size is NEVER
+  // transitioned (per-frame glyph reshaping + device-pixel quantization read as
+  // stepped jitter), and mobile sizes are now static anyway.
+  transition: color var(--transition-smooth), text-shadow var(--transition-smooth);
 
   span {
     display: block;
@@ -266,6 +288,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: color var(--transition-smooth), text-shadow var(--transition-smooth);
   }
 
   @media (min-width: 961px) and (max-width: 1120px) {
@@ -276,9 +299,9 @@
     }
   }
 
-  // Mobile brand sizes (1.6rem / 0.71rem, scrolled 1.3rem / 0.57rem) live in
-  // the mobile navbar block above, where they also win the cascade against
-  // this base rule via `.navbar .navbar__title` specificity.
+  // Mobile brand sizes (1.5rem / 0.65rem, identical in both scroll states)
+  // live in the mobile navbar block above, where they also win the cascade
+  // against this base rule via `.navbar .navbar__title` specificity.
 
   .navbar.is-scrolled & {
     text-shadow: none;
@@ -309,6 +332,9 @@
   gap: 0.15rem;
   flex-shrink: 1;
   min-width: 0;
+  // The scrolled gap swell rides the header's 400ms clock (desktop — the
+  // mobile dropdown overrides this with its own transform/opacity schedule).
+  transition: gap var(--transition-smooth);
 
   .navbar.is-scrolled & {
     gap: 0.4rem;
@@ -401,10 +427,12 @@
   border: none;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   white-space: nowrap;
-  // color/text-shadow only: a per-link padding tween multiplied the navbar
-  // morph's reflow cost across the whole row.
+  // color/text-shadow stay on the fast hover clock; padding joins the
+  // 400ms scrolled swell so the link row breathes with the bar instead of
+  // snapping to its compact metrics (the swap is desktop-only).
   transition: color var(--transition-fast),
-              text-shadow var(--transition-fast);
+              text-shadow var(--transition-fast),
+              padding var(--transition-smooth);
 
   @media (min-width: 961px) and (max-width: 1120px) {
     font-size: 0.75rem;
@@ -696,10 +724,12 @@
     backdrop-filter: blur(18px) saturate(1.5);
     -webkit-backdrop-filter: blur(18px) saturate(1.5);
     cursor: pointer;
-    transition: transform var(--transition-fast),
-                box-shadow var(--transition-fast),
-                background-color var(--transition-fast),
-                color var(--transition-fast);
+    // Press feedback stays snappy (spring overshoot), but the disc's expand /
+    // glass lift now eases on the shared 400ms header clock.
+    transition: transform 240ms var(--spring-snappy),
+                box-shadow var(--transition-smooth),
+                background-color var(--transition-smooth),
+                color var(--transition-smooth);
 
     .floating-menu-btn__icon {
       width: 1.5em;
@@ -713,7 +743,7 @@
     // curve keeps the motion tactile rather than floaty.
     .floating-menu-btn__bar {
       transition: transform 340ms cubic-bezier(0.32, 0.72, 0, 1),
-                  opacity var(--transition-base);
+                  opacity var(--transition-smooth);
     }
 
     .floating-menu-btn__bar--top {
@@ -763,9 +793,9 @@
     // the panel re-enables vertical panning for its own scroll area.
     touch-action: none;
     // Stay painted during the panel's exit transform; hide only after it ends.
-    // Cut must exceed the longest close animation (~260ms panel exit) — links
-    // now close with zero delay, so 320ms leaves them no clipped tail.
-    transition: visibility 0s linear 320ms;
+    // The close now runs the reverse link cascade: worst-case tail is 140ms
+    // stagger + 260ms fade = 400ms, so the cut waits a comfortable 460ms.
+    transition: visibility 0s linear 460ms;
 
     .mobile-menu-overlay__backdrop {
       position: absolute;
@@ -802,10 +832,11 @@
       transform-origin: bottom right;
       opacity: 0;
       transform: scale(0.4) translateY(30px) translateZ(0);
-      // Asymmetric: quick snap-out when closing (this closed-state transition),
-      // slower grow-out-of-the-FAB when opening (override in .is-open below).
-      transition: opacity 200ms var(--spring-snappy),
-                  transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+      // Asymmetric: a soft, still-faster return when closing (this closed-state
+      // transition — eased, no spring on the fade) against the slower
+      // grow-out-of-the-FAB entrance (.is-open below).
+      transition: opacity 260ms cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     .mobile-menu-overlay__nav {
@@ -829,13 +860,24 @@
       border-radius: var(--radius-md);
       opacity: 0;
       transform: translateY(10px);
-      // Closing: every link retargets immediately (zero delay) so nothing
-      // waits its stagger slot before vanishing behind the visibility cut.
-      transition: opacity 220ms var(--spring-snappy),
-                  transform 220ms var(--spring-snappy),
+      // Closing: eased fade (never a spring curve on opacity) on exit, with a
+      // reverse stagger — last row leaves first — so the menu unwinds like the
+      // entrance played backwards instead of vanishing in one hard cut.
+      transition: opacity 240ms cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
                   background-color var(--transition-fast),
                   color var(--transition-fast);
       position: relative;
+
+      // Reverse cascade lives BEFORE the :active/:hover blocks below (equal
+      // specificity) so their transition-delay: 0ms resets win the source-order
+      // tie and press feedback is never held hostage by a stagger slot. The
+      // .is-open forward cascade overrides this at higher specificity.
+      @for $i from 1 through 8 {
+        &:nth-child(#{$i}) {
+          transition-delay: #{(8 - $i) * 20}ms;
+        }
+      }
 
       // Press feedback for touch (taps never reach :hover reliably); :hover is
       // gated to fine pointers so Android taps don't latch a sticky highlight
@@ -896,7 +938,15 @@
       transition-duration: 0.01ms;
     }
 
-    .mobile-menu-overlay__link {
+    // Beat the nth-child close cascade (0-2-0, and this block is later in
+    // source at equal specificity): no stagger, no visibility hold.
+    @for $i from 1 through 8 {
+      .mobile-menu-overlay__link:nth-child(#{$i}) {
+        transition-delay: 0ms;
+      }
+    }
+
+    .mobile-menu-overlay {
       transition-delay: 0ms;
     }
   }
