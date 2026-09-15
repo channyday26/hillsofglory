@@ -1857,6 +1857,10 @@
     // (the [hidden] { display:none } base rule beats all component displays).
     if (section) section.hidden = !isLive;
     if (navBtn) navBtn.hidden = !isLive;
+    // Mirror the state onto the navbar: .navbar--live drives the mobile
+    // brand-row step-down so the new Live pill shares the header with it.
+    var navbarEl = document.querySelector('.navbar');
+    if (navbarEl) navbarEl.classList.toggle('navbar--live', isLive);
     if (!isLive) return;
 
     if (slot) {

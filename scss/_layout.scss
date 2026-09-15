@@ -183,8 +183,10 @@
   }
 
   // Scoped `.navbar ...` (0-2-0): the plain-class base rules defined later
-  // in this file (the 44px logo, flex-shrink: 0 on the brand) would win the
-  // cascade over a media-only override otherwise.
+  // in this file (the logo size, flex-shrink: 0 on the brand) would win the
+  // cascade over a media-only override otherwise. These 40px / 1.5rem / 0.65rem
+  // metrics are the NON-LIVE defaults; with a stream up the `.navbar--live`
+  // block below dynamically steps them down to make room for the Live pill.
   .navbar .navbar__brand {
     min-width: 0;
     flex-shrink: 1;
@@ -212,6 +214,26 @@
   .navbar__actions {
     gap: 0.5rem;
     flex-shrink: 0;
+  }
+}
+
+// Mobile live state: the "Live" pill (62x38, mirroring the mobile toggle)
+// joins the actions cluster, so the brand row dynamically steps the icon and
+// wordmark down to keep the whole lockup on one line.
+.navbar.navbar--live {
+  @media (max-width: 960px) {
+    .navbar__logo {
+      width: 34px;
+      height: 34px;
+    }
+
+    .navbar__title {
+      font-size: 1.2rem;
+
+      span {
+        font-size: 0.55rem;
+      }
+    }
   }
 }
 
@@ -249,23 +271,19 @@
 }
 
 .navbar__logo {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
-  // Sized instantly — width/height tweens reflowed + re-decoded the image
-  // every frame of the navbar morph.
-
-  @media (min-width: 961px) and (max-width: 1120px) {
-    width: 36px;
-    height: 36px;
-  }
+  // Uniform 40x40 at every breakpoint (the mobile live state steps it to 34
+  // for the Live pill — see .navbar--live). Width/height tweens are banned:
+  // they reflow + re-decode the image every frame of the navbar morph.
 }
 
 .navbar__title {
   font-family: var(--font-brand);
   font-weight: 900;
-  font-size: 1.65rem;
+  font-size: 1.5rem;
   color: #FFFFFF;
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -279,7 +297,7 @@
 
   span {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: #FFFFFF;
     letter-spacing: 0.04em;
@@ -1016,12 +1034,17 @@
 
 // --- Navbar "Live" Button ---
 // Stream signal that appears when an active live_status row exists.
-// On desktop and mobile, stays properly scaled and compact.
+// Standardized to the theme-switch toggle's exact footprint: 70x42 next to
+// the 70x42 toggle on desktop, 62x38 next to the 62x38 toggle on mobile
+// (track + padding + border box), so the actions cluster reads as one row.
 .nav-live {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
+  height: 42px;
+  min-width: 70px;
+  padding: 0 0.85rem;
   border-radius: var(--radius-full);
   border: 1px solid rgba(var(--color-live-rgb), 0.4);
   background: rgba(var(--color-live-rgb), 0.12);
@@ -1051,7 +1074,10 @@
   }
 
   @media (max-width: 960px) {
-    padding: 0.3rem 0.65rem;
+    // Same box as the mobile theme switch (62x38); label type tightens to fit.
+    height: 38px;
+    min-width: 62px;
+    padding: 0 0.65rem;
     font-size: 0.72rem;
     letter-spacing: 0.05em;
     gap: 0.35rem;
@@ -1063,7 +1089,7 @@
   }
 
   @media (max-width: 480px) {
-    padding: 0.25rem 0.55rem;
+    padding: 0 0.55rem;
     font-size: 0.68rem;
     gap: 0.3rem;
   }
