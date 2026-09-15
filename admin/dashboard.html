@@ -203,13 +203,15 @@
 </div>
               </div>
               <div class="form__group">
-                <label for="minDesc" class="form__label">Description</label>
-                <textarea id="minDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="minDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="minDesc" name="description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="minDescError"></textarea>
+                <div id="minDescError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="minContact" class="form__label">Contact Person</label>
-                  <input type="text" id="minContact" name="contact_person" class="form__input" />
+                  <label for="minContact" class="form__label">Contact Person <span class="form__required">*</span></label>
+                  <input type="text" id="minContact" name="contact_person" class="form__input" required aria-invalid="false" aria-describedby="minContactError" />
+                  <div id="minContactError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
                   <label for="minSchool" class="form__label">Target School</label>
@@ -236,7 +238,7 @@
             <form class="admin-form" id="locationsForm" novalidate>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="locName" class="form__label">Campus Name <span class="form__required">*</span></label>
+                  <label for="locName" class="form__label">Church Name <span class="form__required">*</span></label>
                   <input type="text" id="locName" name="name" class="form__input" required aria-invalid="false" aria-describedby="locNameError" />
                   <div id="locNameError" class="error-message" aria-live="polite"></div>
                 </div>
@@ -339,21 +341,25 @@
 </div>
               <div class="form__row">
                 <div class="form__group">
-                  <label for="sermonSpeaker" class="form__label">Speaker</label>
-                  <input type="text" id="sermonSpeaker" name="speaker" class="form__input" />
+                  <label for="sermonSpeaker" class="form__label">Speaker <span class="form__required">*</span></label>
+                  <input type="text" id="sermonSpeaker" name="speaker" class="form__input" required aria-invalid="false" aria-describedby="sermonSpeakerError" />
+                  <div id="sermonSpeakerError" class="error-message" aria-live="polite"></div>
                 </div>
                 <div class="form__group">
-                  <label for="sermonDate" class="form__label">Date</label>
-                  <input type="date" id="sermonDate" name="date" class="form__input" />
+                  <label for="sermonDate" class="form__label">Date <span class="form__required">*</span></label>
+                  <input type="date" id="sermonDate" name="date" class="form__input" required aria-invalid="false" aria-describedby="sermonDateError" />
+                  <div id="sermonDateError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="sermonYoutube" class="form__label">YouTube URL</label>
-                <input type="url" id="sermonYoutube" name="youtube_url" class="form__input" />
+                <label for="sermonYoutube" class="form__label">YouTube URL <span class="form__required">*</span></label>
+                <input type="url" id="sermonYoutube" name="youtube_url" class="form__input" required aria-invalid="false" aria-describedby="sermonYoutubeError" />
+                <div id="sermonYoutubeError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="form__group">
-                <label for="sermonDesc" class="form__label">Description</label>
-                <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="sermonDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="sermonDesc" name="description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="sermonDescError"></textarea>
+                <div id="sermonDescError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class=""></i> Add Sermon</button>
@@ -386,13 +392,15 @@
                   <input type="date" id="evDate" name="event_date" class="form__input" required />
                 </div>
                 <div class="form__group">
-                  <label for="evTime" class="form__label">Event Time</label>
-                  <input type="text" id="evTime" name="event_time" class="form__input" placeholder="e.g. 6:00 PM" />
+                  <label for="evTime" class="form__label">Event Time <span class="form__required">*</span></label>
+                  <input type="text" id="evTime" name="event_time" class="form__input" placeholder="e.g. 6:00 PM" required aria-invalid="false" aria-describedby="evTimeError" />
+                  <div id="evTimeError" class="error-message" aria-live="polite"></div>
                 </div>
               </div>
               <div class="form__group">
-                <label for="evDesc" class="form__label">Description</label>
-                <textarea id="evDesc" name="description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="evDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="evDesc" name="description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="evDescError"></textarea>
+                <div id="evDescError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="plus" class="" aria-hidden="true"></i> Add Event</button>
@@ -515,8 +523,9 @@
   <div id="lsTitleError" class="error-message" aria-live="polite"></div>
 </div>
               <div class="form__group">
-                <label for="lsDesc" class="form__label">Description</label>
-                <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3"></textarea>
+                <label for="lsDesc" class="form__label">Description <span class="form__required">*</span></label>
+                <textarea id="lsDesc" name="live_description" class="form__input form__input--textarea" rows="3" required aria-invalid="false" aria-describedby="lsDescError"></textarea>
+                <div id="lsDescError" class="error-message" aria-live="polite"></div>
               </div>
               <div class="admin-form__actions">
                 <button type="submit" class="btn btn--primary"><i data-lucide="save" class="" aria-hidden="true"></i> Save Status</button>

@@ -344,7 +344,7 @@
       countLabel: 'locations',
       exportTitle: 'Locations',
       columns: [
-        { label: 'Campus', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
+        { label: 'Church', thClass: 'data-table__th--name', tdClass: 'data-table__td--name',
           render: function (l) { return identityCell(l.image_url, l.name, 'map-pin', true); } },
         { label: 'Type', render: function (l) { return badgeCell(l.location_type); } },
         { label: 'Address', tdClass: 'data-table__td--grow', render: function (l) { return summaryCell(l.address); } },
@@ -1873,6 +1873,25 @@ locationsForm.addEventListener('submit', async function (e) {
           // make every add/edit fail. Only the columns that exist are sent.
           const payload = { name, location_type: type, address, google_maps_embed_link: maps, status };
 
+          // Only one location may carry the 'Main' designation. Editing the
+          // existing Main row is always allowed, so exclude its own id. A
+          // partial unique index in Supabase re-bounds this as defence in depth:
+          //   create unique index locations_one_main on locations (location_type)
+          //     where location_type = 'Main';
+          if (type === 'Main') {
+            let mainQuery = supabase
+              .from('locations')
+              .select('id', { count: 'exact', head: true })
+              .eq('location_type', 'Main');
+            if (locationsEditingId) mainQuery = mainQuery.neq('id', locationsEditingId);
+            const { count: mainCount, error: mainError } = await mainQuery;
+            if (mainError) console.error(mainError);
+            if (!mainError && mainCount >= 1) {
+              showToast('Only one Main Church is allowed. Set the existing Main location to Outreach first.', 'error');
+              return;
+            }
+          }
+
           let error;
           if (locationsEditingId) {
             ({ error } = await supabase.from('locations').update(payload).eq('id', locationsEditingId));
@@ -1881,7 +1900,11 @@ locationsForm.addEventListener('submit', async function (e) {
           }
 
           if (error) {
-            showToast('Error saving location.', 'error');
+            // Unique-violation from the one-Main index (if installed) reads as the guard.
+            const mainDup = error.code === '23505' && type === 'Main';
+            showToast(mainDup
+              ? 'Only one Main Church is allowed. Set the existing Main location to Outreach first.'
+              : 'Error saving location.', 'error');
             console.error(error);
           } else {
             showToast(locationsEditingId ? 'Location updated!' : 'Location added!', 'success');
